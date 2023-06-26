@@ -1,0 +1,160 @@
+---
+title: "Distribuciones de Probabilidad"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Distribuciones de Probabilidad
+## Variables aleatorias discretas
+### Distribución Binomial
+
+```{r}
+n = 5
+p = 0.6
+valor = 2
+dbinom(valor, size = n, prob = p)
+```
+
+```{r}
+rango = 0:n
+df = data.frame(x = rango, y = dbinom(rango, size = n, prob = p))
+
+ggplot(df, aes(x = x, y = y, fill = factor(ifelse(x <= valor, "Valor", "Resto")))) +
+  geom_bar(stat = "identity", width = 0.75) + xlab("x") + ylab("Densidad") +
+  ggtitle("Distribución Binomial") +
+  scale_fill_manual(name = "", values = c("grey50", "red")) + 
+  theme_bw()
+```
+### Distribución Normal
+
+Obtenido en:
+https://digibug.ugr.es/bitstream/handle/10481/70802/Practica4_bioestad%C3%ADsticaR.pdf?sequence=1&isAllowed=y
+
+Práctica 4. Cálculo de probabilidades en R.
+Universidad de Granada
+Christian J. Acal González y Miguel Ángel Montero Alonso
+
+La distribución Normal es la distribución continua más importante en estadística, ya que una gran mayoría de las variables aleatorias de la Naturaleza siguen dicha distribución y porque presenta unas propiedades muy interesantes y sencillas que hace que sea muy utilizada dentro de esta rama. La distribución Normal queda definida por los parámetros µ y σ que representan la media y la desviación estándar (o típica), respectivamente, de la distribución. En consecuencia, una variable aleatoria con distribución Normal se denotará como X ∼ N(µ, σ).
+
+El tratamiento computacional con R de la distribución Normal es muy similar al que se utiliza con las distribuciones discretas. La principal diferencia radica en que con las distribuciones discretas se trabaja con la función masa de probabilidad y con las distribuciones continuas se usa la función de densidad. La función de densidad de la distribución Normal se calcula a partir de la función dnorm() la cual es análoga a las funciones dbinom() y dpois() de las distribuciones Binomial y Poisson, respectivamente. Sin embargo, el cálculo de probabilidades para valores concretos de una variable continua no tiene sentido, ya que para cualquier variable aleatoria X continua (siga o no distribución Normal) P[X = x] = 0 para cualquier valor de x. En consecuencia, dnorm devuelve el valor de la función de densidad en un punto (o puntos). Asimismo, se detallan a continuación los argumentos de las funciones que se usan en R para el cálculo de probabilidades de una distribución Normal:
+
+• dnorm(x, mean=media, sd=desv.tip). Devuelve el valor (valores) x de la función de densidad de una variable con distribución Normal de parámetros µ y σ.
+
+• pnorm(x, mean=media, sd=desv.tip, lower.tail = TRUE). Calcula el valor (valores) x de la función de distribución de una distribución Normal de parámetros µ y σ. Si lower.tail=FALSE, R calcula P[X > x], lo cual ya no sería la función de distribución.
+
+• qnorm(a, mean=media, sd=desv.tip, lower.tail = TRUE). Determina el cuantil (cuantiles) de una variable con distribución Normal de parámetros µ y σ.
+
+• rqnorm(r, mean=media, sd=desv.tip). Genera r valores aleatorios de una distribución Normal de parámetros µ y σ.
+
+Notar que si no se especifica los valores de µ y σ, R tomará por defecto µ = 0 y σ = 1.
+Para poner en práctica estas funciones se propone el siguiente ejercicio. 
+
+#### Ejercicios
+Se sabe que el peso en kg de los recién nacidos varones sigue una N(3, 0.3).
+
+1. Calcular la probabilidad de que un bebé varón pese entre 2.8 kg y 3 kg (ambos inclusive). Se pide
+calcular la probabilidad de que P[2.8 ≤ X ≤ 3] = P[X ≤ 3] − P[X < 2.8] = P[X ≤ 3] − P[X ≤ 2.8],
+siendo X una variable aleatoria con distribución Normal que representa el peso en gramos de los recién
+nacidos varones.
+```{r}
+media <- 3
+desv.tip <- 0.30
+valor1 <- 3
+valor2 <- 2.8
+normal1 <- pnorm(valor1, mean = media, sd = desv.tip)
+normal2 <- pnorm(valor2, mean = media, sd = desv.tip)
+normal1
+normal2
+normal1 - normal2
+
+```
+```{r}
+rango <- c(media - 3 * desv.tip, media + 3 * desv.tip)
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media, sd = desv.tip), fill = 'red', xlim = c(valor2, valor1), alpha = 0.5) +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("x") + theme_bw()
+```
+
+2. La probabilidad de que un bebé varón pese más de 3.2 kg. Se pide calcular P[X > 3.2] = 1−P[X ≤ 3.2].
+ 
+```{r}
+valor <- 3.2
+pnorm(valor, mean = media, sd = desv.tip)
+pnorm(valor, mean = media, sd = desv.tip, lower.tail = FALSE)
+```
+
+```{r}
+1 - pnorm(valor, media, sd = desv.tip)
+```
+
+```{r}
+rango <- c(media - 3 * desv.tip, media + 3 * desv.tip)
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function',fun = dnorm, args = list(mean = media, sd = desv.tip), fill = 'red', xlim = c(valor, max(rango)), alpha = 0.5) +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("x") + theme_bw()
+```
+
+3. La probabilidad de que un bebé varón pese 3.2 kg o menos. Se pide calcular P[X ≤ 3.2].
+```{r}
+valor <- 3.2
+pnorm(valor, mean = media, sd = desv.tip)
+```
+
+```{r}
+rango <- c(media - 3 * desv.tip, media + 3 * desv.tip)
+```
+
+```{r}
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media, sd = desv.tip), fill = 'red', xlim = c(min(rango), valor), alpha = 0.5) +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("x") + theme_bw()
+```
+4. El peso mínimo del 15% de los bebés varones que más pesan. Se quiere calcular el 15% de los valores más grandes del peso de los bebés varones recién nacidos. Esto es aquel valor que deje a su derecha el 15% de las observaciones, que a su vez, será también aquel que deja a su izquierda el 85% de las observaciones restantes.
+```{r}
+a <- 0.85
+qnorm(a, mean = media, sd = desv.tip)
+```
+
+```{r}
+rango <- c(media - 3 * desv.tip, media + 3 * desv.tip)
+```
+
+```{r}
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media, sd = desv.tip), fill = 'red', xlim = c(min(rango), qnorm(a, mean = media, sd = desv.tip)), alpha = 0.5) +
+  geom_vline(xintercept = qnorm(a, mean = media, sd = desv.tip)) +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("x") + theme_bw()
+```
+5. Generar 15 valores aleatorios que sigan la distribución de la variable aleatoria X.
+```{r}
+r <- 15
+rnorm(r, mean = media, sd = desv.tip)
+```
+
+#### Un ejemplo con datos de iris
+```{r}
+media <- mean(iris$Sepal.Length)
+desv.tip <- sd(iris$Sepal.Length)
+media
+desv.tip
+```
+
+
+```{r}
+ggplot(iris, aes(x=Sepal.Length)) + 
+  geom_histogram(bins = 10) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function', sec.axis = sec_axis(~ . / 10)) +
+  ylab("Densidad") + 
+  ggtitle("Sepal Length (de iris)") + 
+  xlab("length (cm)") + 
+  theme_bw()
+```
+
