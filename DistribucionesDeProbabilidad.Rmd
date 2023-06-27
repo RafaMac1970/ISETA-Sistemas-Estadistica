@@ -119,6 +119,7 @@ ggplot(data.frame(x = rango), aes(x = rango)) +
 ```{r}
 a <- 0.85
 qnorm(a, mean = media, sd = desv.tip)
+qnorm(0.15, mean = media, sd = desv.tip, lower.tail = FALSE)
 ```
 
 ```{r}
