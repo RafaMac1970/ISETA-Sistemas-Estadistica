@@ -1,0 +1,125 @@
+---
+title: "Teorema Central del Límite - Simulación Montecarlo"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(patchwork)
+```
+
+
+# Teorema Central del Límite
+
+## Distribución homogénea
+
+```{r}
+nPop <- 50000
+pop1 <- sample(c(0:99), nPop, replace = TRUE)
+```
+
+```{r}
+n <- 3
+muestras <- matrix(NA, nrow=0, ncol=n)
+for (i in c(1:50)) {
+  muestras <- rbind(muestras, sample(pop1, n, replace = FALSE))
+}
+muestras <- tibble(muestras)
+
+muestras <-  muestras %>% bind_cols(
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+  )
+muestras
+```
+```{r}
+gr1 <- ggplot(muestras, aes(x = media)) + 
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean(muestras$media), sd = sd(muestras$media))) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 12, alpha = 0.4) +
+  xlim(c(0, 100)) +
+  ylab("Densidad") + 
+  ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
+  xlab("valor") + 
+  theme_bw()
+```
+
+```{r}
+n <- 5
+muestras <- matrix(NA, nrow=0, ncol=n)
+for (i in c(1:50)) {
+  muestras <- rbind(muestras, sample(pop1, n, replace = FALSE))
+}
+muestras <- tibble(muestras)
+
+muestras <-  muestras %>% bind_cols(
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+  )
+muestras
+```
+
+```{r}
+gr2 <- ggplot(muestras, aes(x = media)) + 
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean(muestras$media), sd = sd(muestras$media))) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 12, alpha = 0.4) +
+  xlim(c(0, 100)) +
+  ylab("Densidad") + 
+  ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
+  xlab("valor") + 
+  theme_bw()
+```
+
+```{r}
+n <- 8
+muestras <- matrix(NA, nrow=0, ncol=n)
+for (i in c(1:50)) {
+  muestras <- rbind(muestras, sample(pop1, n, replace = FALSE))
+}
+muestras <- tibble(muestras)
+
+muestras <-  muestras %>% bind_cols(
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+  )
+muestras
+```
+```{r}
+gr3 <- ggplot(muestras, aes(x = media)) + 
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean(muestras$media), sd = sd(muestras$media))) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 12, alpha = 0.4) +
+  xlim(c(0, 100)) +
+  ylab("Densidad") + 
+  ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
+  xlab("valor") + 
+  theme_bw()
+```
+
+```{r}
+n <- 15
+muestras <- matrix(NA, nrow=0, ncol=n)
+for (i in c(1:50)) {
+  muestras <- rbind(muestras, sample(pop1, n, replace = FALSE))
+}
+muestras <- tibble(muestras)
+
+muestras <-  muestras %>% bind_cols(
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+  )
+muestras
+```
+```{r}
+gr4 <- ggplot(muestras, aes(x = media)) + 
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean(muestras$media), sd = sd(muestras$media))) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 12, alpha = 0.4) +
+  xlim(c(0, 100)) +
+  ylab("Densidad") + 
+  ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
+  xlab("valor") + 
+  theme_bw()
+```
+
+```{r warning=FALSE}
+gr1 + gr2 + gr3 + gr4
+```
+

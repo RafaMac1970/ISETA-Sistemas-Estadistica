@@ -5,6 +5,7 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+library(GGally)
 ```
 
 # Distribuciones de Probabilidad
@@ -141,6 +142,7 @@ rnorm(r, mean = media, sd = desv.tip)
 
 #### Un ejemplo con datos de iris
 ```{r}
+# iris <- iris %>% group_by(Species)
 media <- mean(iris$Sepal.Length)
 desv.tip <- sd(iris$Sepal.Length)
 media
@@ -149,13 +151,74 @@ desv.tip
 
 
 ```{r}
-ggplot(iris, aes(x=Sepal.Length)) + 
+ggplot(iris, aes(x=Sepal.Length, fill = Species)) + 
   stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
   geom_area(stat = 'function') +
-  geom_histogram(aes(y = ..density..),bins = 10, alpha = 0.3) +
+  geom_histogram(aes(y = ..density..),bins = 12, alpha = 0.4) +
   ylab("Densidad") + 
   ggtitle("Sepal Length (de iris)") + 
   xlab("length (cm)") + 
   theme_bw()
+```
+
+```{r}
+media <- mean(iris$Sepal.Width)
+desv.tip <- sd(iris$Sepal.Width)
+media
+desv.tip
+```
+
+```{r}
+ggplot(iris, aes(x=Sepal.Width, fill = Species)) + 
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 12, alpha = 0.4) +
+  ylab("Densidad") + 
+  ggtitle("Sepal Length (de iris)") + 
+  xlab("length (cm)") + 
+  theme_bw()
+```
+
+
+```{r}
+media <- mean(iris$Petal.Length)
+desv.tip <- sd(iris$Petal.Length)
+media
+desv.tip
+```
+
+
+```{r}
+ggplot(iris, aes(x=Petal.Length, fill = Species)) + 
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 12, alpha = 0.4) +
+  ylab("Densidad") + 
+  ggtitle("Sepal Length (de iris)") + 
+  xlab("length (cm)") + 
+  theme_bw()
+```
+
+```{r}
+media <- mean(iris$Petal.Width)
+desv.tip <- sd(iris$Petal.Width)
+media
+desv.tip
+```
+
+
+```{r}
+ggplot(iris, aes(x=Petal.Width, fill = Species)) + 
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 12, alpha = 0.4) +
+  ylab("Densidad") + 
+  ggtitle("Sepal Length (de iris)") + 
+  xlab("length (cm)") + 
+  theme_bw()
+```
+
+```{r}
+ggpairs(iris, columns = 1:5, aes(fill = Species))
 ```
 
