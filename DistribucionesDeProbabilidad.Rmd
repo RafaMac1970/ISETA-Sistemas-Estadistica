@@ -150,9 +150,9 @@ desv.tip
 
 ```{r}
 ggplot(iris, aes(x=Sepal.Length)) + 
-  geom_histogram(bins = 10) +
   stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
-  geom_area(stat = 'function', sec.axis = sec_axis(~ . / 10)) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 10, alpha = 0.3) +
   ylab("Densidad") + 
   ggtitle("Sepal Length (de iris)") + 
   xlab("length (cm)") + 
