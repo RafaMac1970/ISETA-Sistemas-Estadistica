@@ -21,6 +21,10 @@ str(dsd)
 summary(dsd)
 dsd
 ```
+```{r}
+write_csv(dsd, "datos/dsd.csv")
+```
+
 
 
 ```{r}
