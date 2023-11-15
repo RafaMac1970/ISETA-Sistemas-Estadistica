@@ -1,0 +1,75 @@
+---
+title: "ANOVA 2 factores (2x3)"
+output: html_notebook
+---
+
+```{r}
+library(ggplot2)
+library(emmeans)
+```
+
+```{r}
+# Cargar el conjunto de datos ToothGrowth
+data("ToothGrowth")
+
+muestra <- ToothGrowth %>%
+  group_by(dose, supp) %>%
+  sample_n(10) # n = 10, por lo tanto usando 10 no hay muestreo
+```
+
+
+```{r}
+# Realizar un ANOVA de dos factores
+anova1 <- aov(len ~ supp * factor(dose), data = muestra)
+
+# Mostrar un resumen del ANOVA
+summary(anova1)
+
+# Calcular efefctos por grupo
+anova1Gr <- emmeans(anova1, ~ supp * dose)
+
+# Mostrar los efectos por grupo
+summary(anova1Gr, infer = c(TRUE, TRUE), level = 0.95)
+
+
+```
+
+```{r}
+TukeyHSD(anova1, c("supp", "factor(dose)"), ordered = TRUE)
+```
+
+
+```{r}
+ggplot(muestra, aes(y = len, x = factor(dose), color = supp)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1)
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(muestra, aes(y = len, x = factor(dose), color = supp)) +
+  geom_jitter(width = 0.1) +
+  stat_summary(fun = mean, geom = "point", shape = 3, size = 8, show.legend = FALSE) +
+  labs(title = "Medias de ToothGrowth por Dosis y Suplemento",
+       x = "Dosis",
+       y = "Longitud de los Dientes")
+
+```
+
+```{r}
+# Realizar un modelo GLM
+modelo_glm <- glm(len ~ supp * factor(dose), data = muestra)
+
+# Mostrar un resumen del modelo GLM
+summary(modelo_glm)
+
+# Calcular efectos por grupo
+efectos_por_grupo <- emmeans(modelo_glm, ~ supp * dose)
+
+# Mostrar los efectos por grupo
+summary(efectos_por_grupo, infer = c(TRUE, TRUE), level = 0.95)
+
+```
+
+
