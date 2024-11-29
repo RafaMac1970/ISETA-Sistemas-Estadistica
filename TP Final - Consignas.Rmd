@@ -1,0 +1,104 @@
+---
+title: "2° Parcial - Distribuciones de Probabilidad y sumulaciones Montecarlo"
+output: html_notebook
+---
+
+ISETA.
+
+Carrera: "Tecnicatura Superior en Análisis de Sistemas".
+
+Materia: "Estadística", correspondiente al 2do año de la carrera.
+
+Profesor: Rafael Mac Donough.
+
+# TP Final.
+
+## Consignas:
+
+El trabajo se entregará como un archivo R Marckdown como este. El archivo será nombrado de la siguiente manera: "ApellidoNombre-TP-Final-aaaa-mm-dd.Rmd"
+
+Los notebooks utilizados durante su curso están disponibles en:
+
+<https://github.com/RafaMac1970/ISETA-Sistemas-Estadistica>
+
+También puede guiarse con los utilizados este año, que han sido extensamenete revisados, corregidos y mejorados en multiples aspectos.
+
+<https://github.com/RafaMac1970/ISETA-Sistemas-Estadistica-2024>
+
+### Colecciones de datos:
+
+Cada estudiante trabajará sobre dos datasets:
+
+-   El builtin dataset ToothGrowth.
+
+-   Otro que armará con las siguientes condiciones:
+
+    -   Deben ser datos con distribución binomial. Es decir que deben responder a la lógica con la que se producen este tipo de datos.
+
+    -   Debe contar con al menos dos tratamientos / condiciones / poblaciones.
+
+    -   Debe contar con al menos 40 repeticiones por condición.
+    
+-   Todos los procesos y análisis que realice acompáñelos de un texto explicativo. Los textos que elabore deben cubrir los siguientes aspectos.
+
+    -   Explicaciones breves y concisas de lo hecho.
+
+    -   Descripción breve de los aspectos a destacar de las estadísticas previas.
+
+    -   Breve interpretación del análisis.
+
+### Cargue los datos
+
+-   Cargue las librerías que necesite.
+
+-   Use las herrameintas de ayuda de R para conocer el dataset ToothGrowth.
+
+-   Cargue los datos desde un archivo .csv, haga los arreglos que necesite con su estructura. 
+
+-   Cree un dataset tibble para trabajar con él, recuerde que es muy conveniente que la tenga una estructura tidy.
+
+### Describa los datos.
+
+La descripción debe realizarse de 2 maneras complementarias:
+
+-   Indicadores matemáticos:
+
+    -   Media, mediana, moda, máximos y mínimos, cuantiles / cuartiles, varianza, desvío estándar, error estándar, coeficiente de variación.
+
+-   Gráficos y tablas:
+
+    -   Histogramas, boxPlot, Diagrmas de densidad.
+
+### Distribuciones
+
+Construya los gráficos de distribución de probabilidad de cada grupo de datos dentro de cada dataset. Un dataset tiene distribución normal y el otro binomial.
+
+Muestre en el gráfico una línea que marque la media o mediana según le parezca más conveniente.
+
+Muestre en el gráfico áreas sombreadas que representen probabilidades de interés. Por ejemplo limitada por el intervalo de confianza, o un valor de interés cualquiera.
+
+Recuerde que para estos cálculos cuenta con las siguientes funciones:
+
+-   Distribución Normal: dnorm, qnorm, pnorm
+
+-   Distribución Binomial: dbinom, qbinom, pbinom
+
+### Simulaciones Montecarlo
+
+Realice al menos dos simulaciones montecarlo (una para cada dataset) que le permitan describir la población de referencia mediante una gran cantidad de datos en lugar de la distribución de densidad. Para esto recuerde que puede usar las funciones rnorm y rbinom.
+
+Puede comparar la simulación y la distribución de densidad.
+
+## Recomendaciones
+
+-   Organice el trabajo como le resulte más claro.
+
+-   Pida ayuda cuando lo necesite (puede consultar a su profesor, a compañeros, en internet o a quién lo crea conveniente). Pedir ayuda no es trampa!
+
+-   Anímese a ir más allá de lo estrictamente pedido.
+
+-   Use chatGPT siempre que le resulte útil.
+
+```{r}
+
+```
