@@ -1,0 +1,79 @@
+---
+title: "00-PrimeroOrganizarse"
+output: html_notebook
+---
+
+# Antes de empezar.
+
+La demanda de profesionales capacitados en ciencia de datos está creciendo rápidamente. Aquí se introduce a la adqusición de habilidades que pueden ayudar a enfrentar desafíos de análisis de datos del mundo real. Estas incluyen programación, manipulación y visualización de datos en R, organización de archivos, control de versiones con Git y GitHub, y preparación de documentos reproducibles con Quarto y knitr. Cada parte tiene varios capítulos diseñados para ser presentados como una clase e incluye ejercicios para cada capítulo en documentos aparte.
+
+El lenguaje R <http://r-project.org> es poderosísimo, con una comunidad de usuarios que lo desarrollan permanentemente muy madura y extensa. El entorno de trabajo original de R es extremadamente básico y existen muchos entornos que lo mejoran. Nosotros usaremos RStudio <https://posit.co/downloads>.
+
+Utilizado por millones de personas, el entorno de desarrollo integrado (IDE) de RStudio es un conjunto de herramientas diseñadas para ayudar a ser más productivo con R y Python. Incluye una consola y un editor con resaltado de sintaxis que permite la ejecución directa de código. También cuenta con herramientas para graficar, ver el historial, depurar y gestionar tu espacio de trabajo. R permite realizar una enorme cantidad de análisis estadísticos y matemáticos. 
+
+El R-base tiene las bases para cualquier análisis y las herramientas para desarrollar los otros paquetes. Además de la programación estadística y matemática, R es un entorno de programación orientado a objetos, aunque las parte estadística responde más bien al paradigma funcional.
+
+Seguidamente van las recomendaciones para empezar a usar RStudio.
+
+## Instalar el software necesario.
+
+-   Priemro ingrese a <https://www.r-project.org/>, baje la última versión de R e instálela en su sistema.
+-   Luego ingrese a <https://posit.co/downloads>, baje RStudio e instálelo también.
+-   Usaremos GitHub. RStudio tiene un cliente para GitHub integrado, pero si lo prefiere puede bajar el original de <https://github.com/>.
+
+## Organizar directorios de trabajo.
+
+-   Cree una carpeta en su computadora donde organizará todo su trabajo con R y para este curso.
+-   Cree dentro de esa carpeta una destinada a este curso.
+
+## Crear el primer proyecto.
+
+-   Abra RStudio y cree un nuevo proyecto dentro de la carpeta anterior.
+-   Establezca el directorio de trabajo con el menú "Session / Set Working Directory / To Project Directory"
+-   Configure las Opciones Globales con el menú "Tools / Global Options". Recomiendo:
+    -   Quitar la selección a las opciones "Restore .RData into workspace at start"
+    -   Cambie "Save workspace to .RData on exit" a "Never"
+    -   Cambie lo que le resulte cómodo (a mi me gusta el modo oscuro por ejemplo, está en "appearence / Editor theme")
+-   Cree una carpeta "/datos" dentro del directorio del proyecto.
+
+## Git Hub
+
+-   Ingrese al sitio <https://github.com/> y cree un usuario si no cuenta con uno ya creado.
+-   Clone el sitio de esta materia para mantenerse actualizado. Veremos alternativas de trabajo en clases.
+
+## Recursos en línea (muy recomendados)
+
+Los siguientes libros digitales on line son completas introducciones a R. Cualquiera de ellos lo recomiendo para quienes deseen profundizar en su aprendizaje. También son buenos sitios de consulta para aspectos particulares que le generen dudas.
+
+-   Juan Bosco Mendoza Vega (Actualización permanente). R para principiantes. (On Line) <https://bookdown.org/jboscomendoza/r-principiantes4>
+
+-   Introduction to Data Science (en línea, 2024). Rafael Irisarri.
+
+    -   Data Wrangling and Visualization with R <https://rafalab.dfci.harvard.edu/dsbook-part-1>
+    -   Statistics and Prediction Algorithms Through Case Studies <https://rafalab.dfci.harvard.edu/dsbook-part-2>
+
+## Cómo trabajaremos.
+
+Hay muchísimas formas de trabajar en R, aquí les voy a contar cómo lo haremos nosotros.
+
+Cada clase contará con al menos un Notebook que contará con explicaciones, código, referencias, etc. Los Notebooks son documentos con extensión .Rmd que permiten integrar textos en formato R Markdown e isertos (chunks) de código ejecutables mientras se trabaja. Como por ejemplo:
+
+```{r}
+print("Hola, estamos jugando con cuentas. El logatitmo de base 3 de la raíz cuadrada de la inversa de pi es:")
+log(sqrt(1/pi), base = 3)
+```
+
+Para insertar un nuevo chunk puede hacerlo desde el menú "Code / Insert Chunk", con el botón verde a la derecha de este panel (que tiene un símbolo + y una C), despliega un mení y elige R, o con las teclas rápidas Alt+Ctrl+I.
+
+Pruebelo aquí.
+
+```{r}
+
+```
+
+Para abrir un nuevo Notebook lo puede hacer con el menú "File / New File / R Notebook", o con el primer botón del menú de íconos (arriba a la izquierda, Símbolo + verde, sobre un rectángulo blanco). Guárdelo con el nombre que usted elija.
+
+## Ejercicios.
+
+Esta materia se aprende haciendo. Es importantísima la ejercitación y resolución de problemas para aprender estadística. Por lo tanto cada clase contará con un documento con ejercicios a realizar donde se pone en juego lo discutido en clases. Deberían realizar todos los ejercicios de una clase antes de la siguiente, porque el contenido es cíclico e incremental, eso hace que llevar al día la ejercitación permita la adecuada comprensión de lo que se está aprendiendo.
+
