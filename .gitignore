@@ -4,6 +4,7 @@
 .Ruserdata
 /estudiantes
 /objetos
+/EjerciciosResueltos
 *.Rproj
 *.html
 borrador-*.*
