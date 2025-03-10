@@ -50,6 +50,8 @@ Aprende con Alf (Actualización permanente). Manual de Estadística. <https://ap
 
 Kelmansky, Diana M. (2009). Estadística para todos. Estrategias de pensamiento y herramientas para la solución de problemas. Ministerio de Educación, Buenos Aires, Argentina. 272 pgs. (Está en la biblioteca del ISETA y on line) <http://www.bnm.me.gov.ar/giga1/documentos/EL001858.pdf>
 
+Levin, Richard, David Rubin (2004). Estadística para administración y economía. (7ma ed.) Pearson Educación de México. México, 952pgs. <https://www.academia.edu/9701898/Estad%C3%ADstica_para_Administraci%C3%B3n_y_Econom%C3%ADa_7ma_Edici%C3%B3n_Richard_I_Levin_and_David_S_Rubin>
+
 Juan Bosco Mendoza Vega (Actualización permanente). R para principiantes. (on line) <https://bookdown.org/jboscomendoza/r-principiantes4>
 
 Vicente Coll Serrano y Pedro J. Pérez (2018). Curso de Introducción a R. (on line) <https://www.uv.es/vcoll/curso_r.html>
@@ -72,41 +74,14 @@ Para valientes - Wickham, Hadley & Garret Grolemund (2023). R for Data Science. 
 
 Otro para valientes - Introduction to Data Science (en línea, 2024). Rafael Irisarri.
 
-```         
 -   Data Wrangling and Visualization with R <https://rafalab.dfci.harvard.edu/dsbook-part-1>
 
 -   Statistics and Prediction Algorithms Through Case Studies <https://rafalab.dfci.harvard.edu/dsbook-part-2>
-```
 
 ## Videos recomendados
 
-Canal de youtube unamunoenlinea. Canal de un profesor de matemáticas que enseña en el CBC de la UBA. Aquí les dejo listas de reproducción a videos explicativos sobre Teoría de conjuntos, combinatoria y probabilidad. Vale la pena revisar la lista completa de videos que tiene, son realmente excelentes.
+Canal de youtube unamunoenlinea. Canal de un profesor de matemáticas que enseña en el CBC de la UBA. Vale la pena revisar la lista completa de videos que tiene, son realmente excelentes. <https://www.youtube.com/@unamunoenlinea>
 
-## Por temas:
-
-### Probabilidad
-
-Miró, Ricardo (2006). Números combinatorios y probabilidades. 1° Ed. Colección Ciencia Jóven N.º 2, EUDEBA, Bs.As. 159 pgs. El siguiente vínculo es para comprarlo en el sitio de EUDEBA. Si consigo el .pdf lo agregaré aquí. [https://www.eudeba.com.ar/Papel/9789502314488/N%C3%BAmeros+combinatorios+y+probabilidades+(N%C2%B0)](https://www.eudeba.com.ar/Papel/9789502314488/N%C3%BAmeros+combinatorios+y+probabilidades+(N%C2%B0)){.uri}
-
-Miguel R. Wilhelmi (2004). Combinatoria y Probabilidad. Universidad de Granada. España. 275 pgs. <https://www.ugr.es/~batanero/pages/ARTICULOS/librowhilhelmi.pdf>
-
-Levin, Richard, David Rubin (2004). Estadística para administración y economía. (7ma ed.) Pearson Educación de México. México, 952pgs. <https://www.academia.edu/9701898/Estad%C3%ADstica_para_Administraci%C3%B3n_y_Econom%C3%ADa_7ma_Edici%C3%B3n_Richard_I_Levin_and_David_S_Rubin>
-
-### Teoría de conjuntos
-
-<https://www.youtube.com/watch?v=OwyaMi3UnQY&t=1236s>
-
-### Los Naturales y el Factorial
-
-<https://www.youtube.com/watch?v=VJHE7vwsxrg&list=PL2fBB5seGsOWKATwyDy76rGyBGmdN5p5m>
-
-### Combinatoria
-
-<https://www.youtube.com/watch?v=rAH7RWU4JyM&list=PL2fBB5seGsOUIH732oKHMmqjpMmLeImNY>
-
-### Probabilidades
-
-<https://www.youtube.com/watch?v=OwyaMi3UnQY&list=PL43954F1FE4A51311>
 
 # Perlas
 
