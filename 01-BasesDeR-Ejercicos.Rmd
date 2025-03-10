@@ -1,0 +1,109 @@
+---
+title: "01 - Ejercicios - Bases de R"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Estudiante: SuNombre 
+
+Para realizar estos ejercicios use como referencia el documento "01-BasesDeR.Rmd".
+
+Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna. Agregue al nombre del archivo el suyo al final (01-Ejercicios-BasesDeR-SuNombreApellido.Rmd), y me lo envía por email.
+
+Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la actividad. Esto no es el modo habitual de trabajo, pero se pretende aquí que usted descubra cuándo necesita las librerías extra.
+
+# Tipos de datos (Numeric, character, logical, y varios tipos para fechas y tiempos)
+
+## Numeric
+
+-   Cree objetos de la clase numeric y verifique con class() y typeof().
+-   Averigüe cómo crear un objeto de la case integer.
+-   ¿Qué son los objetos pi y exp(1)?
+
+## Character
+
+-   Cree tres objetos de texto y concaténelos de 3 maneras diferentes. Use los siguientes separadores: un espacio, un guión y sin espacio. Pruebe las funciones paste() y print(). ¿Qué las diferencia?
+
+## Logical
+
+-   Cree las tablas de verdad para los conectores lógicos "y" y "o" y considere también las combinaciones de la negación de las proposiciones. Ponga atención en el orden de ejecución.
+
+## Date and Time.
+
+-   ¿Qué día Juliano es su cumpleaños?
+-   ¿Cuántos días hay entre su último cumpleaños y hoy?
+-   ¿Cuántos días faltan para su próximo cumpleaños?
+-   ¿Cuánto tiempo ha transcurrido desde su nacimiento?
+-   ¿Cuánto tiempo vivió El Diego?
+-   ¿Qué día de la semana nació El Diego?
+-   ¿Qué semana del año murió El Diego?
+-   ¿Qué diferencia de edad tienen usted y El Diego?
+
+# Estructuras de datos
+
+## Vectores
+
+-   Cree un vector con los días julianos correspondientes a 50, 100, 150, 200, 250, 300 y 350 días después de su último cumpleaños.
+-   Cree un vector con los días de la semana (como palabras) corerspondientes a las fechas del inciso anterior.
+-   Cree un vector con las superficies correspondientes a 5 cuadrados. El primer cuadrado tiene lados de 1m de largo, el segundo tiene lados el doble de largos que el cuadrado anterior, el tercero el triple del cuadrado del doble del inicial... y así sigue la serie. (es decir: 1, 2 * 1, 3 * 2 * 1, ...)
+-   Cree un vector con los precios de 6 productos y otro con las cantidades vendidas de dichos productos. ¿Cuánto fué el ingreso total de las ventas?
+
+### Generador de secuencias
+
+-   Cree un vector de números del 21 al 354
+-   Cree un vector con una secuencia desde 0 hasta 700 saltando de a 7 usando la función seq()
+-   Cree el mismo vector anterior pero sin usar el método seq()
+
+### Acceder a los elementos de un vector
+
+-   ¿Cuál es la superficie del tercer cuadrado del ejercicio anterior?
+-   ¿Cuáles son los números desde el 5to al 9no de la serie que salta de a siete?
+-   Cree un vector que contenga las fechas correspondientes a los 100, 200 y 300 días posteriores a su último cumpleaños. No lo vuelva a calcular, rescate los valores del vector previamente creado.
+
+## Matrices
+
+Usted es un comerciante que vende 7 productos en 3 sucursales diferentes.
+
+-   Cree un vector con los precios de compra mayorista de los 7 productos que luego venderá.
+-   Cree una matriz con los precios de venta de los 7 productos en las 3 sucursales diferentes.
+-   Cree una matriz con las ventas realizadas de los 7 productos anteriores en las 3 sucursales mencionadas.
+-   Cree una matriz, usando las anteriores, con la recaudación por producto y sucursal.
+-   Cree una matriz, usando las anteriores, con las ganancias por producto y por sucursal.
+
+### Acceder a sus elementos
+
+Para las matrices del ejemplo anterior:
+
+-   ¿Cuál fué la recaudación total?, ¿y la ganancia?
+-   ¿Cuál fué la recaudación en la sucursal 2?, ¿y la ganancia?
+-   ¿Cuál fué la recaudación del producto 6?, ¿y la ganancia?
+
+## Array.
+
+-   Imagine una inflación mensual del 7% y construya un array con la información del ejercicio anterior agregándole toda esa misma información pero en el mes siguiente.
+
+### Acceder a sus elementos
+
+-   ¿Cuál fué la recaudación total y la ganancia en el mes siguiente?
+-   ¿Cuál fué la recaudación y la ganancia en la sucursal 3 en el primer mes?
+-   ¿Cuál fué la recaudación y la ganancia del producto 2 en los dos meses?
+
+## Estructuras de datos heterogéneos
+
+## Listas
+
+-   Cree una lista con nombres de sus elementos donde almacene precio de compra, precio de venta, ventas, recaudación y ganancias de los productos 3 y 5 en el segundo mes.
+
+### Acceder a sus elementos
+
+-   ¿Cuales fueron las ventas del producto 3? (obtenga la información de la lista anterior)
+
+# Funciones
+
+-   Cree una función que le permita acceder a las ganancias totales del producto que usted elija.
+-   Cree una función que le permita acceder a las ganancias totales de la sucursal que usted elija.
+-   Cree una función que le permita acceder a las ganancias totales de un producto en una sucursal.
+-   Guarde en un archivo externo las funciones creadas. Cárguelas luego y pruebe su funcionalidad. (Recomendación, a las funciones almacenadas aparte póngales un nombre diferente así puede probar si cargan correctamente sin conflicto con las creadas en este documento)
+
+
