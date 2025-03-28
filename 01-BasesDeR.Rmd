@@ -5,6 +5,10 @@ output:
     toc: true
 ---
 
+Para una completa introducción a R desde cero recomiendo:
+
+-   Juan Bosco Mendoza Vega (Actualización permanente). R para principiantes. (on line) <https://bookdown.org/jboscomendoza/r-principiantes4>
+
 # Introducción brevísima a R.
 
 R es un entorno básico cuya funcionalidad puede extenderse instalando "paquetes" (pckages) de software. Hay miles de paquetes disponibles en el repositorio oficial y además hay muchos más disponibles en sitios de personas que los han desarrollado por su cuenta. Casi siempre es necesario su uso, y la elección de los paquetes a utilizar depende de las necesirades del problema en custión y de las preferencias del usuario.
@@ -108,9 +112,9 @@ Asignación \<- ó -\> ó = (no recomendado =)
 
 ## Pipes
 
-| Operación         | Símbolo      |
-|:------------------|:-------------|
-| Pipe a la derecha | %\>% \|\>    |
+| Operación         | Símbolo   |
+|:------------------|:----------|
+| Pipe a la derecha | %\>% \|\> |
 
 # Tipos de datos (Numeric, character, logical, y varios tipos para fechas y tiempos)
 

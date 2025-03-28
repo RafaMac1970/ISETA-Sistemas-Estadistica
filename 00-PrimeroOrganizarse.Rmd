@@ -67,9 +67,6 @@ Para insertar un nuevo chunk puede hacerlo desde el menú "Code / Insert Chunk",
 
 Pruebelo aquí.
 
-```{r}
-
-```
 
 Para abrir un nuevo Notebook lo puede hacer con el menú "File / New File / R Notebook", o con el primer botón del menú de íconos (arriba a la izquierda, Símbolo + verde, sobre un rectángulo blanco). Guárdelo con el nombre que usted elija.
 

@@ -54,8 +54,6 @@ Levin, Richard, David Rubin (2004). Estadística para administración y economí
 
 Juan Bosco Mendoza Vega (Actualización permanente). R para principiantes. (on line) <https://bookdown.org/jboscomendoza/r-principiantes4>
 
-Vicente Coll Serrano y Pedro J. Pérez (2018). Curso de Introducción a R. (on line) <https://www.uv.es/vcoll/curso_r.html>
-
 Introducción a estadística con R. (on line) <https://bookdown.org/matiasandina/R-intro>
 
 ## Nivel Medio
