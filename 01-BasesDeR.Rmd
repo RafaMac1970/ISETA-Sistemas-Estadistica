@@ -96,19 +96,17 @@ Asignación \<- ó -\> ó = (no recomendado =)
 
 ## Estructuras de control
 
-| Estructura                    | Palabra  |
-|:------------------------------|:---------|
-| Condicional si TRUE           | if       |
-| Condicional si FALSE          | else     |
-| Repetir una serie de comandos | repeat   |
-| Mientras                      | while    |
-| Repetir en un vector          | for      |
-| Definir una función           | function |
-| Verificar si un elemento      |          |
-| está en una colección         | in       |
-| Saltar una iteración en       |          |
-| un bucle                      | next     |
-| Interrumpir un bucle          | break    |
+| Estructura                                     | Palabra  |
+|:-----------------------------------------------|:---------|
+| Condicional si TRUE                            | if       |
+| Condicional si FALSE                           | else     |
+| Repetir una serie de comandos                  | repeat   |
+| Mientras                                       | while    |
+| Repetir en un vector                           | for      |
+| Definir una función                            | function |
+| Verificar si un elemento está en una colección | in       |
+| Saltar una iteración en un bucle               | next     |
+| Interrumpir un bucle                           | break    |
 
 ## Pipes
 
@@ -119,6 +117,12 @@ Asignación \<- ó -\> ó = (no recomendado =)
 # Tipos de datos (Numeric, character, logical, y varios tipos para fechas y tiempos)
 
 ## Numeric
+
+```{r}
+a <- 1
+a
+class(a)
+```
 
 ```{r}
 a <- 1
@@ -213,7 +217,7 @@ paste("year(hoy):", year(hoy)) # año
 | 2d          | Matrix      | Data frame / tibble |
 | nd          | Array       |                     |
 
-## Vectores
+## s[1,2]Vectores
 
 Los vectores son conjuntos ordenados de objetos de la misma clase (o type). Se instancian con c(). Pueden contener cualquier tipo de objetos mientras sean del mismo tipo y los fuerza al mismo tipo por defecto. Las operaciones básicas funcionan elemento a elemento.
 
@@ -253,7 +257,7 @@ vec2
 
 ```{r}
 # Vector
-x[1] # 1
+x[2] # 1
 y[3] # 5
 
 # Se puede accedeer a un rango de datos
@@ -361,7 +365,7 @@ vector2 <- c(10,11,12,13,14,15)
 vector3 <- c(16,17,18,19,20,21,22,23,24,25,26,27,28,29,30)
 
 # Usar los vectores creados para armar la matriz.
-unArray3D <- array(c(vector1,vector2,vector3), dim = c(3,3,2))
+unArray3D <- array(c(vector1,vector2,vector3), dim = c(4,3,2))
 unArray3D
 
 class(unArray3D)
