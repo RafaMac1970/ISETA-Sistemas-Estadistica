@@ -1,0 +1,460 @@
+---
+title: "02 - Data Frames"
+output:
+  html_document:
+    toc: true
+    df_print: paged
+  html_notebook:
+    toc: true
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Tipos de Datos
+
+Los Datos son un tema central de preocupación en estadística que se relaciona muy intimamente con las estructuras en las que los ordenamos y almacenamos para luego analizarlos. Por esa razón los abordamos juntos en este documento.
+
+Los tipos de datos los clasificamos de acuerdo a las condiciones que le imponen a los análisis que debemos realizar con ellos. La siguiente clasificación es muy general y sin embargo muy útil también:
+
++---------------+--------------+----------------------------------------------+-----------------------------------+
+| Col1          | Col2         | Ejemplos                                     | Valores                           |
++===============+==============+==============================================+===================================+
+| Cualitativos  | Nominales    | Candidatos en una elección.                  | Fulano, Mengano                   |
+|               |              |                                              |                                   |
+|               |              | Sexo de un animal.                           | Masculino, Femenino               |
+|               |              |                                              |                                   |
+|               |              | Marca de un auto.                            | Fiat, Renault, Toyota             |
+|               |              |                                              |                                   |
+|               |              | Test de CoVid                                | Positivo, Negativo                |
++---------------+--------------+----------------------------------------------+-----------------------------------+
+|               | Ordinales    | Desarrollo de un lepidóptero.\               | Huevo, larva, pupa, mariposa      |
+|               |              |                                              |                                   |
+|               |              | Año de estudio.                              | 1°, 2°, 3°, 4°, 5°, 6°            |
+|               |              |                                              |                                   |
+|               |              | Estado Civil.\                               | Soltero, casado, separado         |
+|               |              |                                              |                                   |
+|               |              | Mes del año.                                 | Enero, Febrero, ...               |
++---------------+--------------+----------------------------------------------+-----------------------------------+
+| Cuantitativos | Discretos    | Puntaje en el chinchón.\                     | Número entero (incluso negativos) |
+|               |              |                                              |                                   |
+|               |              | Cantidad de hojas de una planta.             | Número natural\                   |
+|               |              |                                              |                                   |
+|               |              | Nota en el final de una materia.             | 1 al 10\                          |
+|               |              |                                              |                                   |
+|               |              | Cantidad de personas en la cola de un banco. | Número natural                    |
++---------------+--------------+----------------------------------------------+-----------------------------------+
+|               | Contínuos    | Altura de una persona.                       | En centímetros                    |
+|               |              |                                              |                                   |
+|               |              | Peso de un fierro.                           | En gramos                         |
+|               |              |                                              |                                   |
+|               |              | Densidad de un hueso.                        | En gramos / cm\^3                 |
+|               |              |                                              |                                   |
+|               |              | Ingresos brutos de una empresa               | En pesos                          |
++---------------+--------------+----------------------------------------------+-----------------------------------+
+| Especiales    | Cronológicos | Asociados al tiempo                          |                                   |
+|               |              |                                              |                                   |
+|               | Geográficos  | Asociados a una posición                     |                                   |
+|               |              |                                              |                                   |
+|               | Repetidos\   | Asociados a una unidad muestral              |                                   |
+|               |              |                                              |                                   |
+|               | Genéticos    | Secuencias de ADN                            |                                   |
+|               |              |                                              |                                   |
+|               | Narrativos   | Se usan en ciencias sociales                 |                                   |
+|               |              |                                              |                                   |
+|               | Etc.         |                                              |                                   |
++---------------+--------------+----------------------------------------------+-----------------------------------+
+
+Cada tipo de datos tiene necesidades especiales cuando deben ser ordenados y almacenados y para ello existen diferentes estructuras diseñadas con ese objetivo.
+
+Hay muchos frameworks de estructuras de datos en R. Voy a describir muy someramente el más básico y luego con más detalle el de Tidyverse, y en particular la estructura Tidy.
+
+# La estructura por defecto de R.
+
+## Crear Data Frames
+
+Existen muchas fromas de crear Data Frames, cada una depende del modo en que tengamos la información.
+
+1.  Crear Data Frame con los datos en un comando.
+2.  Crear vectores con la información y luego unirlos en un data frame.
+3.  Crear una matriz y luego convertirla en data frame.
+4.  Crear el data frame leyendo los datos de un archivo .csv
+
+### 1. Crear Data Frame con los datos en un comando.
+
+```{r}
+unDataFrame1 <- data.frame(
+  "entero" = 1:4,
+  "factor" = c("a", "b", "c", "d"),
+  "numero" = c(1.2, 3.4, 4.5, 5.6),
+  "cadena" = c("e", "f", "g", "h")
+)
+
+unDataFrame1
+```
+
+### 2. Crear vectores con la información y luego unirlos en un data frame.
+
+```{r}
+entero <- 1:4
+factor <- c("a", "b", "c", "d")
+numero <- c(1.2, 3.4, 4.5, 5.6)
+cadena <- c("e", "f", "g", "h")
+
+unDataFrame2 <- data.frame(entero, factor, numero, cadena)
+unDataFrame2
+```
+
+### 3. Crear una matriz y luego convertirla en data frame.
+
+Las matrices tienen todos los datos numéricos, de modo que sólo podemos crear un data frame de datos numéricos
+
+```{r}
+matriz1 <- matrix(1:12, ncol = 4)
+unDataFrame3 <- data.frame(matriz1)
+unDataFrame3
+```
+
+### 4. Crear el data frame leyendo los datos de un archivo .csv
+
+```{r}
+#library(readr)
+unDataFrame4 <- read.csv("datos/datitos1.csv")
+unDataFrame4
+```
+
+## Acceder a la información
+
+### Acceder a una columna completa
+
+```{r}
+unDataFrame4$factor
+unDataFrame4[,2]
+```
+
+### Acceder a una fila completa
+
+```{r}
+unDataFrame4[2,]
+```
+
+### Acceder a una sola celda
+
+```{r}
+unDataFrame4[2,2]
+```
+
+### Acceder a una celda por nombre de columna (variable)
+
+```{r}
+unDataFrame4[2,]$numero
+unDataFrame4$numero[2]
+```
+
+# Tidyverse y estructuras Tidy (paquete tidyr).
+
+Cargar la librería no es necesario si ya se cargó tidyverse.
+
+```{r}
+library(tidyr)
+```
+
+<https://www.tidyverse.org> Cheatsheet <https://github.com/rstudio/cheatsheets/blob/master/tidyr.pdf>
+
+1.  Cada columna (column) es una variable medida sobre la unidad experimental en una observación.
+2.  Cada fila (row) representa una observación.
+3.  Cada celda es un valor único.
+
+El siguiente es un ejemplo que no es Tidy, porque cada fila tiene muchas observaciones (una para cada año) sobre la unidad experimental (una Variable - Indicator - en un País). Para transformarla es necesario agregar dos columnas, una para el año y otra para la población y reordenar las columnas por año dentro de esas dos columnas.
+
+En este ejemplo usamos un dataframe que ya existe en R, que se llama world_bank_pop. world_bank_pop es lo que llamamos "built-in dataset", más detalles en "03 - Built-in datasets.Rmd".
+
+```{r}
+world_bank_pop
+```
+
+> Nótese que en Tidyverse los DataFrames se llaman Tibble, esto es así porque se comportan un poquito distinto. (Se explica en la siguiente sección)
+
+De esta manera transformamos el data frame para darle una estructura Tidy
+
+```{r}
+# Pongo los años en un vector para simplificar la lectura de la transformación
+anios <- as.character(2000:2017)
+
+world_bank_pop %>% 
+# Transformo el dataframe en Tidy
+  pivot_longer(anios, names_to = "year", values_to = "population")  %>% 
+# Como los años quedaron con formato de carácter (porque los nombres de columna son carácter) los convierto a número
+  type_convert(col_types = cols( year = col_double())) %>%
+# Ahora se puede seleccionar una parte del dataset
+  subset(country == 'ARG' | country == 'ROU' | country == 'CHE') %>% 
+  subset(indicator == 'SP.POP.TOTL') 
+
+```
+
+El inconveniente de usar pipes es que si quiero trabajar sobre los datos del gráfico anterior debo repetir el proceso. Siempre una alternativa es darle persistencia al proceso anterior antes de hacer el gráfico, de esa manera se lo puede volver a usar.
+
+```{r}
+wbpTidy <- world_bank_pop %>% 
+# Transformo el dataframe en Tidy
+  pivot_longer(anios, names_to = "year", values_to = "population")  %>% 
+# Como los años quedaron con formato de carácter (porque los nombres de columna son carácter) los convierto a número
+  type_convert(col_types = cols( year = col_double())) %>%
+# Ahora se puede seleccionar una parte del dataset
+  subset(country == 'ARG' | country == 'ROU' | country == 'CHE') %>% 
+  subset(indicator == 'SP.POP.TOTL') 
+```
+
+Por ejemplo para graficarlo ...
+
+```{r}
+#Finalmente podemos graficarlo
+  ggplot(wbpTidy, aes(x = year, y = population, color = country)) + 
+    geom_line() + 
+    ylim(0,50000000)
+```
+
+O seguir transformando el tibble de acuerdo a nuestras necesidades
+
+```{r}
+wbp_ARG_ROU_CHE <- wbpTidy %>% 
+  group_by(country)  %>% 
+  reframe(media = mean(population), variacion = sd(population), prob = c(0.25, 0.75), qs = quantile(population, c(0.25, 0.75)))
+wbp_ARG_ROU_CHE
+```
+
+# Tibble
+
+Los "tibble" son los "data.frame" de "tidyverse". Los tibbles pueden tener una estructura que no sea tidy, pero toda la lógica de trabajo es con tidy, de modo que no hacerlo hace muchas tareas más engorrosas.
+
+## Crear un data frame Tibble
+
+Existen muchísimas formas de crear un tibble, aquí presentaremos las más usadas.
+
+### 1- Desde un Data Frame
+
+Se puede transformar cualquier Data Frame (como los creados anteriormente) en un tibble. No es una buena práctica acostumbrarse a esto porque se pierden algunas de las ventajas como por ejemplo que los nombres de las columnas de tibble pueden ser cualquier string.
+
+En este ejemplo usamos dataframes que ya existe en R, que se llaman iris y cars. iris y cars son lo que llamamos "built-in dataset", más detalles en "03 - Built-in datasets.Rmd".
+
+```{r}
+irisTibble <- iris %>% as_tibble() %>% 
+  subset(Species == 'setosa')
+irisTibble
+```
+
+```{r}
+carsTibble <- cars %>%as_tibble() %>%
+   subset(speed > 20)
+carsTibble
+```
+
+### 2- Crear tibble con los datos en un comando.
+
+Nótese que es posible, siempre conveniente y aveces necesario especificar el tipo de datos de cada columna (en este caso factor y cadena).
+
+```{r}
+unTibble1 <- tibble(
+  "entero" = 1:4,
+  "factor" = as.factor(c("a", "b", "c", "d")),
+  "numero" = c(1.2, 3.4, 4.5, 5.6),
+  "cadena" = as.character(c("e", "f", "g", "h"))
+)
+
+unTibble1
+```
+
+### 3. Crear vectores con al información y luego unirlos en un tibble.
+
+```{r}
+enteros <- 1:4
+unFactor <- c("a", "b", "c", "d")
+numeros <- c(1.2, 3.4, 4.5, 5.6)
+texto <- as.character(c("e", "f", "g", "h"))
+
+unTibble2 <- tibble(enteros, unFactor, numeros, texto)
+unTibble2
+```
+
+### 4. Crear una matriz y luego convertirla en tibble.
+
+```{r}
+matriz2 <- matrix(1:16, ncol = 4)
+unTibble3 <- data.frame(matriz2)
+unTibble3
+```
+
+### 5. Crear el tibble leyendo los datos de un archivo .csv
+
+Nótese que es muy similar al caso de la creación de un data frame. La diferencia es sutil, antes lo hacíamos con "read.csv" y ahora "read_csv" usamos el guión bajo en lugar del punto.
+
+```{r}
+#library(readr)
+unTibble4 <- read_csv("datos/datitos1.csv")
+unTibble4
+```
+
+### 6- Crear un tibble vacío y alimentarlo con datos luego.
+
+Este es un ejemplo muy simple. Es poco frecuente trabajar con datos siempre numéricos. Sin embargo puede resultar útil junto a la estrategia "7- Crear un tibble compuesto de otros tibbles."
+
+```{r}
+unTibble5 <- tibble()
+
+columna <- 1
+repeat {
+  for (fila in 1:7) {
+  unTibble5[fila,columna] <- sample(1:20, 1)
+    }
+  
+  if (columna >= 5) {
+    break
+  }
+  
+  columna <- columna + 1
+}
+
+
+unTibble5
+```
+
+Hay una enorme cantidad de tipos posibles para cada columna, aquí los más usados. Conviene determinar los tipos desde el inicio porque las transformaciones posteriores (que son posibles) son engorrosas.
+
+```{r}
+unTibble5 <- tibble("Entero"=integer(),
+                    "Decimal"=double(),
+                    "Palabra"=character(),
+                    "Factor"=factor(),
+                    "Fecha"=date()
+                    )
+```
+
+### 7- Crear un tibble compuesto de otros tibbles.
+
+Los tibbles usados deben tener tamaños compatibles (misma cantidad de filas), y los nombres de columnas no deben repetirse.
+
+```{r}
+tibbleCompuesto <- tibble(unTibble1, unTibble2, unTibble3)
+tibbleCompuesto
+```
+
+## Cambiar el tipo de datos de una columna
+
+Aveces es necesario cambiar el tipo de datos una vez que la base de datos está cargada. Por ejemplo, en la base antes creada unTibble2, la columna unFactor es de tipo caracter.
+
+```{r}
+unTibble2
+```
+
+Si queremos cambiarla a factor podemos hacerlo de la siguiente manera.
+
+```{r}
+unTibble2$unFactor <- factor(unTibble2$unFactor)
+unTibble2
+```
+
+También puede cambiarse otros tipos de datos, siempre que sea compatible.
+
+```{r}
+unTibble2$enteros <- as.character(unTibble2$enteros)
+unTibble2
+```
+
+```{r}
+unTibble2$enteros <- as.double(unTibble2$enteros)
+unTibble2
+```
+
+```{r}
+unTibble2$enteros <- as.integer(unTibble2$enteros)
+unTibble2
+```
+
+## Acceder a la información de un tibble
+
+Hay una diferencia importante con un dataframe respecto del acceso a información. Aquí va una comparación de algunos casos de uso común. La tabla muestra la clase del objeto que devuelve cada comando.
+
+| Comando              |     data Frame      |       tibble        |
+|:---------------------|:-------------------:|:-------------------:|
+| datos[,2]            |      un vector      |      un tibble      |
+| datos[2,]            |    un data frame    |      un tibble      |
+| datos[2,2]           | un dato (contenido) |      un tibble      |
+| datos\$nombreColumna |      un vector      |      un vector      |
+| datos[[2,2]]         | un dato (contenido) | un dato (contenido) |
+
+Si queremos acceder al contenido debemos hacerlo con \$ o con [[]]
+
+```{r}
+unDataFrame1[,2]
+unTibble1[,2]
+```
+
+```{r}
+unDataFrame1[2,]
+unTibble1[2,]
+```
+
+```{r}
+unDataFrame1[2,3]
+unTibble1[2,3]
+```
+
+```{r}
+unDataFrame1$cadena
+unTibble1$cadena
+```
+
+```{r}
+unDataFrame1[[2,3]]
+unTibble1[[2,3]]
+```
+
+# Guardar los datos en archivos externos
+
+Hay muchísimas librerías para dar persistencia externa a los datos. La manera más utilizada es en archivos .csv
+
+Una manera simple y muy eficiente cuando se trabaja con bases de datos grandes pero no inmensas es usando tablas de SQLite.
+
+También se puede acceder a bases de datos externas usando la web. No vamos a mostrar esa funcionalidad aquí, pero es posible y hay muchos métodos y librerías para ello. Para información financiera es particularmente importante, dado que necesitamos información al minuto.
+
+## Guardar en .csv
+
+Ejecute el script y mire en su carpeta de trabajo el archivo generado. Use la ayuda para ver las opciones de formato (que dan mucha flexibilidad).
+
+```{r}
+write_csv(tibbleCompuesto, "datos/datosFalopa.csv")
+```
+
+## Guardar en SQLite
+
+Vamos a trabajar con sos built-in dataset mtcars y diamonds.
+
+Primero hay que crear una concexión a la base de datos, CarsDB.db
+
+```{r}
+library(RSQLite)
+
+# Se crea un archivo .db en el directorio de trabajo.
+conn <- dbConnect(RSQLite::SQLite(), "datos/pruebaSQLite.db")
+```
+
+Luego escribir los datos de mtcars en una tabla llamada cars_data. Se pueden crear muchas tablas.
+
+```{r}
+dbWriteTable(conn, "mtcars_data", mtcars)
+dbWriteTable(conn, "diamonds_data", diamonds)
+```
+
+Finalmente leer de la base de datos con un query SQL
+
+```{r}
+tibble(dbGetQuery(conn, "SELECT * FROM diamonds_data LIMIT 10"))
+```
+
+O cargar toda la base de datos. Esto hay que hacerlo con cuidado cuando la base es grande y dependiendo de la RAM de la computadora usada. Nótese que la función dbGetQuery() me devuelve un data.frame (df), para convertirlo a tibble debo usar la función tibble() como en el caso anterior.
+
+```{r}
+# Leer de la base de datos con un query SQL
+dbGetQuery(conn, "SELECT * FROM mtcars_data")
+```

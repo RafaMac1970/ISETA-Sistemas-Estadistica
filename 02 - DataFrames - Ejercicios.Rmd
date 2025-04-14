@@ -1,0 +1,67 @@
+---
+title: "02 - Data Frames"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Estudiante: SuNombre
+
+Para realizar estos ejercicios use como referencia el documento "02 - DataFrames.Rmd".
+
+Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna. Agregue al nombre del archivo el suyo al final (02 - Ejercicios - DataFrames - SuNombre Apellido.Rmd), y me lo envía por email.
+
+Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la actividad. Esto no es el modo habitual de trabajo, pero se pretende aquí que usted descubra cuándo necesita las librerías extra.
+
+# Tidyverse y estructuras Tidy.
+
+## Fuel Consumption
+
+-   Cargue los datos del archivo "FuelConsumption.xlsx" que está en la carpeta "datos". Los dato fueron obtenidos del siguiente sitio: <https://kaggle.com/datasets/krupadharamshi/fuelconsumption?resource=download> En el sitio encontrará referencias para comprender los datos.
+
+-   Asegurese de controlar el tipo de datos de cada columna. Por ejemplo, CYLINDERS debería ser integer, MAKE podría ser factor. Decida usted qué tipo de datos representa mejor a cada variable.
+
+-   Cree al menos una columna usando información de las otras.
+
+-   Convierta el dataset a Tidy. Hágalo como le parezca, tendremos tiempo de discutir estas decisiones. Puede usar la función pivot_longer().
+
+-   Cree un nuevo tibble con información parcial del dataset anterior. Puede filtrar y reducir la cantidad de filas y elegir algunas columnas.
+
+-   Guarde los datos del nuevo tibble en un archivo.csv externo. Verifique que puede leerlos fuera de R y volver a cargarlos a R.
+
+-   Guarde los datos del nuevo tibble y los del archivo original en dos tablas de una base de datos SQLite. Verifique que puede leerlos fuera de R y volver a cargarlos a R.
+
+## Girasol
+
+Los siguientes datos fueron obtenidos del libro:
+
+-   Batista William (2020). Introducción a la inferencia estadística aplicada. 2da Ed. Editorial Facultad de Agronomía. 272 pgs. <https://www.agro.uba.ar/catalog/introducci-n-la-inferencia-estad-stica-aplicada-3ra-edici-n>
+
+Los datos son la "Altura de cada planta de girasol (cm)", medidas en parcelas experimentales sembradas en dos densidades (plantas por m2) diferentes. Se midieron 40 plantas pertenecientes a cada uno de los 2 tratamientos de densidad:
+
+Parcelas de 5 pl/m2. 213 221 220 210 205 224 215 212 225 216 207 205 215 213 213 215 214 199 215 215 210 201 209 204 197 202 221 221 226 219 215 222 212 208 208 219 198 217 208 193
+
+Parcelas de 10 pl/m2. 230 221 223 209 233 230 231 221 213 214 219 238 229 224 230 226 208 216 222 218 222 219 222 223 234 211 226 217 233 211 231 220 219 226 227 226 218 215 224 229
+
+-   Cree un tibble con la información del experimento.
+
+-   Guarde esa información en un archivo .csv y en otra tabla de la base de datos SQLite.
+
+## Acceder a la información de un tibble
+
+### Fuel Consumption
+
+-   Extraiga el dato contenido en una celda.
+
+-   Extraiga todos los datos de un automovil en particular.
+
+-   Muestre los valores de una variable para todos los automóviles disponibles.
+
+-   Calcule el consumo de combustible promedio de los vehículos con 4 cilindros.
+
+-   Muestre las emisiones de CO2 de los autos compactos de AUDI.
+
+### Girasol
+
+-   ¿Cuál es el promedio de altura de cada tratamiento?
+
