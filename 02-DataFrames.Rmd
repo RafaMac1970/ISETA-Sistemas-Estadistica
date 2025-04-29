@@ -184,7 +184,7 @@ anios <- as.character(2000:2017)
 
 world_bank_pop %>% 
 # Transformo el dataframe en Tidy
-  pivot_longer(anios, names_to = "year", values_to = "population")  %>% 
+  pivot_longer(anios, names_to = "year", values_to = "population") %>% 
 # Como los años quedaron con formato de carácter (porque los nombres de columna son carácter) los convierto a número
   type_convert(col_types = cols( year = col_double())) %>%
 # Ahora se puede seleccionar una parte del dataset
@@ -193,7 +193,7 @@ world_bank_pop %>%
 
 ```
 
-El inconveniente de usar pipes es que si quiero trabajar sobre los datos del gráfico anterior debo repetir el proceso. Siempre una alternativa es darle persistencia al proceso anterior antes de hacer el gráfico, de esa manera se lo puede volver a usar.
+El inconveniente de usar pipes es que si quiero trabajar sobre los datos del gráfico anterior debo repetir el proceso. Siempre una alternativa es darle persistencia al proceso anterior antes de hacer el gráfico, de esa manCHEera se lo puede volver a usar.
 
 ```{r}
 wbpTidy <- world_bank_pop %>% 

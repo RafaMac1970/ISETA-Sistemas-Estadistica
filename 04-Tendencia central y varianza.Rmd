@@ -1,0 +1,415 @@
+---
+title: "05 - Tendencia central y varianza"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+## Teoría
+
+### Video
+
+Canal de youtube Ingeniería elemental. Varianza y Desviación Estándar <https://www.youtube.com/watch?v=cg4kUsbjQms> 
+
+Canal de youtube Ingeniería elemental. Comprendiendo la Desviación Estándar.
+<https://www.youtube.com/watch?v=WJ8uG5nYxak&list=PLOo4zWKKHXDIWF77kPXFVwXBA3drT7uG2&index=2>
+
+
+```{r}
+library(tidyverse)
+```
+
+# Medidas de tendencia Central
+
+## Media poblacional
+
+$$
+\mu = \frac{\displaystyle \sum_{i=1}^{N} x_{i}}{N}
+$$
+Siendo:
+ N: tamaño de la población
+ x: la variable de interés
+ i: un individuo de la población
+
+## Promedio de la muestra
+
+$$
+\overline{x} = \frac{\displaystyle \sum_{i=1}^{n} x_{i}}{n}
+$$
+Siendo:
+ n: tamaño de la muestra
+ x: la variable de interés
+ i: un individuo de la muestra
+ 
+### Ejemplo de cálculo
+
+```{r}
+(70 + 74 + 78 + 66 + 73 + 71 + 71 + 70 + 64 + 66 + 72 + 68 + 77 + 69 + 73 + 88 +  62 + 73 + 75 + 76) / 20
+```
+
+### Cálculo con un vector
+
+```{r}
+muestraA <- c(70, 74, 78, 66, 73, 71, 71, 70, 64, 66, 72, 68, 77, 69, 73, 88, 62, 73, 75, 76)
+
+muestraA
+sum(muestraA)
+length(muestraA)
+sum(muestraA) / length(muestraA)
+```
+
+### Usando las funciones existentes
+
+```{r}
+# Escribir una función que encuentre la moda. Moda es el valor que aparece más cantidad de veces.
+
+table(muestraA)
+moda <- function(unVector){
+  frecuencias <- table(unVector)
+  names(frecuencias[frecuencias == max(frecuencias)])
+}
+```
+
+
+```{r}
+sort(muestraA)
+
+# Media
+mean(muestraA)
+
+# Mediana. Es el valor que divide los datos en dos (coincide con el quantil 0.5)
+median(muestraA)
+
+# Moda es el valor que aparece más cantidad de veces.
+moda(muestraA)
+
+```
+
+# Medidas de variación
+
+## Extremos y quantiles
+
+```{r}
+# min q1 q2 q3 max
+fivenum(muestraA)
+
+min(muestraA)
+# también podría ser 
+# fivenum(data)[1]
+max(muestraA)
+# también podría ser 
+# fivenum(data)[5]
+
+quantile(muestraA, probs = c(0,0.25, 0.50, 0.75,1))
+quantile(muestraA, probs = 0.25)
+
+
+q1 <- function(data) {
+  quantile(data, probs = 0.25)[[1]]
+  # también podría ser fivenum(data)[2]
+}
+q2 <- function(data) {
+  quantile(data, probs = 0.5)[[1]]
+  # también podría ser fivenum(data)[3]
+}
+q3 <- function(data) {
+  quantile(data, probs = 0.75)[[1]]
+  # también podría ser fivenum(data)[4]
+}
+
+q1(muestraA)
+q2(muestraA)
+q3(muestraA)
+```
+
+```{r}
+summary(muestraA)
+```
+
+```{r}
+library(tidyverse)
+
+muestraB <- c(38, 37, 43, 47, 52, 45, 35, 52, 32, 51, 50, 45, 52, 40, 51, 47, 44, 45, 44, 30)
+muestraC <- c(78, 69, 76, 64, 81, 84, 58, 77, 67, 69, 61, 62, 74, 87, 68, 90, 60, 84, 72, 76)
+muestraD <- c(69, 63, 59, 55, 73, 45, 70, 68, 70, 67, 63, 60, 56, 76, 76, 65, 62, 64, 65, 59)
+
+muestrasTidy <- tibble(muestraA,muestraB,muestraC,muestraD)
+nombres <- c("muestraA","muestraB","muestraC","muestraD")
+muestrasTidy <- muestrasTidy %>% pivot_longer(all_of(nombres), names_to = "muestra", values_to = "valor")
+muestrasTidy
+```
+
+Hay dos funciones que hacen cosas parecidas (en este caso hacenlo mismo) que se llaman summarise() y reframe(). reframe() es de uso más general, pero puede ser más complejo aveces.
+
+```{r}
+muestrasTidy %>% group_by(muestra) %>% reframe(n = n(), min = min(valor), q1 = q1(valor), mediana = median(valor), q3 = q3(valor), Max = max(valor))
+```
+
+## Calculando Varianza y Desvío Estándar
+
+### Varianza poblacional
+
+$$
+\sigma^{2}={\frac{{\displaystyle \sum_{i=1}^{N}\left(x_{i}-\mu\right)^{2}}}{N}}
+$$
+
+### Varianza de una muestra
+
+$$
+s^{2}={\frac{{\displaystyle \sum_{i=1}^{n}\left(x_{i}-\overline{x}\right)^{2}}}{n-1}}
+$$
+
+### Devío Estándar poblacional
+
+$$
+\sigma=\sqrt{\sigma^{2}}
+$$
+
+### Devío Estándar de una muestra
+
+$$
+s=\sqrt{s^{2}}
+$$
+
+```{r}
+iA <- 1:length(muestraA)
+residualesA <- muestraA - mean(muestraA)
+residualesCuadradosA <- residualesA ^2
+dfA <- tibble(i = iA, x = muestraA, "x - media" = residualesA, "(x-media)^2" = residualesCuadradosA)
+dfA
+```
+
+```{r}
+paste("Media residuales (segunda columna)")
+mean(residualesA)
+writeLines("\n")
+paste("Suma y Media de residualesCuadrados (tercera columna)")
+sum(residualesCuadradosA)
+mean(residualesCuadradosA)
+writeLines("\n")
+paste("Media de residualesCuadrados (tercera columna) PERO CON n-1")
+sum(residualesCuadradosA) / (length(residualesCuadradosA) - 1)
+```
+
+```{r}
+cat(paste("Varianza:", var(muestraA), "\n"))
+cat(paste("Desvío Estándar:", sd(muestraA), "\n"))
+
+sd(muestraA) == sqrt(var(muestraA))
+var(muestraA) == sd(muestraA)^2
+```
+
+### Coeficiente de variación (cv)
+
+$$
+cv =\frac{s}{\overline{x}}
+$$
+
+```{r}
+cv <- function(data) {
+  sd(data)/mean(data)
+}
+```
+
+
+```{r}
+cv(muestraA)
+```
+
+### Error estándar (EE)
+
+$$
+EE =\frac{s}{\sqrt{n}}
+$$
+
+```{r}
+library(plotrix) 
+std.error(muestraA)
+sd(muestraA)/sqrt(length(muestraA))
+```
+
+### Coeficiente de asimetría
+
+$$
+\lambda_1={\frac{{\displaystyle \sum_{i=1}^{n}\left(x_{i}-\mu\right)^{3}}}{N\sigma^{3}}}
+$$
+
+Cuando el valor es positivo, la distribución está "abultada" hacia la derecha, y los valores negativos a la izquierda.
+
+```{r}
+library(moments)
+skewness(muestraA)
+```
+
+### Curtosis (kurtosis en inglés)
+
+$$
+g_2={\frac{{\displaystyle \sum_{i=1}^{n}\left(x_{i}-\mu\right)^{4}}}{N\sigma^{4}}} - 3
+$$
+Cuando el lacurtosis es mayor que 3 quiere decir que las colas de la distribución son más pesadas que en la distribución normal.
+
+```{r}
+kurtosis(muestraA)
+```
+
+
+### Intervalo de Confianza (IC)
+
+La siguiente es una forma general de cálculo de del IC para una distribución normal de una variable aleatoria contínua. Z, es el estadístico de prueba de dicha distribución. Cada tipo de distribución tiene por lo tanto algunas variaciones sobre este método, aquí estamos introduciendo el concepto general de un modo muy simplificado.
+
+$$
+IC_{\%} =\overline{x} \pm Z_{\%}.EE = \overline{x} \pm Z_{\%}\frac{s}{\sqrt{n}}
+$$
+
+Para el ejemplo armamos nuestra función que usa una distrubución normal y calcula el intervalo al 95% de confianza (1.96 es el valor de Z para ese nivel de confianza), es decir que lo hace con un error del 5% (alpha = 0.05).
+
+```{r}
+ic95 <- function(data) {
+  alpha <- 0.05
+  z <- qnorm (p = alpha / 2, lower.tail = FALSE )
+  c(mean(data) - z * std.error(data), mean(data) + z * std.error(data))
+}
+```
+
+```{r}
+ic95(muestraA)
+```
+
+```{r}
+library("BSDA")
+test <- z.test(muestraA, sigma.x = sd(muestraA), conf.level = 0.95)
+test$conf.int
+```
+
+## Todos los índices
+
+Se puede calcular los índices que se desee a cada grupo de interés
+
+```{r}
+indicesMuestras <- muestrasTidy %>% group_by(muestra) %>% reframe(n = n(), min = min(valor), q1 = q1(valor), mediana = median(valor), q3 = q3(valor), Max = max(valor), media = mean(valor), varianza = var(valor), sd = sd(valor), cv = sd/media, EE = std.error(valor), asimetria = skewness(valor), curtosis = kurtosis(valor), "IC95-" = ic95(valor)[1], "IC95+" = ic95(valor)[2])
+indicesMuestras
+```
+
+### Datos atípicos (outliers)
+
+La función de abajo muestra la definición de dato atípico. Lea el script atentamente y cuando comprenda lo que hace sabrá qué es un dato atípico.
+
+```{r}
+datosAtipicos <- function (aVector) {
+  riq <- q3(aVector) - q1(aVector) # riq viene de rango inter quiartil
+  min <- q1(aVector) - 1.5 * riq
+  max <- q3(aVector) + 1.5 * riq
+  aVector[aVector < min | aVector > max]
+} 
+```
+
+Estos son datos inventados para mostrar outliers y cómo detectarlos.
+
+```{r}
+datosLocos <- c(46, 51, 57, 55, 47, 44, 44, 58, 52, 53, 44, 41, 46, 43, 44, 55, 15, 25, 29, 80, 78, 75, 61)
+datosAtipicos(datosLocos)
+skewness(datosLocos)
+kurtosis(datosLocos)
+hist(datosLocos, breaks = seq(0,90,10))
+boxplot(datosLocos)
+```
+
+## Gráficos
+
+### Boxplot
+
+```{r}
+ggplot(muestrasTidy, aes(x = muestra, y = valor, fill = muestra)) + 
+  geom_violin(alpha = 0.2) +
+  geom_boxplot( alpha=0.7) +
+  stat_boxplot(geom = "errorbar",
+               width = 0.25) +
+  geom_jitter(color="red", size=0.6, alpha=0.7, width = 0.1) +
+  xlab("Muestra") + ylab("Largos (cm)") +
+  ylim(0,100)
+```
+
+### Histograma
+
+```{r fig.height=10, fig.width=5}
+ggplot(muestrasTidy, aes(x=valor, y = after_stat(density))) + 
+  geom_boxplot(aes(x =  valor, y = 0.1), width = 0.01) +
+  geom_histogram(bins = 10) +
+  geom_density(fill = 4, alpha = 0.25) +
+  xlab("valores") + ylab("frecuencia") +
+  facet_wrap(~muestra, ncol=1)
+```
+
+Aquí agrego una forma más elaborada y compleja de realizar los mismos gráficos pero agregándoles más información. La intensión de esto es mostrar que se puede hacer un montón de cosas a un gráfico, pero al salirse de los estándares se vuelve necesario abordar otra complejidad.
+
+```{r warning=FALSE}
+todasLasMuestras <- indicesMuestras$muestra
+
+graficos <- list()
+
+for (i in todasLasMuestras) {
+  subset <- filter(muestrasTidy, muestra == i)
+  
+  graficos[[length(graficos) + 1]] <-  ggplot(subset, aes(x=valor, y = after_stat(density))) + 
+    geom_boxplot(aes(x =  valor, y = 0.1), width = 0.01) +
+    geom_histogram(bins = 10) +
+    geom_vline(xintercept = mean(subset$valor)) +
+    geom_vline(xintercept = ic95(subset$valor)[1], color = "darkgreen") +
+    geom_vline(xintercept = ic95(subset$valor)[2], color = "darkorange2") +
+    geom_density(fill = 4, alpha = 0.25) +
+    xlim(c(25, 95)) + ylim(c(0, 0.11)) +
+    xlab("valores") + ylab("frecuencia") + ggtitle(i) +
+    labs(caption = paste("asimetría:", filter(indicesMuestras, muestra == i)$asimetria,
+         "kurtosis:", filter(indicesMuestras, muestra == i)$curtosis)) #  +
+    # geom_text(aes(x = 35, y = 0.08, label = paste("asimetría:", skewness(valor))), stat = "unique")  + 
+    # geom_text(aes(x = 35, y = 0.07, label = paste("kurtosis:", kurtosis(valor))), stat = "unique")
+} 
+graficos
+```
+
+```{r}
+filter(indicesMuestras, muestra == "muestraA")$curtosis
+indicesMuestras$curtosis[]
+```
+
+Los histogramas pueden mostrarse como polígonos en vez de barras
+
+```{r }
+ggplot(muestrasTidy, aes(x=valor, color = muestra, fill = muestra)) + 
+  geom_freqpoly(bins = 10) +
+#  geom_area(aes(y = ..count.., fill = muestra, group = muestra), stat = "bin") +
+  xlab("valores") + ylab("frecuencia")
+```
+
+
+También pueden ajustarse funciones de densidad
+
+```{r }
+ggplot(muestrasTidy, aes(x=valor, fill = muestra)) + 
+  geom_density(alpha = 0.5) +
+  xlab("valores") + ylab("frecuencia")
+```
+
+### Frecuencia acumulada.
+
+También puede mostrarse la frecuencia acumulada
+
+
+
+```{r }
+ggplot(muestrasTidy, aes(x=valor, color = muestra)) + 
+  stat_ecdf(geom = "step", alpha = 0.5) +
+  xlab("valores") + ylab("frecuencia")
+```
+
+```{r}
+ggplot(muestrasTidy, aes(x=valor, color = muestra)) + 
+  stat_ecdf(geom = "line", alpha = 0.5) +
+  stat_ecdf(geom = "point", alpha = 0.5) +
+  geom_vline(xintercept = indicesMuestras[[1,8]], alpha = 0.3) +
+  geom_vline(xintercept = indicesMuestras[[2,8]], alpha = 0.3) +
+  geom_vline(xintercept = indicesMuestras[[3,8]], alpha = 0.3) +
+  geom_vline(xintercept = indicesMuestras[[4,8]], alpha = 0.3) +
+  xlab("valores") + ylab("frecuencia")
+```
+
