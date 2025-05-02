@@ -5,34 +5,24 @@ output:
     toc: true
 ---
 
-# Built in databases 
+# Built in databases
 
-R cuenta con una larga serie de bases de datos que se usan en diferentes contextos y paquetes para ejemplificar el funcionamineto. Lo bueno de estas bases de datos es que son datos reales y que han sido analizados por muchísima gente. Adedmás algunas de ellas son muy conocidas. Vamos a explorar algunas de ellas y cómo conocerlas así las tenemos disponibles para todo el curso.
+R cuenta con una larga serie de conjuntos de datos (datasets) que se usan en diferentes contextos y paquetes para ejemplificar el funcionamineto. Lo bueno de estos datasets es que son datos reales y que han sido analizados por muchísima gente. Adedmás algunos de ellos son muy conocidos. Vamos a explorar algunos y cómo conocerlos así los tenemos disponibles para todo el curso.
 
 ```{r}
 library(help = "datasets")
 data(package = .packages(all.available = TRUE))
 ```
 
-Aquí les nombro algunos datasets interesantes (los nombres son "case sensitives"):
--   iris
--   diamonds
--   mtcar
--   airquality
--   mpg
--   co2 (no es lo mismo que CO2 !! )
--   who
--   world_bank_pop
--   gapminder
--   gapminder_unfiltered
--   ToothGrowth
+Aquí les nombro algunos datasets interesantes (los nombres son "case sensitives"): - iris - diamonds - mtcar - airquality - mpg - co2 (no es lo mismo que CO2 !! ) - who - world_bank_pop - gapminder - gapminder_unfiltered - ToothGrowth
 
 ## iris
+
+Con el comando help() pueden obtener información descriptiva acerca de dada dataset. Además suele haber vínculos a información más ámplia como los trabajos originales en los que se usaron.
 
 ```{r}
 help(iris)
 ```
-
 
 ```{r}
 iris
@@ -44,14 +34,11 @@ library(GGally)
 ggpairs(iris, aes(color = Species, alpha = 0.5))
 ```
 
-Iris setosa
-https://search.brave.com/images?q=irissetosa&source=web&img=104
+Iris setosa <https://search.brave.com/images?q=irissetosa&source=web&img=104>
 
-Iris versicolor
-https://www.jardin2m.com/Content/Images/Vegetaux/29IRVERS.jpg
+Iris versicolor <https://www.jardin2m.com/Content/Images/Vegetaux/29IRVERS.jpg>
 
-Iris virginica
-https://imgs.search.brave.com/RL8PDV1Fb6X3z_brQvsexvB4IUzLJBnrZeAWq0K_b48/rs:fit:540:720:1/g:ce/aHR0cDovL3d3dy5t/aW5uZXNvdGF3aWxk/Zmxvd2Vycy5pbmZv/L3VkYXRhL3I5bmRw/MjNxL3BkL2lyaXMt/dmlyZ2luaWNhLTgu/anBn
+Iris virginica <https://imgs.search.brave.com/RL8PDV1Fb6X3z_brQvsexvB4IUzLJBnrZeAWq0K_b48/rs:fit:540:720:1/g:ce/aHR0cDovL3d3dy5t/aW5uZXNvdGF3aWxk/Zmxvd2Vycy5pbmZv/L3VkYXRhL3I5bmRw/MjNxL3BkL2lyaXMt/dmlyZ2luaWNhLTgu/anBn>
 
 ```{r}
 hist(iris$Sepal.Length)
@@ -59,14 +46,14 @@ hist(iris$Sepal.Length)
 
 ## Gapminder
 
-https://www.gapminder.org/
+<https://www.gapminder.org/>
 
 ```{r}
+library(gapminder)
 help(gapminder)
 ```
 
 ```{r}
-library(gapminder)
 gapminder_unfiltered %>% 
   str()
 ```
@@ -113,6 +100,3 @@ ToothGrowth
 ```{r}
 ggpairs(ToothGrowth, aes(color = factor(dose), alpha = 0.5))
 ```
-
-
-

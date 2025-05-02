@@ -1,5 +1,5 @@
 ---
-title: "05 - Tendencia central y varianza"
+title: "04 - Tendencia central y varianza"
 output: 
   html_notebook: 
     toc: true
@@ -9,11 +9,11 @@ output:
 
 ### Video
 
-Canal de youtube Ingeniería elemental. Varianza y Desviación Estándar <https://www.youtube.com/watch?v=cg4kUsbjQms> 
+Canal de youtube Ingeniería elemental. Varianza y Desviación Estándar
+<https://www.youtube.com/watch?v=cg4kUsbjQms>
 
 Canal de youtube Ingeniería elemental. Comprendiendo la Desviación Estándar.
 <https://www.youtube.com/watch?v=WJ8uG5nYxak&list=PLOo4zWKKHXDIWF77kPXFVwXBA3drT7uG2&index=2>
-
 
 ```{r}
 library(tidyverse)
@@ -25,22 +25,18 @@ library(tidyverse)
 
 $$
 \mu = \frac{\displaystyle \sum_{i=1}^{N} x_{i}}{N}
-$$
-Siendo:
- N: tamaño de la población
- x: la variable de interés
- i: un individuo de la población
+$$ 
+
+Siendo: N: tamaño de la población x: la variable de interés i: un individuo de la población
 
 ## Promedio de la muestra
 
 $$
 \overline{x} = \frac{\displaystyle \sum_{i=1}^{n} x_{i}}{n}
-$$
-Siendo:
- n: tamaño de la muestra
- x: la variable de interés
- i: un individuo de la muestra
- 
+$$ 
+
+Siendo: n: tamaño de la muestra x: la variable de interés i: un individuo de la muestra
+
 ### Ejemplo de cálculo
 
 ```{r}
@@ -69,7 +65,6 @@ moda <- function(unVector){
   names(frecuencias[frecuencias == max(frecuencias)])
 }
 ```
-
 
 ```{r}
 sort(muestraA)
@@ -180,15 +175,11 @@ dfA
 ```
 
 ```{r}
-paste("Media residuales (segunda columna)")
-mean(residualesA)
-writeLines("\n")
-paste("Suma y Media de residualesCuadrados (tercera columna)")
-sum(residualesCuadradosA)
-mean(residualesCuadradosA)
-writeLines("\n")
-paste("Media de residualesCuadrados (tercera columna) PERO CON n-1")
-sum(residualesCuadradosA) / (length(residualesCuadradosA) - 1)
+paste("Media residuales (segunda columna): ", mean(residualesA))
+paste("Suma de residualesCuadrados (tercera columna): ", sum(residualesCuadradosA))
+paste("Media de residualesCuadrados (tercera columna): ", mean(residualesCuadradosA))
+paste("Media de residualesCuadrados (tercera columna) PERO CON n-1: ", sum(residualesCuadradosA) / (length(residualesCuadradosA) - 1))
+
 ```
 
 ```{r}
@@ -211,7 +202,6 @@ cv <- function(data) {
 }
 ```
 
-
 ```{r}
 cv(muestraA)
 ```
@@ -228,7 +218,7 @@ std.error(muestraA)
 sd(muestraA)/sqrt(length(muestraA))
 ```
 
-### Coeficiente de asimetría
+### Coeficiente de asimetría (en inglés "skewness")
 
 $$
 \lambda_1={\frac{{\displaystyle \sum_{i=1}^{n}\left(x_{i}-\mu\right)^{3}}}{N\sigma^{3}}}
@@ -241,17 +231,17 @@ library(moments)
 skewness(muestraA)
 ```
 
-### Curtosis (kurtosis en inglés)
+### Curtosis (en inglés "kurtosis")
 
 $$
 g_2={\frac{{\displaystyle \sum_{i=1}^{n}\left(x_{i}-\mu\right)^{4}}}{N\sigma^{4}}} - 3
-$$
-Cuando el lacurtosis es mayor que 3 quiere decir que las colas de la distribución son más pesadas que en la distribución normal.
+$$ 
+
+Cuando el la curtosis es mayor que 3 quiere decir que las colas de la distribución son más pesadas que en la distribución normal.
 
 ```{r}
 kurtosis(muestraA)
 ```
-
 
 ### Intervalo de Confianza (IC)
 
@@ -316,11 +306,11 @@ boxplot(datosLocos)
 
 ## Gráficos
 
-### Boxplot
+### Boxplot y violín
 
 ```{r}
 ggplot(muestrasTidy, aes(x = muestra, y = valor, fill = muestra)) + 
-  geom_violin(alpha = 0.2) +
+  # geom_violin(alpha = 0.2) +
   geom_boxplot( alpha=0.7) +
   stat_boxplot(geom = "errorbar",
                width = 0.25) +
@@ -364,7 +354,12 @@ for (i in todasLasMuestras) {
     # geom_text(aes(x = 35, y = 0.08, label = paste("asimetría:", skewness(valor))), stat = "unique")  + 
     # geom_text(aes(x = 35, y = 0.07, label = paste("kurtosis:", kurtosis(valor))), stat = "unique")
 } 
-graficos
+# graficos
+```
+
+```{r fig.height=16, fig.width=8}
+library(patchwork)
+graficos[[1]] / graficos[[2]] / (graficos[[3]]) / (graficos[[4]])
 ```
 
 ```{r}
@@ -381,7 +376,6 @@ ggplot(muestrasTidy, aes(x=valor, color = muestra, fill = muestra)) +
   xlab("valores") + ylab("frecuencia")
 ```
 
-
 También pueden ajustarse funciones de densidad
 
 ```{r }
@@ -394,8 +388,6 @@ ggplot(muestrasTidy, aes(x=valor, fill = muestra)) +
 
 También puede mostrarse la frecuencia acumulada
 
-
-
 ```{r }
 ggplot(muestrasTidy, aes(x=valor, color = muestra)) + 
   stat_ecdf(geom = "step", alpha = 0.5) +
@@ -404,12 +396,11 @@ ggplot(muestrasTidy, aes(x=valor, color = muestra)) +
 
 ```{r}
 ggplot(muestrasTidy, aes(x=valor, color = muestra)) + 
-  stat_ecdf(geom = "line", alpha = 0.5) +
-  stat_ecdf(geom = "point", alpha = 0.5) +
-  geom_vline(xintercept = indicesMuestras[[1,8]], alpha = 0.3) +
-  geom_vline(xintercept = indicesMuestras[[2,8]], alpha = 0.3) +
-  geom_vline(xintercept = indicesMuestras[[3,8]], alpha = 0.3) +
-  geom_vline(xintercept = indicesMuestras[[4,8]], alpha = 0.3) +
+  stat_ecdf(geom = "line", alpha = 0.7) +
+  stat_ecdf(geom = "point", alpha = 0.7) +
+  geom_vline(xintercept = indicesMuestras$media[1], alpha = 0.5) +
+  geom_vline(xintercept = indicesMuestras$media[2], alpha = 0.5) +
+  geom_vline(xintercept = indicesMuestras$media[3], alpha = 0.5) +
+  geom_vline(xintercept = indicesMuestras$media[4], alpha = 0.5) +
   xlab("valores") + ylab("frecuencia")
 ```
-

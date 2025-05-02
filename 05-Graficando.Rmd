@@ -1,0 +1,522 @@
+---
+title: "05 - Graficando"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(patchwork)
+```
+
+La estadística necesita representar la información de modos poderosos para analizar datos y comunicar conclusiones. Además RStudio tiene un framework para graficar (ggplot2) muy potente que se basa en la gramática de gráficos. Aquí presentaremos los dos aspectos juntos, ya que la gramática de grágicos está pensada para la estadística fundamentalmente y por lo tanto tienen los mismos objetivos.
+
+Todo gráfico tiene algunas cosas en común:
+
+-   datos
+-   área de graficado
+-   escala
+-   leyendas
+-   transformaciones
+-   etc
+
+## Gráfico mínimo
+
+En ggplot2 se define un objeto gráfico y con " + " se van agregando capas de información.
+
+Como se trata de un paquete de Tidyverse, la estructura de los datos es Tidy con formato tibble().
+
+La función aes() define el "mapeo de los datos", en el caso de ejemplo le estamos diciendo que use como variable de ordenadas (x) la variable var1 y como abscisas (y) la variable var2.
+
+Finalmente le decimos que construya un gráfico de líneas (geom_line, es la manera de decirle que la geometría del gráfico es de líneas).
+
+```{r}
+# Primero generamos una set de datos
+data <- tibble(var1 = seq(-10,10,0.1), var2 = sin(var1) )
+
+# Luego creeamos el gráfico
+grafico1 <- ggplot(data) +
+  aes(x = var1, y = var2) +
+  geom_line()# +
+  # geom_point()
+
+# Finalmente dibujamos el gráfico creado
+grafico1
+```
+
+Esos tres aspectos son obligatorios y cualquier gráfico debe definirlos: los datos, el mapeo y la geometría.
+
+Veremos seguidamente las geometrías básicas que deben conocerse en estadística descriptiva, tanto por su potencia para sintetizar datos extensos y/o complejos como porque son extensamente utilizados.
+
+## Tipos de gráficos.
+
+-   Histograma
+-   Gráfico de densidad
+-   BoxPlot (o cajas y bigotes)
+-   Gráfico de dispersión (coordenadas cartesianas)
+-   Gráfico de Columnas / Barras
+-   Gráfico de líneas
+-   Coordenadas polares
+-   Matriz Gráfica de correlación
+
+### Primero preparamos los datos
+
+```{r}
+# Pongo los años en un vector para simplificar la lectura de la transformación
+variables <- variables <- variable.names(iris)[1:4]
+
+irisTidy <- iris %>%
+  # Creamos una vaiable de identificación para cada flor (cada línea en el dataframe original)
+  mutate(idFlower = row_number()) %>% 
+  # Transformo el dataframe en Tidy
+  pivot_longer(variables, names_to = "Variable", values_to = "Magnitude") %>%
+  # Separamos la columna de variable en dos
+  separate(Variable, into = c("FloralPart", "Dimension"), sep = "\\.")
+
+irisTidy$FloralPart <- factor(irisTidy$FloralPart)
+irisTidy$Dimension <- factor(irisTidy$Dimension)
+```
+
+### Histograma y Polígono de frecuencias
+
+SIEMPRE hay que conocer la estructura de los datos y tenemos que saber lo que queremos graficar. En este ejemplo si le pedimos que grafique sin separar por especie hace un histograma con todo mezclado.
+
+La primera opción es filtrar la base de datos para dejar una sola especie y hacer el histograma de esa manera. Si quiero ver el histograma de otra especie debo cambiar el nombre (pruebe comentando la línea 69 y descomentando la 70).
+
+
+```{r}
+# Primero generamos una set de datos
+data <- irisTidy %>% filter(FloralPart == "Petal" & Dimension == "Length")
+
+# Luego creeamos el gráfico
+grafico2 <- ggplot(data) +
+  aes(x = Magnitude) +
+  geom_histogram()
+
+# Igual al anterior pero con un polígono
+grafico3 <- ggplot(data) +
+  aes(x = Magnitude) +
+  geom_freqpoly()
+
+# Finalmente dibujamos los gráficos creados
+grafico2 + grafico3
+```
+
+Otra alternativa es pedirle que pinte las columnas diferenciando entre especies (aquí con el parámetro fill).
+
+```{r}
+# Primero generamos una set de datos
+data <- irisTidy %>% filter(FloralPart == "Petal" & Dimension == "Length")
+
+# Luego creeamos el gráfico
+grafico4 <- ggplot(data) +
+  aes(x = Magnitude, fill = Species, alpha = 0.5) +
+  geom_histogram()
+
+# Igual al anterior pero con un polígono
+grafico5 <- ggplot(data) +
+  aes(x = Magnitude, color = Species, alpha = 0.5) +
+  geom_freqpoly()
+
+# Finalmente dibujamos los gráficos creados
+grafico4 / grafico5
+```
+
+Como en el caso anterior dos especies están solapadas, podemos separar los histogramas en gráficos aparte con la función facet.
+
+```{r}
+# Primero generamos una set de datos
+data <- irisTidy %>% filter(FloralPart == "Petal" & Dimension == "Length")
+
+# Luego creeamos el gráfico
+grafico6 <- ggplot(data) +
+  aes(x = Magnitude) +
+  geom_histogram() + 
+  facet_wrap(vars(Species), dir = "v") # facet repite el gráfico separando los datos de acuerdo a la variable indicada
+
+# Igual al anterior pero con un polígono
+grafico7 <- ggplot(data) +
+  aes(x = Magnitude) +
+  geom_freqpoly() + 
+  facet_wrap(vars(Species), dir = "v")
+
+# Finalmente dibujamos los gráficos creados
+grafico6 + grafico7
+```
+
+Descripción detallada en :
+
+Humberto LLinás Solano. "Histogramas (por grupos)".
+<https://rpubs.com/hllinas/R_Histogram_ggplot_porgrupo>
+
+
+### Gráfico de densidad
+
+```{r}
+# Primero generamos una set de datos
+data <- irisTidy %>% filter(FloralPart == "Petal" & Dimension == "Length" & Species == "setosa")
+
+# Luego creeamos el gráfico
+grafico8 <- ggplot(data) +
+  aes(x = Magnitude) +
+  geom_density()
+
+# Finalmente dibujamos el gráfico creado
+grafico8
+```
+
+```{r}
+# Frecuencia acumulada
+grafico9 <- ggplot(data) +
+  aes(x = Magnitude) +
+  geom_freqpoly(aes(y=cumsum(..count..)))
+
+# Igual al anterior pero con un densidad
+grafico10 <- ggplot(data) +
+  aes(x = Magnitude) +
+  geom_density(aes(y=cumsum(..count..)))
+
+grafico9 + grafico10
+```
+
+### BoxPlot y Violin
+
+```{r}
+# Primero generamos una set de datos
+data <- irisTidy %>% 
+  filter(Species == "setosa")
+
+# Luego creeamos el gráfico
+grafico11 <- ggplot(data) +
+  aes(y = Magnitude, x = Species, color = Dimension) +
+  geom_boxplot() +
+  facet_wrap(vars(FloralPart))# +
+#  geom_jitter()
+
+grafico12 <- ggplot(data) +
+  aes(y = Magnitude, x = Species, color = Dimension) +
+  geom_violin() +
+  facet_wrap(vars(FloralPart))# +
+#  geom_jitter()
+
+# Finalmente dibujamos el gráfico creado
+grafico11 + grafico12
+```
+
+### Gráfico de dispersión
+
+Aquí la opción más fácil es usar el dataset original (no tidy).
+
+```{r}
+# Primero generamos una set de datos
+data <- iris
+
+# Luego creeamos el gráfico
+grafico13 <- ggplot(data) +
+  aes(x = Sepal.Length, y = Sepal.Width, color = Species) +
+    geom_point(size = 3, alpha = 0.5)# +
+#    geom_smooth(method=lm, se=FALSE)
+# Finalmente dibujamos el gráfico creado
+grafico13
+```
+
+También se puede usar el tidy pero ensancharlo antes.
+
+```{r}
+irisUnTidy <- irisTidy %>%
+  filter(FloralPart == "Sepal") %>%
+  pivot_wider(
+    names_from = Dimension,
+    values_from = Magnitude
+  )
+```
+
+```{r}
+ggplot(irisUnTidy, aes(x = Length, y = Width, color = Species)) +
+  geom_point(size = 4, alpha = 0.7) +  # Puntos más grandes y más obscuros
+  scale_color_brewer(palette = "Set1")# +  # Otra paleta de colores
+#  geom_smooth(method=lm, se=FALSE) # Se agregan líneas de regresión
+```
+
+
+### Gráfico de Columnas (Barras es cuando las columnas son horizontales y se llama geom_bar)
+
+Los gráficos de columnas o barras representan un sólo valor y por lo tanto hay que decidir qué mostrar. Por defecto muestra la cantidad de valores del set de datos, que generalmente no es llo que deseamos. Por esta razón es que necesitamos generar un dataset nuevo con los datos organizadospara este tipo de gráficos. La función summarise() nos permite hacer eso.
+
+ Este método es algo más largo, pero se tiene más control sobre el resultado.
+
+
+```{r}
+library(dplyr)
+
+# Calcular estadísticas por FloralPart y Dimension
+iris_summary <- irisTidy %>%
+  group_by(FloralPart, Dimension) %>%
+  summarise(
+    n = n(),
+    mean = mean(Magnitude),
+    sd = sd(Magnitude),
+    se = sd / sqrt(n),
+    lower_ci = mean - 1.96 * se,
+    upper_ci = mean + 1.96 * se
+    # Intervalo de confianza del 95% (usando t-distribución)
+    # lower_ci = mean - qt(0.975, df = n - 1) * se,
+    # upper_ci = mean + qt(0.975, df = n - 1) * se
+  )
+```
+
+Luego usamos el nuevo tibble para graficar lo que generamos con el summarise().
+
+```{r}
+ggplot(iris_summary, aes(x = FloralPart, y = mean, fill = Dimension)) +
+  # Columnas para las medias
+  geom_col(position = position_dodge(width = 0.9), width = 0.7) +
+  # geom_bar(position = position_dodge(width = 0.9), width = 0.7) +
+  # Barras de error (intervalo de confianza)
+  geom_errorbar(
+    aes(ymin = lower_ci, ymax = upper_ci),
+    position = position_dodge(width = 0.9),
+    width = 0.25,
+    color = "black",
+    linewidth = 0.5
+  ) +
+  labs(title = "Media con IC del 95% (usando summarise() y geom_col())")
+```
+
+Existe otra manera de hacer lo mismo sobre irisTidy sin transformar, pero en esta alternativa tenemos menos libertad para decidir qué datos mostramos.
+
+```{r}
+ggplot(irisTidy, aes(x = FloralPart, y = Magnitude, fill = Dimension)) +
+# Para cambiar la orientación de las barras (ponerlas horizontales) hay que invertir las variables x e y
+# ggplot(irisTidy, aes(x = Magnitude, y = FloralPart, fill = Dimension)) +
+  stat_summary(
+    fun = mean,
+    geom = "bar",
+    position = position_dodge(width = 0.9),
+    width = 0.7
+  ) +
+  stat_summary(
+    fun.data = mean_cl_normal,
+    geom = "errorbar",
+    position = position_dodge(width = 0.9),
+    width = 0.25
+  ) +
+  labs(title = "Media con IC del 95% (usando stat_summary)")
+```
+
+Descripción detallada en:
+
+Humberto LLinás Solano. "Diagrama de barras por grupos".
+<https://rpubs.com/hllinas/R_Barras_ggplot_grupo>
+
+### Gráfico de líneas
+
+En este caso usamos la misma estructura de datos que para un gráfico de dispersión, porque estamos relacionando dos variables medidas sobre cada flor. Las líneas unen los puntos ordenándolo previamente por el valor de x, lo que en nuestro caso no tiene mucha utilidad (se incluye aquí con un sentido demostrativo del tipo de gráfico).
+
+```{r}
+# Primero generamos una set de datos
+data <- irisUnTidy
+
+# Luego creeamos el gráfico
+grafico14 <- ggplot(data) +
+  aes(x = Length, y = Width, color = Species) +
+    geom_line()
+# Finalmente dibujamos el gráfico creado
+grafico14
+```
+
+## Otras capas
+
+### Coordenadas polares
+
+Este gráfico es igual al anterior, donde lo único que se cambia es una capa adicional de información que le dice que se trata de coordenadas polares en vez de un eje x cartesiano. Estosignifica que los valores de x son transformados en un ángulo en vez de en una distancia sobre el eje horizontal. Esta transformación puede hacerse también sobre los gráficos anteriores, anímese a probarla!
+
+```{r}
+# Primero generamos una set de datos
+data <- irisUnTidy
+
+# Luego creeamos el gráfico
+grafico15 <- ggplot(data) +
+  aes(x = Length, y = Width, color = Species) +
+    geom_line() + 
+    coord_polar(theta = "x")
+# Finalmente dibujamos el gráfico creado
+grafico15
+```
+
+### Estalas y transformación de los ejes
+
+```{r}
+grafico13 + 
+  xlim(0, 10) +
+  ylim(0, 5)
+```
+
+```{r}
+grafico13 + 
+  scale_x_continuous(trans='log2')
+```
+```{r}
+grafico13 + 
+  scale_y_continuous(trans='log10')
+```
+```{r}
+grafico11 +
+  scale_y_sqrt()
+```
+```{r}
+grafico11 +
+  scale_y_reverse()
+```
+
+### Títulos, leyendas y notas al pie.
+
+Esto es muy importante para la edición final del gráfico, mejoran mucho la comunicación y es importante a usar estas alternativas para dejar claro qué es lo que se está mostrando. Como ejemplo vamos a modificar el gráfico4.
+
+```{r}
+grafico4 +
+  labs(
+    title = "Histograma",
+    subtitle = "Largos de los pétalos por especie",
+    caption = "Se muestra la frecuencia absoluta",
+    x = "Longitud del Pétalo (cm)",
+    y = "Frecuencia"
+  ) 
+```
+
+### Themes.
+
+Existe una forma muy completa de manejar los themes con la función theme(), que dda una enorme capacidad de modificar el aspecto de los gráficos y es por lo tanto complejo aprender su uso completo. No es esto parte del objetivo de esta materia así que sólo abordaré aquí un uso muy superficial. Si quiere sumergirse en este apasionante mundo puede empezar aquí: <https://ggplot2.tidyverse.org/reference/theme.html> 
+
+#### Preconfigurados
+
+Sin embargo para el usuario general hay algunos temas preconfigurados por defecto que puede usar directamente o haciéndoles modificaciones. theme_grey() theme_gray() theme_bw() theme_linedraw() theme_light() theme_dark() theme_minimal() theme_classic() theme_void() theme_test()
+
+Aquí algunos ejemplos, siéntase libre de jugar con ellos, pruébelos todos.
+
+```{r}
+(grafico4 +
+  theme_linedraw()) /
+
+(grafico4 +
+  theme_dark())
+```
+
+###  Paletas de colores
+
+Hay muchísimas maneras de usar las paletas de colores en los gráficos. Puede empezar por aquí si desea sumergirse en este tema: <https://r-charts.com/es/paletas-colores/>
+
+Por suerte también contamos con paletas preconfiguradas que permiten configurar muy rápudo gran diversidad de aspectos. Una posibilidad es el paquete "paleteer", si quiere mirar las alternativas (2728 paletas ya armadas) y averiguar cómo hacer un uso avanzado de las mismas mire aquí: <https://r-graph-gallery.com/color-palette-finder.html>
+
+#### RColorBrewer
+
+Una versión más simple y restringida es "RColorBrewer". Puede ver más información aquí: <https://r-graph-gallery.com/38-rcolorbrewers-palettes.html>
+
+```{r}
+library(RColorBrewer)
+display.brewer.all()
+```
+Las paletas secuenciales son: Blues BuGn BuPu GnBu Greens Greys Oranges OrRd PuBu PuBuGn PuRd Purples RdPu Reds YlGn YlGnBu YlOrBr YlOrRd.
+
+Las paletas divergentes son: BrBG PiYG PRGn PuOr RdBu RdGy RdYlBu RdYlGn Spectral.
+
+Las paletas cualitativas son (el número indica la cantidad de categorías -colores- de la peleta):
+
+Accent	8, Dark2	8, Paired	12, Pastel1, Pastel2	8, Set1	9, Set2	8, Set3	12.
+
+Elija uno de los nombres de arriba y úselo agregando una capa al gráfico con la función scale_color_brewer(). Tenga en cuenta que este gráfico está configurado con alpha = 0.5, por eso los colores son transparentes y más pálidos.
+
+```{r}
+grafico13 + 
+  theme_gray() +
+  scale_color_brewer(palette = "Set1")
+```
+
+#### Paletas de colores para Daltónicos (en inglés colorblind)
+
+Los colores amigables para los daltónicos son siempre complicados, las paletas anteriores buscan servir para cualquiera, pero el problema es más complicado y un abordaje serio del problema requiere estudiarlo atentamente. El tema excede los alcances de este curso y no lo abordaremos, pero quién quiera comprender el asunto puede empezar por:
+
+-   Colors for all!, (paquete cols4all) <https://cols4all.github.io/cols4all-R/>
+-   Designing for Color blindness. Color choices and transformations for deuteranopia and other afflictions. (Martin Krzywinski, science + art) <https://mk.bcgsc.ca/colorblind/distinct.colors.mhtml#projecthome>
+
+### Agregar objetos gráficos
+
+Se puede agregar objetos como líneas, flechas, textos, etc.
+
+```{r}
+grafico1 +
+  geom_abline(slope = 0.05, intercept = -0.3, colour = "red", linewidth = 2) +
+  geom_segment(x = -5, y = 0.8,
+               xend = 3, yend = 0,
+               color = "blue",
+               arrow = arrow()) + 
+  geom_text(aes(x = -8, y = 1), label = "Mire aquí",
+            size = 10, color = "green")
+  
+```
+
+```{r}
+grafico13 +
+  stat_ellipse()
+```
+
+## Gráficos especiales
+
+### Matriz Gráfica de correlación
+
+Se trata de un gráfico exploratorio, sirve para tener una idea general de los datos antes de empezar a trabajar sobre ellos. Es un gráfico tradicional de R (en R-base la función es pairs()), por eso lo han implementado en ggplot2, pero no usa una estructura tidy por defecto (es anterior a esa forma de organización de los datos), y por eso lo usamos con el dataset original iris.
+
+Hay que tener cuidado con este tipo de gráfico, tanto desde el punto de vista estadístico como desde su uso con ggplot2. ggpairs() es una función que se encuentra en un paquete diferente a Tidyverse, está en GGally, que usa a ggplot2 como base, pero no todo funciona igual (por ejemplo no se puede poner aes() fuera de la función ggpairs() ).
+
+Desde el punto de vista estadístico al relacionar todo con todo nos da una idea general del grupo de datos, pero cualquier hipótesis que se nos ocurra al observar la matriz y analizarla debemos corroborarla con análisis complementarios.
+
+```{r fig.width=12, message=FALSE, warning=FALSE}
+library(GGally)
+ggpairs(iris, aes(color = Species, alpha = 0.5)) +
+  scale_color_brewer(palette = "Dark2")
+```
+
+### Datos Financieros
+
+Puede probar varias empresas como: Adecoagro (AGRO), Globant (GLOB), YPF, John Deere (DE), etc.
+
+```{r, eval = FALSE}
+library(tidyquant)
+dataBolsa  <- tq_get("GLOB", get = "stock.prices")
+dataBolsa 
+
+desde <- date("2025-01-01")
+hasta <- today()
+dataBolsaPeriodo <- dataBolsa %>% subset(date >= desde & date <= hasta)
+dataBolsaPeriodo
+```
+
+```{r}
+graficoVelas <- dataBolsaPeriodo %>% as.data.frame() %>% select(2:8) %>%
+  candleChart()
+# candleChart(theme='white',up.col='blue',dn.col='red')
+```
+
+
+## Sitios con colecciones de gráficos en ggplot2, con explicaciones y código.
+
+The R Graph Gallery (en inglés)
+https://r-graph-gallery.com/index.html
+
+R Charts (en español)
+https://r-charts.com/es/ggplot2/
+
+GRÁFICOS EN R (R CODER, en español). Gráficos de R-base, No son ggplot2!
+https://r-coder.com/graficos-r/
+
+r-statistics.co (en inglés)
+https://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html
+
+Guía oficial de ggplot2 (en inglés)
+https://ggplot2.tidyverse.org/
+
+Statology (R Guides) (en inglés)
+Este sitio tiene de guías cortas y muy bien explicadas para estadística en general. Tiene una sección de R, y dentro de ella muchas guías para graficar con ggplot2
+https://www.statology.org/r-guides/

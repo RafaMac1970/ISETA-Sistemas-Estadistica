@@ -1,0 +1,62 @@
+---
+title: "05 - Ejercicios - Graficando"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Estudiante: SuNombre
+
+Para realizar estos ejercicios use como referencia el documento "05-Graficando.Rmd".
+
+Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna. Agregue al nombre del archivo el suyo al final (05-Ejercicios - Graficando - SuNombre Apellido.Rmd), y me lo envía por email.
+
+Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la actividad. Esto no es el modo habitual de trabajo, pero se pretende aquí que usted descubra cuándo necesita las librerías extra.
+
+# Cargar datos de Girasol
+
+-   Cargue los datos de Girasol que construyó en la práctica de Data Frames. Recuerde que siempre debe preparar los datos antes de graficarlos.
+
+# Graficar con ggplot2
+
+## Histograma
+
+-   Haga un histograma con los datos de girasol diferenciando los tratamientos.
+
+-   Haga un histograma con los datos de girasol separando los gráficos por tratamients con "facet".
+
+##  Polígono de Frecuencias
+
+-   ídem anterior pero cambiando la geometría a Polígono de Frecuencias
+
+## Gráfico de Densidad
+
+-   ídem anterior pero cambiando la geometría a Densidad
+
+## Densidad Acumulada
+
+-   ídem anterior pero cambiando la geometría a Densidad Acumulada
+
+## BoxPlot
+
+-   ídem anterior pero cambiando la geometría a BoxPlot
+
+## Violin
+
+-   ídem anterior pero cambiando la geometría a Violín
+
+## Gráficos superpuestos
+
+-   Superponga en un mismo gráfico un histograma y un Polígono de Frecuencias.
+
+-   Superponga en un mismo gráfico un BoxPlot y un Violín.
+
+# Cargar datos de Fuel Consumption
+
+Los datos de girasol no sirven para los gráfico siguientes porque sólo contienen una variable, y seguidamente necesitaremos al menos 2.
+-   Cargue los datos de Fuel Consumption que usó en la práctica de Data Frames.
+
+## Gráfico de dispersión
+
+-   Haga un gráfico de dispersión que relacione las emisiones de CO2 y el consumo de combustible.
+

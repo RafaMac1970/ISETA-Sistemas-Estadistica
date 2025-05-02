@@ -7,9 +7,9 @@ output:
 
 # Estudiante: SuNombre
 
-Para realizar estos ejercicios use como referencia el documento "02 - DataFrames.Rmd".
+Para realizar estos ejercicios use como referencia el documento "02-DataFrames.Rmd".
 
-Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna. Agregue al nombre del archivo el suyo al final (02 - Ejercicios - DataFrames - SuNombre Apellido.Rmd), y me lo envía por email.
+Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna. Agregue al nombre del archivo el suyo al final (02-Ejercicios - DataFrames - SuNombre Apellido.Rmd), y me lo envía por email.
 
 Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la actividad. Esto no es el modo habitual de trabajo, pero se pretende aquí que usted descubra cuándo necesita las librerías extra.
 
