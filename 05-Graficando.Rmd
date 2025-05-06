@@ -68,6 +68,22 @@ irisTidy$Dimension <- factor(irisTidy$Dimension)
 ```
 
 ## Tipos de gráficos.
+<<<<<<< HEAD
+=======
+
+Veremos seguidamente las geometrías básicas que deben conocerse en estadística descriptiva, tanto por su potencia para sintetizar datos extensos y/o complejos como porque son extensamente utilizados.
+
+-   Histograma
+-   Gráfico de densidad
+-   BoxPlot (o cajas y bigotes)
+-   Gráfico de dispersión (coordenadas cartesianas)
+-   Gráfico de Columnas / Barras
+-   Gráfico de líneas
+-   Coordenadas polares
+-   Matriz Gráfica de correlación
+
+### Histograma y Polígono de frecuencias
+>>>>>>> 2b39206355b1f2d84ae02098902d0270db55b0b3
 
 Veremos seguidamente las geometrías básicas que deben conocerse en estadística descriptiva, tanto por su potencia para sintetizar datos extensos y/o complejos como porque son extensamente utilizados.
 
@@ -547,7 +563,11 @@ Permite organizar varios gráficos juntos de un modo muy sencillo y amigable. Ya
 library(patchwork)
 p1 <- ggplot(mtcars) + geom_point(aes(mpg, disp))
 p2 <- ggplot(mtcars) + geom_boxplot(aes(gear, disp, group = gear))
+<<<<<<< HEAD
 p3 <- ggplot(mtcars) + geom_smooth(aes(disp, qsec), formula = 'y ~ x', method = 'loess')
+=======
+p3 <- ggplot(mtcars) + geom_smooth(aes(disp, qsec))
+>>>>>>> 2b39206355b1f2d84ae02098902d0270db55b0b3
 p4 <- ggplot(mtcars) + geom_bar(aes(carb))
 
 (p1 + p2 + p3) / p4
@@ -555,8 +575,11 @@ p4 <- ggplot(mtcars) + geom_bar(aes(carb))
 
 ### ggExtra
 
+<<<<<<< HEAD
 Agrega mucha funcionalidad, aquí se muestra la posibilidad de agregar gráficos marginales.
 
+=======
+>>>>>>> 2b39206355b1f2d84ae02098902d0270db55b0b3
 ```{r}
 library(ggExtra)
 p5 <- ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species, size = Sepal.Length, alpha = 0.3)) +
@@ -568,9 +591,13 @@ p6
 
 ### library(cowplot)
 
+<<<<<<< HEAD
 Tiene una función plot_grid(), muy útil para combinar gráficos. Además hay muchas otras funciones extra que proporciona cowplot. Aquí val algunos ejemplos como incluir un gráfico dentro de otro.
 
 Sitio de referencia aquí: <https://wilkelab.org/cowplot/index.html>
+=======
+Tiene una función plot_grid(), muy útil para combinar gráficos. Además hay muchas otras funciones extra que proporciona cowplot. Sitio de referencia aquí: <https://wilkelab.org/cowplot/index.html>
+>>>>>>> 2b39206355b1f2d84ae02098902d0270db55b0b3
 
 ```{r}
 library(cowplot)
@@ -590,6 +617,10 @@ p8 <- ggMarginal(p5, type="histogram", fill = "slateblue", xparams = list(  bins
 p9 <- ggMarginal(p7, type="density")
 p10 <- ggMarginal(p1, type="boxplot")
 
+<<<<<<< HEAD
+=======
+library("cowplot")
+>>>>>>> 2b39206355b1f2d84ae02098902d0270db55b0b3
 # Graficar en grilla
 plot_grid(p7,p8,p9,p10, labels = "AUTO")
 ```
