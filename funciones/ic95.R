@@ -1,3 +1,4 @@
+library(plotrix)
 ic95 <- function(aVector) {
   alpha <- 0.05
   z <- qnorm (p = alpha / 2, lower.tail = FALSE )

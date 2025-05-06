@@ -273,11 +273,22 @@ test$conf.int
 
 ## Todos los índices
 
-Se puede calcular los índices que se desee a cada grupo de interés
+Se puede calcular los índices que se desee a cada grupo de interés.
 
 ```{r}
-indicesMuestras <- muestrasTidy %>% group_by(muestra) %>% reframe(n = n(), min = min(valor), q1 = q1(valor), mediana = median(valor), q3 = q3(valor), Max = max(valor), media = mean(valor), varianza = var(valor), sd = sd(valor), cv = sd/media, EE = std.error(valor), asimetria = skewness(valor), curtosis = kurtosis(valor), "IC95-" = ic95(valor)[1], "IC95+" = ic95(valor)[2])
+indicesMuestras <- muestrasTidy %>% group_by(muestra) %>% reframe(n = n(), min = min(valor), q1 = q1(valor), mediana = median(valor), q3 = q3(valor), RIQ = q3 - q1, Max = max(valor), RAbs = Max - min, media = mean(valor), varianza = var(valor), sd = sd(valor), cv = sd/media, EE = std.error(valor), asimetria = skewness(valor), curtosis = kurtosis(valor), "IC95-" = ic95(valor)[1], "IC95+" = ic95(valor)[2])
 indicesMuestras
+```
+Arriba se muestra el procedimiento, además armé una función que hace lo mismo.
+
+```{r}
+# source("funciones/todosLosIndices.R")
+
+# # Primero armar el tibble agrupado de acuerdo a la agregación que se desee
+# unTibbleAgrupado <- muestrasTidy %>% group_by(muestra)
+
+# # Luego puede invocar la función
+# todosLosIndices(unTibbleAgrupado)
 ```
 
 ### Datos atípicos (outliers)
