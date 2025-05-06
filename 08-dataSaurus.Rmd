@@ -1,0 +1,84 @@
+---
+title: "06 - DataSaurus"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+https://jumpingrivers.github.io/datasauRus/
+
+# Dispersión de datos
+
+Estos datos muestran la importancia de graficar los datos para entender lo que estamos analizando. Todos los gráficos son datos con la misma media, la misma varianza y la misma cantidad de datos.
+
+```{r}
+library(tidyverse)
+library(datasauRus)
+library(ggplot2)
+```
+
+```{r}
+dsd <- datasaurus_dozen
+dsd$dataset <- factor(dsd$dataset)
+str(dsd)
+summary(dsd)
+dsd
+```
+
+```{r}
+write_csv(dsd, "datos/dsd.csv")
+```
+
+
+
+```{r}
+resumen <- dsd %>% 
+  group_by(dataset) %>% 
+  reframe(n = n(), mediaX = mean(x), medianaX = median(x), sdX = sd(x), mediaY = mean(y), medianaY = median(y), sdY = sd(x))
+resumen
+```
+
+```{r fig.height=8, fig.width=8}
+#ggplot(dsd, aes(x = x, y = y)) + 
+ggplot(dsd, aes(y = y)) + 
+  geom_boxplot() +
+  stat_boxplot(geom = "errorbar",
+               width = 0.25) +
+#  geom_jitter(width = 0.1) +
+  xlab("Muestra") + ylab("Largos (cm)") +
+  ylim(0,100) + 
+  facet_wrap(~dataset)
+```
+
+
+```{r fig.height=15, fig.width=9}
+misColores <- c("#00afbb", "#e7b800","#fc4e07", "deeppink", "chartreuse", "midnightblue","#29BF12", "#00A5CF", "#DE1A1A","#574AE2", "#FFBF00", "grey45", "grey22")
+
+ggplot(dsd,
+       aes(x=x, y=y, colour=dataset)) +
+  geom_point(alpha = 0.5) +
+  theme_classic() + # theme_minimal() theme_grey() theme_bw() theme_linedraw() theme_light() theme_dark() theme_minimal() theme_classic() theme_void()
+  scale_color_manual(values = misColores) +
+  theme(legend.position = "none") +
+  facet_wrap(~dataset, ncol=3) + 
+  theme(aspect.ratio = 1)
+```
+
+## Pipes y capas (layers) de ggplot2
+
+```{r fig.height=8, fig.width=8}
+dsd %>% 
+  group_by(dataset)  %>% 
+    ggplot() + 
+      aes(x = x, y = y, colour=dataset) +
+      geom_boxplot() +
+      stat_boxplot(geom = "errorbar", width = 0.25) +
+      geom_point(alpha = 0.3) + 
+      ylim(0,100) + 
+      facet_wrap(~dataset) +
+      theme_grey()+  # theme_minimal() theme_grey() theme_bw() theme_linedraw() theme_light() theme_dark() theme_minimal() theme_classic() theme_void()
+      theme(legend.position = "none") +
+      xlab("Muestra") + 
+      ylab("Largos (cm)") +
+      theme(aspect.ratio = 1)
+```

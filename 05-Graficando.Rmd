@@ -30,7 +30,7 @@ Como se trata de un paquete de Tidyverse, la estructura de los datos es Tidy con
 
 La función aes() define el "mapeo de los datos", en el caso de ejemplo le estamos diciendo que use como variable de ordenadas (x) la variable var1 y como abscisas (y) la variable var2.
 
-Finalmente le decimos que construya un gráfico de líneas (geom_line, es la manera de decirle que la geometría del gráfico es de líneas).
+Finalmente le decimos que construya un gráfico de líneas (geom_line(), es la manera de decirle que la geometría del gráfico es de líneas).
 
 ```{r}
 # Primero generamos una set de datos
@@ -39,7 +39,7 @@ data <- tibble(var1 = seq(-10,10,0.1), var2 = sin(var1) )
 # Luego creeamos el gráfico
 grafico1 <- ggplot(data) +
   aes(x = var1, y = var2) +
-  geom_line()# +
+  geom_line() # +
   # geom_point()
 
 # Finalmente dibujamos el gráfico creado
@@ -48,20 +48,7 @@ grafico1
 
 Esos tres aspectos son obligatorios y cualquier gráfico debe definirlos: los datos, el mapeo y la geometría.
 
-Veremos seguidamente las geometrías básicas que deben conocerse en estadística descriptiva, tanto por su potencia para sintetizar datos extensos y/o complejos como porque son extensamente utilizados.
-
-## Tipos de gráficos.
-
--   Histograma
--   Gráfico de densidad
--   BoxPlot (o cajas y bigotes)
--   Gráfico de dispersión (coordenadas cartesianas)
--   Gráfico de Columnas / Barras
--   Gráfico de líneas
--   Coordenadas polares
--   Matriz Gráfica de correlación
-
-### Primero preparamos los datos
+## Primero preparamos los datos
 
 ```{r}
 # Pongo los años en un vector para simplificar la lectura de la transformación
@@ -78,6 +65,19 @@ irisTidy <- iris %>%
 irisTidy$FloralPart <- factor(irisTidy$FloralPart)
 irisTidy$Dimension <- factor(irisTidy$Dimension)
 ```
+
+## Tipos de gráficos.
+
+Veremos seguidamente las geometrías básicas que deben conocerse en estadística descriptiva, tanto por su potencia para sintetizar datos extensos y/o complejos como porque son extensamente utilizados.
+
+-   Histograma
+-   Gráfico de densidad
+-   BoxPlot (o cajas y bigotes)
+-   Gráfico de dispersión (coordenadas cartesianas)
+-   Gráfico de Columnas / Barras
+-   Gráfico de líneas
+-   Coordenadas polares
+-   Matriz Gráfica de correlación
 
 ### Histograma y Polígono de frecuencias
 
@@ -497,6 +497,160 @@ dataBolsaPeriodo
 graficoVelas <- dataBolsaPeriodo %>% as.data.frame() %>% select(2:8) %>%
   candleChart()
 # candleChart(theme='white',up.col='blue',dn.col='red')
+```
+
+## Paquetes extras
+
+Existe una enorme cantidad de paquetes que extienden la funcionalidad de ggplot2. Aquí algunos que usaremos más adelante.
+
+### library(patchwork)
+
+Permite organizar varios gráficos juntos de un modo muy sencillo y amigable. Ya lo usamos en este documento. El sitio oficial aquí: <https://patchwork.data-imaginist.com/>
+
+```{r}
+library(patchwork)
+p1 <- ggplot(mtcars) + geom_point(aes(mpg, disp))
+p2 <- ggplot(mtcars) + geom_boxplot(aes(gear, disp, group = gear))
+p3 <- ggplot(mtcars) + geom_smooth(aes(disp, qsec))
+p4 <- ggplot(mtcars) + geom_bar(aes(carb))
+
+(p1 + p2 + p3) / p4
+```
+
+### ggExtra
+
+```{r}
+library(ggExtra)
+p5 <- ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species, size = Sepal.Length, alpha = 0.3)) +
+      geom_point() +
+      theme(legend.position="none")
+p6 <- ggMarginal(p5, type="histogram")
+p6
+```
+
+### library(cowplot)
+
+Tiene una función plot_grid(), muy útil para combinar gráficos. Además hay muchas otras funciones extra que proporciona cowplot. Sitio de referencia aquí: <https://wilkelab.org/cowplot/index.html>
+
+```{r}
+library(cowplot)
+
+p7 <- ggplot(mtcars, aes(disp, mpg)) + 
+  geom_point(size = 1.5, color = "blue")
+
+inset <- ggplot(mpg, aes(drv)) + 
+  geom_bar(fill = "skyblue2", alpha = 0.7) + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05)))
+
+ggdraw(p7 + theme_half_open(12)) +
+  draw_plot(inset, .45, .45, .5, .5)
+```
+```{r}
+p8 <- ggMarginal(p5, type="histogram", fill = "slateblue", xparams = list(  bins=10))
+p9 <- ggMarginal(p7, type="density")
+p10 <- ggMarginal(p1, type="boxplot")
+
+library("cowplot")
+# Graficar en grilla
+plot_grid(p7,p8,p9,p10, labels = "AUTO")
+```
+
+```{r}
+ggdraw(p7 + theme_half_open(12)) +
+  draw_plot(p10, .45, .45, .5, .5)
+```
+
+### library(ggiraph)
+
+Excelente!! Gráficos interactivos y relacionados de una manera sencilla. Una guía rápida aquí: <https://r-graph-gallery.com/package/ggiraph.html>
+
+```{r}
+library(ggiraph)
+library(tidyverse)
+library(patchwork)
+
+mtcars_db <- rownames_to_column(mtcars, var = "carname")
+
+# First plot: Scatter plot
+scatter <- ggplot(
+  data = mtcars_db,
+  mapping = aes(
+    x = disp, y = qsec,
+    tooltip = carname, data_id = carname
+  )
+) +
+  geom_point_interactive(
+    size = 3, hover_nearest = TRUE
+  ) +
+  labs(
+    title = "Displacement vs Quarter Mile",
+    x = "Displacement", y = "Quarter Mile"
+  ) +
+  theme_bw()
+
+# Second plot: Bar plot
+bar <- ggplot(
+  data = mtcars_db,
+  mapping = aes(
+    x = reorder(carname, mpg), y = mpg,
+    tooltip = paste("Car:", carname, "<br>MPG:", mpg),
+    data_id = carname
+  )
+) +
+  geom_col_interactive(fill = "skyblue") +
+  coord_flip() +
+  labs(
+    title = "Miles per Gallon by Car",
+    x = "Car", y = "Miles per Gallon"
+  ) +
+  theme_bw()
+
+# Combine the plots using patchwork
+combined_plot <- scatter + bar +
+  plot_layout(ncol = 2)
+
+# Create a single interactive plot with both subplots
+interactive_plot <- girafe(ggobj = combined_plot)
+
+# Set options for the interactive plot
+interactive_plot <- girafe_options(
+  interactive_plot,
+  opts_hover(css = "fill:cyan;stroke:black;cursor:pointer;"),
+  opts_selection(type = "single", css = "fill:red;stroke:black;")
+)
+interactive_plot
+```
+
+### library(plotly)
+
+Gráficos interactivos. El sitio oficial aquí: <https://plotly.com/r/>
+
+```{r}
+library(plotly)
+ggplotly(grafico13)
+```
+
+### library(GGally)
+
+Para análisis exploratorios de datos. Simplifica la realización de algunos tipos especiales de gráficos, como por ejemplo ggpairs(). Sitio de referencia aquí: <https://ggobi.github.io/ggally/reference/index.html>
+
+### library(gganimate)
+
+```{r}
+library(ggplot2)
+library(gganimate)
+library(gapminder)
+
+p <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, colour = country)) +
+  geom_point(alpha = 0.7, show.legend = FALSE) +
+  scale_colour_manual(values = country_colors) +
+  scale_size(range = c(2, 12)) +
+  scale_x_log10() +
+  labs(title = "Year: {frame_time}", x = "GDP per capita", y = "life expectancy")
+
+anim <- p + transition_time(year) +
+  ease_aes("linear")
+anim
 ```
 
 
