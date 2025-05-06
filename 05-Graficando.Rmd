@@ -22,6 +22,7 @@ Todo gráfico tiene algunas cosas en común:
 -   transformaciones
 -   etc
 
+
 ## Gráfico mínimo
 
 En ggplot2 se define un objeto gráfico y con " + " se van agregando capas de información.
