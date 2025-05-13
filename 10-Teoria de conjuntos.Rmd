@@ -1,0 +1,228 @@
+---
+title: "10 - Teoría de conjuntos"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+## Explicaciones teóricas:
+
+### Video
+
+Hay un video explicando este tema de manera concisa y completa. Las explicaciones son muy claras y rigurosas, recomiendo enfáticamente que lo miren con detenimiento. Fueron realizadas por el profesor Unamuno, que enseña matemáticas en el CBC de la UBA para las carreras de ingeniería.
+
+<https://www.youtube.com/watch?v=OwyaMi3UnQY&t=1236s>
+
+### Libro
+
+Un libro donde eltema está tratado muy bien es:
+
+-   Miró, Ricardo (2006). Números combinatorios y probabilidades. 1° Ed. Colección Ciencia Jóven N.º 2, EUDEBA, Bs.As. 159 pgs. "Capítulo 2. Los Conjuntos".
+
+# Conjuntos en R, operaciones con conjuntos
+
+Basado en: https://rpubs.com/cghv94/operaciones-con-conjuntos
+
+Facultad de Economía, UNAM
+
+Profesor: Cesar Gerardo Hernández Vargas
+
+12/10/2020
+
+## Unión e intersección de conjuntos
+
+### Crear conjuntos
+
+Creando los vectores i, j en R:
+
+```{r}
+i <- 1:15
+j <- 10:25
+i
+j
+```
+
+### Unión
+
+Creando la unión de los vectores i, j con la función union:
+
+```{r}
+iUj <- union(i,j)
+iUj
+```
+
+### Intersección
+
+También podemos crear la intersección de los vectores i, j con la función intersect:
+
+```{r}
+iIj <- intersect(i,j)
+iIj
+```
+
+### Diferencia
+
+Podemos saber la diferencia entre los vectores i, j (elementos que aparecen en i y no aparecen en j), con la función setdiff:
+
+```{r}
+iDj <- setdiff(i,j)
+iDj
+```
+
+También podemos saber la diferencia entre los vectores j, i (elementos que aparecen en j y no aparecen en i), con la función setdiff:
+
+```{r}
+jDi <- setdiff(j,i)
+jDi
+```
+
+### Igualdad
+
+Finalmente, podemos comprobar si los vectores i, j son iguales mediante la función setequal:
+
+```{r}
+iIGj <- setequal(i,j)
+iIGj
+```
+
+## Leyes de los conjuntos
+
+En la teoría de conjuntos se llama conjunto universal al conjunto de todo (es decir que nada existe fuera del conjunto universal). Esta idea puede parecer inutil, pero cuando usamos la teoríade conjuntos para entender la combinatoria, que es la base de la probabilidad, resulta muy útil conocer el conjunto universal, porque incluye todos los eventos posibles "del problema bajo estudio".
+
+En los ejemplos siguientes vamos a trabajar con los numeros naturales del 1 al 20, de modo que no puede haber objetos que no sean alguno de ellos. Así podemos crear el conjunto universal "u":
+
+```{r}
+u <- 1:20
+u
+```
+
+### Creando el conjunto vacío, v:
+
+```{r}
+v <- c()
+v
+```
+
+### Creando los conjuntos x, y, z:
+
+```{r}
+x <- 1:10
+x
+
+y <- 5:15
+y
+
+z <- 10:20
+z
+```
+
+### I. Identidad
+
+Union con v. La unión de un conjunto cualquiera con el conjunto vacío es el mismo conjunto:
+
+```{r}
+xUv <- union(x,v)
+xUv
+```
+
+Comprobando la propiedad de identidad con la función setequal:
+
+```{r}
+setequal(xUv,x)
+```
+
+Intersección con u. La intersección de un conjunto cualquiera con el conjunto universo es el mismo conjunto:
+
+```{r}
+xIu <- intersect(x,u)
+xIu
+```
+
+Comprobando la propiedad de identidad con la función setequal:
+
+```{r}
+setequal(xIu,x)
+```
+
+### II. Dominación
+
+La unión de un conjunto cualquiera con el conjunto universo, es el conjunto universo:
+
+```{r}
+xUu <- union(x,u)
+xUu
+```
+
+Comprobando la propiedad de dominación con la función setequal:
+
+```{r}
+setequal(xUu,u)
+```
+
+La intersección de un conjunto cualquiera con el conjunto vacío, es el conjunto vacío:
+
+```{r}
+xIv <- intersect(x, v)
+xIv
+```
+
+Comprobando la propiedad de dominación con la función setequal:
+
+```{r}
+setequal(xIv,v)
+```
+
+### III. Idempotencia
+
+La unión de un conjunto cualquiera consigo mismo, es el mismo conjunto:
+
+```{r}
+xUx <- union(x,x)
+xUx
+```
+
+Comprobando la propiedad de idempotencia con la función setequal:
+
+```{r}
+setequal(xUx,x)
+```
+
+La intersección de un conjunto cualquiera consigo mismo, es el mismo conjunto:
+
+```{r}
+xIx <- intersect(x,x)
+xIx
+```
+
+
+Comprobando la propiedad de idempotencia con la función setequal:
+
+```{r}
+setequal(xIx,x)
+```
+
+
+### IV. Complementariedad
+
+La negación de la negación de un conjunto cualquiera, es el mismo conjunto:
+
+Creando x complemento (primera negación)
+
+```{r}
+xc <- setdiff(u,x)
+xc
+```
+
+Creando x complemento-complemento (segunda negación)
+
+```{r}
+xcc <- setdiff(u,xc)
+xcc
+```
+
+Comprobando la propiedad de complementariedad con la función setequal:
+
+```{r}
+Complementariedad <- setequal(xcc,x)
+Complementariedad
+```

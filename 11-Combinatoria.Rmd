@@ -1,0 +1,203 @@
+---
+title: "11 - Combinatoria"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+Para abordar el problema de la "probabilidad", que está en los fundamentos más básicos de la estadística, se debe conocer la teoría matemática que trata sobre los arreglos diferentes que se puede obtener en conjuntos de elementos en diferentes situaciones. Esta especialidad dentro de la matemática se llama Combinatoria. En este capítulo vamos a abordar este problema.
+
+## Explicaciones teóricas:
+
+### Video
+
+Hay dos videos explicando este tema de manera concisa y completa. Las explicaciones son muy claras y rigurosas, recomiendo enfáticamente que lo miren con detenimiento. Fueron realizados por el profesor Unamuno, que enseña matemáticas en el CBC de la UBA para las carreras de ingeniería. Además hay otros videos con ejercicios resueltos que todos son excelentes.
+
+-   Conceptos Básicos de Combinatoria <https://www.youtube.com/watch?v=-HFv7RYOoIU&list=PL43954F1FE4A51311&index=3>
+
+-   Los Naturales y el Factorial <https://www.youtube.com/watch?v=VJHE7vwsxrg&list=PL2fBB5seGsOWKATwyDy76rGyBGmdN5p5m>
+
+-   Combinatoria Variaciones Permutaciones Combinaciones con y sin repeticion <https://www.youtube.com/watch?v=rAH7RWU4JyM&list=PL2fBB5seGsOUIH732oKHMmqjpMmLeImNY>
+
+### Libro
+
+Un libro donde el tema está tratado muy bien, breve y sintético es:
+
+Miró, Ricardo (2006). Números combinatorios y probabilidades. 1° Ed. Colección Ciencia Jóven N.º 2, EUDEBA, Bs.As. 159 pgs. "Capítulo 6. Combinatoria: una técnica para ayudar a contar".
+
+Para explicaciones más completas y formalmente más desarrolladas (explicado muy claramente y con mayor complejidad):
+
+Miguel R. Wilhelmi (2004). Combinatoria y Probabilidad. Universidad de Granada. España. 275 pgs. <https://www.ugr.es/~batanero/pages/ARTICULOS/librowhilhelmi.pdf>
+
+```{r}
+library(gtools)
+```
+
+### Factorial
+
+En combinatoria se usa mucho una herramienta matemática muy útil que necesita una explicación (sencilla).
+
+El factorial de un número (n) es el resultado de multiplicar todos los números naturales desde el 1 hasta el número en cuestión (n), y se escribe n!.
+
+Es decir que 4! = 1.2.3.4 = 24
+
+```{r}
+n <- 5
+a <- 1
+factorial(n)
+
+for (i in 1:n) {
+  a <- a * i
+  print(a)
+}
+paste(a)
+```
+
+Es interesante notar que n! = n.(n-1)! y por convención se ha definido que 0! = 1. Esto nos permite programar una función recursiva para realizar la cuenta.
+
+```{r}
+nuestroFactorial <- function(n) {
+  if (n == 0) {
+    1
+  } else {
+    n * nuestroFactorial(n-1)
+  }
+}
+```
+
+```{r}
+nuestroFactorial(6)
+```
+
+#### Atención:
+
+Si se trata de calcular el factorial de un número grande la computadora consume muchísima capacidad de proceso. Fíjese que 100! es un número de 158 cifras, 170! tiene 307 cifras y para valores más grandes R ya lo considera infinito.
+
+```{r}
+for (i in 1:172) {
+  print(paste(i, nuestroFactorial(i)))
+}
+```
+
+Una buena explicación acerca del factorial también puede encontrarla en el canal de Unamuno.
+
+Los Naturales y el Factorial <https://www.youtube.com/watch?v=VJHE7vwsxrg>
+
+## Definiciones. 
+
+### Permutaciones, Variaciones y Combinaciones.
+
+Existen tres tipos básicos de operaciones que podemos realizar sobre un conjunto de elementos: Permutaciones, Variaciones y Combinaciones.
+
+| Orden      | Operacion     | Elementos involucrados               |                      Sin Rep.                       |                  Con Rep.                   |
+|:------------|:------------|:------------|:----------------:|:-------------:|
+| Importa    | Permutaciones | Todos los elementos del conjunto (m) |                   $$P_{m} = m!$$                    |              $$P'_{m} = m^m$$               |
+| Importa    | Variaciones   | Todos (m) tomados de a k             |           $$V_{m,k} = \frac{m!}{(m-k)!}$$           |             $$V'_{m,k} = m^k$$              |
+| No Importa | Combinaciones | Todos (m) tomados de a k             | $$C_{m,k} = \frac{m!}{(m-k)! . k!} = \binom{m}{k}$$ | $$C'_{m,k} = \frac{(m+k-1)!}{k! . (m-1)!}$$ |
+
+Cada una de estas alternativas puede considerarse con la posibilidad de repetir los elementos del conjunto de referencia (Con repetición), o sin ella (Sin repetición).
+
+En la fila de Combinaciones y columna Sin Rep. la notación entre paréntesis con m arriba y k abajo es la forma de escribir un "Número Combinatorio" (volveremos sonre esto más adelante).
+
+Se lee, Permutaciones en un conjunto de m elementos totales; o Variaciones/Combinaciones en un conjunto de m elementos totales, tomados de a k elementos.
+
+### Nótese
+
+que si calculamos las Variaciones para m elementos tomados de a m (es decir todos, k = m), lo que en realidad estamos haciendo son Permutaciones:
+
+$$
+V_{m,m} = \frac{m!}{(m-m)!} = \frac{m!}{0!} = \frac{m!}{1} = m! = P_{m}
+$$
+
+es decir que las permutaciones son el caso especial de las variaciones en el cual se toman todos los elementos del conjunto de referencia.
+
+y que:
+
+$$
+C_{m,k} . P_{k} =\frac{m!}{(m-k)! . \not k!}.\not k! = \frac{m!}{(m-k)!} = V_{m,k}
+$$
+son los dos pasos propuestos en el ejemplo de Variaciones que encontrará un poco más adelante.
+
+## Ejemplos
+
+Para ejemplificar imaginemos un aula con cierta cantidad de bancos y un grupo de estudiantes que usarán el aula.
+
+```{r}
+estudiantes <- c("María", "Juan", "José", "Eduviges", "Tiburcio", "Hermenegilda", "Pedro")
+cantidadEstudiantes <- length(estudiantes)
+bancos <- c(1,2,3,4,5,6,7)
+cantidadBancos <- length(bancos)
+```
+
+### Permutaciones
+
+Si la cantidad de bancos y estudiantes es la misma, podemos averiguar de cuántas maneras diferentes se pueden sentar los estudiantes en el alula. En este caso realizamos "Permutaciones." Hacer Permutaciones es intercambiar posiciones en un conjunto de elementos.
+
+ATENCIÓN:
+
+1.  en R la función permutations() permite realizar permutaciones y variaciones. Son permutaciones cuando la cantidad de elementos del conjunto de referencia y la cantidad de elementos seleccionados son iguales (en el ejemplo cantidadEstudiantes = cantidadBancos).
+
+2.  opciones set y repeats.allowed:
+
+    1.  Set=TRUE fuerza que en el grupo de estudiantes no haya repetidos.
+
+    2.  repeats.allowed=FALSE realiza la operación sin repetición.
+
+3.  las funciones permutations() y combinations() no calculan la cantidad de posibilidades, fabrican de hecho una matriz con una fila por permutación, variación o combinación posible (por eso usamos la función nrow(), para contar la cantidad de filas).
+
+```{r}
+permutaciones <- permutations(cantidadEstudiantes, cantidadBancos, estudiantes, set = TRUE, repeats.allowed = FALSE)
+head(permutaciones)
+paste("La cantidad total de posibilidades es: ", nrow(permutaciones))
+paste("Calculado con la fórmula: ", factorial(cantidadEstudiantes))
+```
+
+### Variaciones
+
+Si la cantidad de bancos en el aula es menor a la cantidad de estudiantes, entonces podemos hacer dos operaciones:
+
+1.  Primero averiguar cuántos grupos diferentes de estudiantes podemos formar, en este caso realizamos "Combinaciones", porque como no están sentatos en ningún lado, entonces el orden no importa;
+
+2.  y luego podemos averiguar para cada selección de estudiantes de cuántas maneras los podemos sentar en el aula. Es decir que calculamos cuántas Permutaciones podemos realizar en cada Combinación posible.
+
+Al resultado de ambas operaciones lo llamamos "Variaciones."
+
+Primero reduciremos la cantidad de bancos
+
+```{r}
+bancos <- c(1,2,3,4)
+cantidadBancos <- length(bancos)
+```
+
+Luego realizamos la misma operación que antes (Permutaciones), sólo que ahora con cantidadBancos = 4.
+
+```{r}
+permutaciones <- permutations(cantidadEstudiantes, cantidadBancos, estudiantes, set = TRUE, repeats.allowed = FALSE)
+head(permutaciones)
+paste("La cantidad total de posibilidades es: ", nrow(permutaciones))
+paste("Calculado con la fórmula: ", factorial(cantidadEstudiantes) / factorial(cantidadEstudiantes - cantidadBancos) )
+```
+
+### Combinaciones
+
+En el caso anterior podemos calcular la cantidad de posibles grupos de estudiantes.
+
+```{r}
+combinaciones <- combinations(cantidadEstudiantes, cantidadBancos, estudiantes, set = TRUE, repeats.allowed = FALSE)
+head(combinaciones)
+paste("La cantidad total de posibilidades es: ", nrow(combinaciones))
+paste("Calculado con la fórmula: ", factorial(cantidadEstudiantes) / (factorial(cantidadEstudiantes - cantidadBancos) * factorial(cantidadBancos)) )
+```
+
+
+
+```{r}
+cantComb <- nrow(combinations(7, 4, 1:7, set = TRUE, repeats.allowed = FALSE))
+cantPerm <- nrow(permutations(4, 4, 1:4, set = TRUE, repeats.allowed = FALSE))
+cantVar <- nrow(permutations(7, 4, 1:7, set = TRUE, repeats.allowed = FALSE))
+paste("cantComb : ", cantComb)
+paste("cantPerm : ", cantPerm)
+paste("cantVar : ", cantVar)
+paste("C m,k * P m,k : ", cantComb * cantPerm)
+paste("Calculado con la fórmula: ", factorial(7) / factorial(7 - 4))
+```

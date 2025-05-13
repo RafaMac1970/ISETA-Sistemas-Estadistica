@@ -27,23 +27,23 @@ Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la 
 
 ##  Polígono de Frecuencias
 
--   ídem anterior pero cambiando la geometría a Polígono de Frecuencias
+-   ídem anterior pero cambiando la geometría a Polígono de Frecuencias.
 
 ## Gráfico de Densidad
 
--   ídem anterior pero cambiando la geometría a Densidad
+-   ídem anterior pero cambiando la geometría a Densidad.
 
 ## Densidad Acumulada
 
--   ídem anterior pero cambiando la geometría a Densidad Acumulada
+-   ídem anterior pero cambiando la geometría a Densidad Acumulada.
 
 ## BoxPlot
 
--   ídem anterior pero cambiando la geometría a BoxPlot
+-   ídem anterior pero cambiando la geometría a BoxPlot.
 
 ## Violin
 
--   ídem anterior pero cambiando la geometría a Violín
+-   ídem anterior pero cambiando la geometría a Violín.
 
 ## Gráficos superpuestos
 

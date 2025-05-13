@@ -11,7 +11,9 @@ library(ggplot2)
 library(patchwork)
 ```
 
-La estadística necesita representar la información de modos poderosos para analizar datos y comunicar conclusiones. Además RStudio tiene un framework para graficar (ggplot2) muy potente que se basa en la gramática de gráficos. Aquí presentaremos los dos aspectos juntos, ya que la gramática de grágicos está pensada para la estadística fundamentalmente y por lo tanto tienen los mismos objetivos.
+La estadística necesita representar la información de modos poderosos para analizar datos y comunicar conclusiones. 
+
+RStudio tiene un framework para graficar (ggplot2) muy potente que se basa en la gramática de gráficos. Aquí presentaremos los dos aspectos juntos, ya que la gramática de grágicos está pensada para la estadística fundamentalmente y por lo tanto tienen los mismos objetivos.
 
 Todo gráfico tiene algunas cosas en común:
 
@@ -53,7 +55,7 @@ Esos tres aspectos son obligatorios y cualquier gráfico debe definirlos: los da
 
 ```{r}
 # Pongo los años en un vector para simplificar la lectura de la transformación
-variables <- variables <- variable.names(iris)[1:4]
+variables <- variable.names(iris)[1:4]
 
 irisTidy <- iris %>%
   # Creamos una vaiable de identificación para cada flor (cada línea en el dataframe original)
@@ -106,7 +108,7 @@ La primera opción es filtrar la base de datos para dejar una sola especie y hac
 
 ```{r}
 # Primero generamos una set de datos
-data <- irisTidy %>% filter(FloralPart == "Petal" & Dimension == "Length", Species == "setosa")
+data <- irisTidy %>% filter(FloralPart == "Petal" & Dimension == "Length", Species == "virginica")
 
 # Luego creeamos el gráfico
 grafico2 <- ggplot(data) +
@@ -199,8 +201,8 @@ grafico9 + grafico10
 
 ```{r}
 # Primero generamos una set de datos
-data <- irisTidy %>% 
-  filter(Species == "setosa")
+data <- irisTidy #%>% 
+ # filter(Species == "setosa")
 
 # Luego creeamos el gráfico
 grafico11 <- ggplot(data) +
@@ -216,7 +218,7 @@ grafico12 <- ggplot(data) +
 #  geom_jitter()
 
 # Finalmente dibujamos el gráfico creado
-grafico11 + grafico12
+grafico11 / grafico12
 ```
 
 ### Gráfico de dispersión

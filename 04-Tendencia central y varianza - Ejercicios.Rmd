@@ -17,7 +17,7 @@ Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la 
 
 Existen experimentos manipulativos o mensurativos.
 
-Los manipulativos son aquellos en los que manipulamos algo y medimos variables sobre lo manipulado. Por ejemplo, regamos plantas de tomate con dos cantidades diferentes de agua y cierto tiempo depués medimos altura, peso, cantidad de hojas, cantidad de flores, cantidad de frutos, peso de los frutos, etc. de las plantasde tomate en ambos tratamientos. 
+Los manipulativos son aquellos en los que manipulamos algo y medimos variables sobre lo manipulado. Por ejemplo, regamos plantas de tomate con dos cantidades diferentes de agua y cierto tiempo depués medimos altura, peso, cantidad de hojas, cantidad de flores, cantidad de frutos, peso de los frutos, etc. de las plantasde tomate en ambos tratamientos.
 
 Los experimentos mensurativos en cambio, consisten en observar y medir algo "como está", y buscamos en la realidad un experimento que se haya hecho espontáneamente. Por ejemplo, encuestamos personas que hayan comprado en dos supermercados diferentes y les preguntamos qué compraron, cuánto compraron, qué faltó en el supermercado, qué decidieron no comprar, etc.
 
@@ -68,11 +68,9 @@ Todos los índices siguientes deben calcularse sobre cada variable cuantitativa 
 
 # Sugerencias
 
-En el siguiente sitio hay varios test de reflejos, memoria etc. que podrían realizar varias veces cada uno y recopilar datos de esta manera. Obviamente debe haber infinidad de este tipo de sitios, puede elejir el que le resulte más adecuado.
-https://www.arealme.com/apm-actions-per-minute-test/es/
+En el siguiente sitio hay varios test de reflejos, memoria etc. que podrían realizar varias veces cada uno y recopilar datos de esta manera. Obviamente debe haber infinidad de este tipo de sitios, puede elejir el que le resulte más adecuado. <https://www.arealme.com/apm-actions-per-minute-test/es/>
 
-En realidad el sitio anterior tiene muchos otros tipos de tests que podría usar.
-https://www.arealme.com/es
+El sitio anterior tiene muchos otros tipos de tests que podría usar. [https://www.arealme.com/es](#0){.uri}
 
 Puede recopilar una serie de objetos similares (por ejemplo plantas), y medirle varias cosas a cada una (como altura, peso, cantidad de hojas, cantidad de flores).
 
