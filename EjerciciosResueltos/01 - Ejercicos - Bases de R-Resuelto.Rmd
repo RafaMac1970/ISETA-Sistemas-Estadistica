@@ -1,0 +1,385 @@
+---
+title: "01 - Ejercicios - Bases de R"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Estudiante: SuNombre
+
+Para realizar estos ejercicios use como referencia el documento "01 - Bases de R.Rmd".
+
+Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna.
+
+Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la actividad. Esto no es el modo habitual de trabajo, pero se pretende aquí que usted descubra cuándo necesita las librerías extra.
+
+# Tipos de datos (Numeric, character , logical, y varios tipos para fechas y tiempos)
+
+## Numeric
+
+-   Cree objetos de la clase numeric y verifique con class() y typeof().
+
+```{r}
+unNumero <- 65.35
+otroNumero <- 9
+unNumero
+class(unNumero)
+typeof(unNumero)
+otroNumero
+class(otroNumero)
+typeof(otroNumero)
+```
+
+-   Averigüe cómo crear un objeto de la case integer.
+
+```{r}
+unNumero <- as.integer(unNumero)
+otroNumero <- as.integer(otroNumero)
+unNumero
+class(unNumero)
+typeof(unNumero)
+otroNumero
+class(otroNumero)
+typeof(otroNumero)
+```
+
+-   ¿Qué son los objetos pi y exp(1)?
+
+```{r}
+pi # es un literal que representa la constante pi, es un irracional
+exp(1) # e^1 = e El número de Euler, es un número irracional
+class(pi)
+typeof(pi)
+help(pi)
+class(exp(1))
+typeof(exp(1))
+```
+
+## Character
+
+-   Cree tres objetos de texto y concaténelos de 3 maneras diferentes. Use los siguientes separadores: un espacio, un guión y sin espacio. Pruebe las funciones paste() y print(). ¿Qué las diferencia?
+
+```{r}
+unTexto <- "esto"
+otroTexto <- "es"
+unOtroTexto <- "mentira"
+
+paste(unTexto, otroTexto, unOtroTexto)
+paste(unOtroTexto, otroTexto, unTexto, sep = " - ")
+paste(otroTexto, unTexto, unOtroTexto, sep = "")
+
+print(c(unOtroTexto, unTexto, otroTexto))
+```
+
+## Logical
+
+-   Cree las tablas de verdad para los conectores lógicos "y" y "o" y considere también las combinaciones de la negación de las proposiciones. Ponga atención en el orden de ejecución.
+
+
+```{r}
+combs <- expand.grid(p = c(TRUE, FALSE), q = c(TRUE, FALSE))
+combs$"p y q" <- combs$p & combs$q
+combs$"p o q" <- combs$p | combs$q
+combs$"!p y q" <- !combs$p & combs$q
+combs$"!p o q" <- !combs$p | combs$q
+combs$"p y !q" <- combs$p & !combs$q
+combs$"p o !q" <- combs$p | !combs$q
+combs$"!p y !q" <- !combs$p & !combs$q
+combs$"!p o !q" <- !combs$p | !combs$q
+class(combs)
+combs
+```
+
+## Date and Time.
+
+```{r}
+library(lubridate)
+```
+
+-   ¿Qué día Juliano es su cumpleaños?
+
+```{r}
+miFechaDeNacimiento <- ymd("1970/08/23")
+yday(miFechaDeNacimiento)
+miProximoCumpleanios <- update(miFechaDeNacimiento, year = 2024)
+class(miFechaDeNacimiento)
+yday(miProximoCumpleanios)
+```
+
+-   ¿Cuántos días hay entre su último cumpleaños y hoy?
+
+```{r}
+miUltimoCumpleanios <- update(miFechaDeNacimiento, year = 2024)
+# miUltimoCumpleanios <- miFechaDeNacimiento + years(53)
+# miUltimoCumpleanios <- ymd(paste("2023", month(miFechaDeNacimiento), day(miFechaDeNacimiento)))
+# miUltimoCumpleanios <- ymd("2023/08/23")
+days(today() - miUltimoCumpleanios)
+```
+
+-   ¿Cuántos días faltan para su próximo cumpleaños?
+
+```{r}
+miProximoCumpleanios <- update(miFechaDeNacimiento, year = 2025)
+days(miProximoCumpleanios - today())
+```
+
+-   ¿Cuánto tiempo ha transcurrido desde su nacimiento?
+
+```{r}
+now() - as_datetime(miFechaDeNacimiento) 
+```
+
+-   ¿Cuánto tiempo vivió El Diego?
+
+```{r}
+fechaDeNacimientoElDiego <- ymd("1960-10-30")
+fechaDeMuerteDeElDiego <- ymd("2020-11-25")
+fechaDeMuerteDeElDiego - fechaDeNacimientoElDiego
+time_length(fechaDeMuerteDeElDiego - fechaDeNacimientoElDiego, unit = "years")
+```
+
+-   ¿Qué día de la semana nació El Diego?
+
+```{r}
+wday(fechaDeNacimientoElDiego, label = TRUE)
+```
+
+-   ¿Qué semana del año murió El Diego?
+
+```{r}
+week(fechaDeMuerteDeElDiego)
+```
+
+-   ¿Qué diferencia de edad tienen usted y El Diego?
+
+```{r}
+miFechaDeNacimiento - fechaDeNacimientoElDiego
+time_length(miFechaDeNacimiento - fechaDeNacimientoElDiego, unit = "years")
+```
+
+
+# Estructuras de datos
+
+## Vectores
+-   Cree un vector con los días julianos correspondientes a 50, 100, 150, 200, 250, 300 y 350 días después de su último cumpleaños.
+-   Cree un vector con los días de la semana (como palabras) correspondientes a las fechas del inciso anterior.
+
+
+```{r}
+miUltimoCumpleanios
+vec <- c(50, 100, 150, 200, 250, 300, 350)
+vec2 <- vec + miUltimoCumpleanios
+vec2
+yday(vec2)
+wday(vec2, label = TRUE, abbr = FALSE)
+```
+
+-   Cree un vector con las superficies correspondientes a 5 cuadrados. El primer cuadrado tiene lados de 1m de largo, el segundo tiene lados el doble de largos que el cuadrado anterior, el tercero el triple del cuadrado del doble del inicial... y así sigue la serie. (es decir: 1, 2 * 1, 3 * 2 * 1, ...)
+
+```{r}
+lado <- 1
+vec4 <- c(1,2,3,4,5)
+vec5 <- factorial(vec4) * lado
+vec6 <- vec5 ^ 2
+vec5
+vec6
+```
+
+-   Cree un vector con los precios de 6 productos y otro con las cantidades vendidas de dichos productos. ¿Cuánto fué el ingreso total de las ventas?
+
+```{r}
+precios <- c(15,25,35,45,55,65,75)
+ventas <- c(100,90,80,70,60,50,40)
+sum(precios * ventas)
+```
+
+
+### Generador de secuencias
+
+-   Cree un vector de números del 21 al 354
+
+```{r}
+21:354
+```
+
+-   Cree un vector con una secuencia desde 0 hasta 700 saltando de a 7 usando la función seq()
+
+```{r}
+salta7 <- seq(0,700,7)
+salta7
+```
+
+-   Cree el mismo vector anterior pero sin usar el método seq()
+
+```{r}
+0:100 * 7
+```
+
+### Acceder a los elementos de un vector
+
+-   ¿Cuál es la superficie del tercer cuadrado del ejercicio anterior?
+
+```{r}
+vec6[3]
+```
+
+-   ¿Cuáles son los números desde el 5to al 9no de la serie que salta de a siete?
+
+```{r}
+salta7[5:9]
+```
+
+-   Cree un vector que contenga las fechas correspondientes a los 100, 200 y 300 días posteriores a su último cumpleaños. No lo vuelva a calcular, rescate los valores del vector previamente creado.
+
+```{r}
+vec7 <- vec2[c(2,4,6)]
+vec7
+```
+
+## Matrices
+
+Usted es en comerciante que vende 7 productos en 3 sucursales diferentes.
+
+-   Cree un vector con los precios de compra mayorista de los 7 productos que luego venderá.
+-   Cree una matriz con los precios de venta de los 7 productos en las 3 sucursales diferentes.
+-   Cree una matriz con las ventas realizadas de los 7 productos anteriores en las 3 sucursales mencionadas.
+-   Cree una matriz, usando las anteriores, con la recaudación por producto y sucursal.
+-   Cree una matriz , usando las anteriores, con las ganancias por producto y por sucursal.
+
+```{r}
+prCompra <- c(10,20,30,40,50,60,70)
+prVenta <- cbind(c(15,25,35,45,55,65,75),
+                  c(16,26,36,46,56,66,76),
+                  c(17,27,37,47,57,67,77))
+canVentas <- cbind(c(100,90,80,70,60,50,40),
+                    c(300,290,280,270,260,250,240),
+                    c(200,190,180,170,160,150,140))
+prCompra
+prVenta
+canVentas
+recaudacion <- prVenta * canVentas
+ganancias <- (prVenta - prCompra) * canVentas
+
+recaudacion
+ganancias
+```
+
+### Acceder a sus elementos
+
+Para las matrices del ejemplo anterior:
+
+-   ¿Cuál fué la recaudación total?, ¿y la ganancia?
+
+```{r}
+sum(recaudacion)
+sum(ganancias)
+```
+
+-   ¿Cuál fué la recaudación en la sucursal 2?, ¿y la ganancia?
+
+```{r}
+sum(canVentas[,2] * prVenta[,2])
+sum(canVentas[,2] * (prVenta[,2] - prCompra))
+```
+
+-   ¿Cuál fué la recaudación del producto 6?, ¿y la ganancia?
+
+```{r}
+sum(canVentas[6,] * prVenta[6,])
+sum(canVentas[6,] * (prVenta[6,] - prCompra[6]))
+```
+
+## Array.
+
+-   Imagine una inflación mensual del 7% y construya un array con la información del ejercicio anterior agregándole toda esa misma información pero en el mes siguiente.
+
+```{r}
+recaudacion2Meses <- array(c(recaudacion, recaudacion * 1.07), dim = c(3,7,2))
+recaudacion2Meses
+ganancias2Meses <- array(c(ganancias, ganancias * 1.07), dim = c(3,7,2))
+ganancias2Meses
+```
+
+
+### Acceder a sus elementos
+
+-   ¿Cuál fué la recaudación total y la ganancia en el mes siguiente?
+
+```{r}
+sum(recaudacion2Meses[,,2])
+sum(ganancias2Meses[,,2])
+```
+
+-   ¿Cuál fué la recaudación y la ganancia en la sucursal 3 en el primer mes?
+
+```{r}
+sum(recaudacion2Meses[3,,1])
+sum(ganancias2Meses[3,,1])
+```
+
+-   ¿Cuál fué la recaudación y la ganancia del producto 2 en los dos meses?
+
+```{r}
+sum(recaudacion2Meses[,2,])
+sum(ganancias2Meses[,2,])
+```
+
+## Estructuras de datos heterogéneos
+
+## Listas
+
+-   Cree una lista con nombres de sus elementos donde almacene precio de compra, precio de venta, ventas, recaudación y ganancias de los productos 3 y 5 en el segundo mes. 
+
+```{r}
+comercio <- list("precios de compra" = prCompra[c(3,5)], "precios de venta" = prVenta[c(3,5),] * 1.07, "ventas" = canVentas[c(3,5),], "recaudación" = recaudacion2Meses[,c(3,5),2], "ganancias" = ganancias2Meses[,c(3,5),2])
+comercio
+```
+
+### Acceder a sus elementos
+
+-   ¿Cuales fueron las ventas del producto 3? (obtenga la información de la lista anterior)
+
+```{r}
+comercio$ventas[1,]
+```
+
+
+# Funciones
+
+-   Cree una función que le permita acceder a las ganancias totales del producto que usted elija.
+
+```{r}
+gananciasDelProducto <- function(indiceProducto) {
+  sum(ganancias2Meses[,indiceProducto,])
+}
+gananciasDelProducto(2)
+```
+
+-   Cree una función que le permita acceder a las ganancias totales de la sucursal que usted elija.
+
+```{r}
+source("../funciones/busca.R")
+
+```
+
+```{r}
+# gananciasDeLaSucursal <- function(indiceSucursal) {
+#   sum(ganancias2Meses[indiceSucursal,,])
+# }
+gananciasDeLaSucursal(2)
+```
+
+
+-   Cree una función que le permita acceder a las ganancias totales de un producto en una sucursal.
+
+```{r}
+gananciasDeProductoEnSucursal <- function(indiceProducto, indiceSucursal) {
+  sum(ganancias2Meses[indiceSucursal,indiceProducto,])
+}
+gananciasDeProductoEnSucursal(5,3)
+```
+
+-   Guarde en un archivo externo las funciones creadas. Cárguelas luego y pruebe su funcionalidad. (Recomendación, a las funciones almacenadas aparte póngales un nombre diferente así puede probar si cargan correctamente sin conflicto con las creadas en este documento)
+
+
+
