@@ -42,7 +42,7 @@ El factorial de un número (n) es el resultado de multiplicar todos los números
 Es decir que 4! = 1.2.3.4 = 24
 
 ```{r}
-n <- 5
+n <- 7
 a <- 1
 factorial(n)
 
@@ -50,7 +50,6 @@ for (i in 1:n) {
   a <- a * i
   print(a)
 }
-paste(a)
 ```
 
 Es interesante notar que n! = n.(n-1)! y por convención se ha definido que 0! = 1. Esto nos permite programar una función recursiva para realizar la cuenta.
@@ -74,7 +73,7 @@ nuestroFactorial(6)
 Si se trata de calcular el factorial de un número grande la computadora consume muchísima capacidad de proceso. Fíjese que 100! es un número de 158 cifras, 170! tiene 307 cifras y para valores más grandes R ya lo considera infinito.
 
 ```{r}
-for (i in 1:172) {
+for (i in 1:171) {
   print(paste(i, nuestroFactorial(i)))
 }
 ```
@@ -156,7 +155,7 @@ paste("Calculado con la fórmula: ", factorial(cantidadEstudiantes))
 
 Si la cantidad de bancos en el aula es menor a la cantidad de estudiantes, entonces podemos hacer dos operaciones:
 
-1.  Primero averiguar cuántos grupos diferentes de estudiantes podemos formar, en este caso realizamos "Combinaciones", porque como no están sentatos en ningún lado, entonces el orden no importa;
+1.  Primero averiguar cuántos grupos diferentes de estudiantes podemos formar, en este caso realizamos "Combinaciones", porque como no están sentados en ningún lado, entonces el orden no importa;
 
 2.  y luego podemos averiguar para cada selección de estudiantes de cuántas maneras los podemos sentar en el aula. Es decir que calculamos cuántas Permutaciones podemos realizar en cada Combinación posible.
 
@@ -201,3 +200,6 @@ paste("cantVar : ", cantVar)
 paste("C m,k * P m,k : ", cantComb * cantPerm)
 paste("Calculado con la fórmula: ", factorial(7) / factorial(7 - 4))
 ```
+
+
+  

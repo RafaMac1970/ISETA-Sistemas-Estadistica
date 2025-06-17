@@ -1,0 +1,99 @@
+---
+title: "11 - Combinatoria - Ejercicios"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+## Ejercicios
+
+  1- Hemos decidido hacer un viaje, podemos hacerlo en avión o en micro y sabemos que hay dos compañías aéreas (Aerolíneas Argentinas y Latam Airlines) y cuatro empresas de micros (Balut, Flecha Bus, El rápido, Vosa), ¿de cuántas formas podemos hacerlo?
+  
+```{r}
+compAereas <- c("Aerolíneas Argentinas", "Latam Airlines")
+compMicros <- c("Balut", "Flecha Bus", "El rápido", "Vosa")
+length(compAereas) + length(compMicros)
+```
+  
+  2- Hemos decidido pasar nuestras próximas vacaciones en la ciudad de Tucumán. Desde Buenos Aires contamos con tres medios distintos de hacer el viaje: por tren, avión o micro; estas tres posibilidades están disponibles tanto para el viaje de ida, como para el regreso. Nos preguntamos entre cuántas formas distintas de viajar, podemos elegir.
+  
+  3- Ejemplo 3: Al cambiar de lugar las letras de una palabra, lo que se obtiene puede ser una palabra o una secuencia de letras sin sentido. Llamamos ANAGRAMA a cualquier reordenamiento de las letras de una palabra. Si por ejemplo utilizamos las letras de la palabra NOTA para formarlos, ¿tendremos solo cuatro resultados por haber cuatro letras?
+  
+  4- El hotel Urquiza Apart & Suites de Rosario cuenta con cuatro suites súper matrimonial, a las que designaremos SM1, SM2, SM3 y SM4. Dos matrimonios arriban al hotel, en horarios diferentes, un día en el que las cuatro suites están disponibles y desean alojarse en ellas. ¿De cuántas maneras diferentes los podemos alojar?
+  
+  5- Supongamos que en el caso anterior llegan cuatro matrimonios en momentos diferentes. ¿De cuántas maneras diferentes los podemos alojar?
+  
+  6- Calcule las cantidad de anagramas posibles para cada una de las siguientes palabras:
+    a- PASA
+    b- RASARA
+    c- BANANA
+    
+  7- Una caja de seguridad tiene una clave de tres dígitos. El dueño la olvidó y un amigo intenta abrirla. ¿Cuál es el número máximo de intentos que debe realizar para abrir la caja?
+  
+  8- Las patentes para automóviles en nuestro país, contenían tres letras y luego tres dígitos; un ejemplo es la siguiente: "123 ABC". Pero un convenio del MERCOSUR, ha impuesto un cambio y, actualmente las patentes tienen 2 letras, 4 números y luego 2 legras más: "AB 1234 CD". Calcule el número de patentes distintas antes del convenio y también después del connvenio. (Hay 27 letras posibles)
+  
+  9- La Gerencia Operativa Museos, dependiente de la Dirección General de Patrimonio, Museos y Casco Histórico, reúne a 11 museos de la Ciudad de Buenos Aires que albergan, cuidan y difunden un nutrido patrimonio cultural y artístico público. En la Noche de los Museos decidimos visitar tres de ellos. ¿Cuántas formas de seleccionar tres, entre los 11 museos, son posibles?
+  
+  10- En una clase de 35 alumnos se quiere elegir un grupo formado por tres alumnos. ¿Cuántos grupos diferentes se pueden formar?
+  
+  11- Un grupo, compuesto por cinco hombres y siete mujeres, forma un comité de 2 hombres y 3 mujeres. De cuántas formas puede formarse, si:
+    a- Puede pertenecer a él cualquier hombre o mujer. 
+    b- Una mujer determinada debe pertenecer al comité.
+  
+  12- Durante un día de visita a una ciudad, un turista decide recorrer tres museos, dos parques y un teatro.
+    a- ¿De cuántas maneras puede organizar su itinerario? 
+    b- Como en a), pero debiendo comenzar por un museo y seguir por un parque. 
+    c- ¿De cuántas formas, si el día debe concluir en el teatro?
+    
+  13- Seis turistas deben atravesar en fila, un puente angosto. ¿De cuántas maneras pueden hacerlo?. En cuántas de ellas Alejandra cruzará inmediatamente después de Fernando? 
+  
+  14- En el estado de California, las placas de los automóviles tienen un dígito distinto de cero, seguido por tres letras y después tres dígitos. 
+    a- ¿Cuántas placas distintas son posibles con este sistema? 
+    b- ¿Cuántas de ellas comienzan con un dígito impar? 
+    c- ¿Cuántas de las posibles placas terminan en dígito par? 
+    
+  15- En un programa televisivo se propone a un invitado participar del siguiente juego: Se le dan al concursante cinco tarjetas boca abajo y se le informa que cada una tiene escrito del otro lado una letra A,M,N,0,S. Sin verlas, debe ordenar las tarjetas y si al darlas vuelta se lee la palabra MANOS, se le da un millón de pesos. 
+    a- ¿Cuántos anagramas se pueden formar con esas cinco letras? 
+    b- ¿Y si las letras fueran las de la palabra Marta, cuántas posibilidades habría?
+  
+  16- ¿Cuántos son los anagramas con las letras de la palabra TURISMO si: 
+    a) No hay restricciones. 
+    b) Los anagramas deben comenzar con M. 
+    c) Los anagramas deben terminar con S. 
+    d) Los anagramas deben comenzar con M y terminar con S. 
+    e) Los anagramas deben comenzar con vocal. 
+    f) Las vocales y consonantes en cada anagrama se deben alternar. 
+    g) Las letras R y M no pueden estar juntas. 
+  
+  17- Un crucero ofrece camarotes para tres personas, internos o con balcón. Una familia de 9 miembros (3 adultos y 6 adolescentes) contratan el servicio, pero sólo queda disponible un camarote con balcón. ¿De cuántas maneras pueden ubicarse en dicho camarote, 
+    a) ¿Si no hay restricciones? 
+    b) ¿Si sólo se alojarán adolescentes? 
+    c) ¿Si al menos un mayor debe ocuparlo? 
+    
+  18- ¿Cuántos anagramas diferentes se pueden formar con todas las letras de la palabra MESOPOTAMIA? 
+  
+  19- En una clase de 40 alumnos entre los que se encuentran Ana, Paula, Pablo y Joaquín, hay que seleccionar una comisión formada por 6 de ellos, de cuántas maneras puede hacerse si: 
+    a) no hay restricciones. 
+    b) No se puede incluir a Pablo. 
+    c) Ana y Paula no pueden estar juntas en la comisión. 
+    d) Es obligación de incluir a Pablo o a Joaquín. 
+    
+  20- Un grupo de 50 personas: 20 adultos y 30 niños, tienen que ingresar a un aula escolar. ¿De cuántas formas pueden ingresar si deben hacerlo primero todos los niños y luego los adultos? 
+  
+  21- De ese grupo de 50 personas, 20 adultos y 30 niños, debe elegirse una comisión formada por 3 niños y 2 adultos ¿de cuántas maneras se puede elegir? 
+  
+  22- De ese grupo de 50 personas, 20 adultos y 30 niños, debe elegirse una comisión formada por 3 niños ó 2 adultos ¿de cuántas maneras se puede elegir? 
+  
+  23- De cuántas maneras puede jugarse a los siguientes juegos de azar:
+    a- Quini 6
+    b- Loto
+    
+  24- En un juego de truco:
+    a- ¿Cuántas manos alternativas puede obtener una persona?
+    b- ¿Cuántas manos alternativas puede haber considerando las 4 personas?
+    c- ¿Cuántas maneras de obtener 33 en el envido hay?
+    d- ¿Cuántas maneras de obtener 31 en el envido hay?
+    e- ¿son iguales las alternativas si se reparten las cartas de a una por jugador dando 3 vueltas, que dando 3 seguidas a cada jugador?
+    f- ¿Es posible asegurar que nunca en la historia hubo dos partidos de truco con las mismas cartas en cada mano?
+  
+  

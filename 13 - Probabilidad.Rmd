@@ -1,0 +1,166 @@
+---
+title: "13 - Probabilidad"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Teoría
+
+## Videos
+
+Videos del profesor Unamuno.
+
+-   Concepto de probabilidad. <https://youtu.be/FZxPZgZv1nA?si=7FD8bcw2hv2O9qkQ>
+-   Sucesos mutuamente excluyentes. <https://youtu.be/LPAKgrYxyE4?si=gRlhtxeN0DtjfNes> (Descubra el error!)
+-   Probabilidad simultánea de sucesos independientes.
+    -   <https://youtu.be/NLeNhatUD5s?si=NWxxvwcgLUqvAuiD> (Descubra el error!, que corrige después)
+    -   <https://youtu.be/xOatB9yMWPg?si=sj3OICb3rF8dLgVG>
+
+## Libros
+
+-   Miró, Ricardo (2006). Números combinatorios y probabilidades. 1° Ed. Colección Ciencia Jóven N.º 2, EUDEBA, Bs.As. 159 pgs. "Capítulo 3. Experimentos Aleatorios" y "Capítulo 5. La Ley Clásica de los Grandes Números".
+
+-   Miguel R. Wilhelmi (2004). Combinatoria y Probabilidad. Universidad de Granada. España. 275 pgs. <https://www.ugr.es/~batanero/pages/ARTICULOS/librowhilhelmi.pdf>
+
+-   Levin, Richard, David Rubin (2004). Estadística para administración y economía. (7ma ed.) Pearson Educación de México. México, 952pgs. <https://www.academia.edu/9701898/Estad%C3%ADstica_para_Administraci%C3%B3n_y_Econom%C3%ADa_7ma_Edici%C3%B3n_Richard_I_Levin_and_David_S_Rubin>
+
+# Probabilidad
+
+## Definición de espacio muestral
+
+Es el conjunto de todos los resultados que puede producir un evento aleatorio, los eventos sonsubconjuntos del espacio muestral. Lo representamos con las llaves -igual que la representación de un conjunto- {}.
+
+Ejemplo: al arrojar un dado el espacio muestral es D = {1, 2, 3, 4, 5, 6}. Un evento (lo indicamos entre paréntesis) simple es cualquier subconjunto de D que contenga un solo resultado, como (5). Un evento compuesto es cualquiera que contenga más de un resultado, como (2, 6). En D podemos decir "que salga un número impar" se escribe (1, 3, 5); "que salga un número mayor que 3" se escribe (4, 5, 6).
+
+### Definición 1.
+
+Para D = {1, 2, 3, 4, 5, 6} un espacio muestral cualquiera. 
+
+$$
+p(D)= 1 \hspace{2em} y \hspace{2em} p() = 0
+$$
+
+### Definición 2.
+
+Sea (A) un evento aleatorio que produzca n eventos posibles igualmente probables (siendo n cualquier número natural). Llamamos p(A) a la probabilidad de ocurrencia del evento A.
+
+Entonces: 
+
+$$
+p(A)= \frac{1}{n}
+$$
+
+### Definición 3. Probablilidad
+
+Llamamos #(A) a la cantidad de elementos del evento (A) y #{M} a la cantidad de elementos totales posibles.
+
+$$
+p(A)= \frac{\#(A)}{\#\{M\}}
+$$
+
+Por ejemplo: "la probabilidad de que salga un número par en un dado".
+
+$$
+M= \{1,2,3,4,5,6\} \hspace{2em} y \hspace{2em} D = (2,4,6)
+$$ 
+
+$$
+p(D)= \frac{\#(A)}{\#\{M\}} = \frac{3}{6} = \frac{1}{2}
+$$
+
+## Algunas funciones útiles
+
+Adaptado de: <https://bookdown.org/dparedesi/data-science-con-r/probabilidades-discretas.html#combinaciones-y-permutaciones>
+
+```{r}
+unasLetras <- c("A", "B", "C")
+unosNumeros <- 1:5
+bool <- c(TRUE, FALSE)
+conRepeticiones <- rep(c("azul", "amarillo"), times = c(7, 13))
+
+# Selecciona al azar desde un vector. Se puede indicar que lo seleccionado vuelva al vector inicial antes de hacer la siguiente selección (replace = TRUE), o que el vector se achique cada vez que le saca un elemento (replace = FALSE).
+muestraAlAzar <- sample(conRepeticiones, 3, replace = TRUE)
+
+# Crea un data.frame con todas las combinaciones posibles
+combinando <- expand.grid(unasLetras = unasLetras, unosNumeros = unosNumeros, bool = bool)
+
+unasLetras
+unosNumeros
+bool
+conRepeticiones
+muestraAlAzar
+
+combinando
+```
+
+```{r}
+table(conRepeticiones)
+
+prop.table(table(conRepeticiones))
+```
+
+## Permutaciones y Combinaciones
+
+```{r}
+library(gtools)
+```
+
+### Permutaciones
+
+Importa el orden cuando calculamos, por ejemplo, los ganadores de una competencia. Supongamos que tenemos 10 estudiantes que están compitiendo en igualdad de condiciones por quién construye el modelo en machine learning más preciso.
+
+```{r}
+data_scientists <- c("Jenny", "Freddy", "Yasan", "Iver", "Pamela", "Alexandra", 
+                     "Bladimir", "Enrique", "Karen", "Christiam")
+```
+
+Solo los top 3 recibirán el premio. En este caso el orden importa, entonces usaremos la función permutations(total, seleccion, data) donde el total me indica el tamaño del vector, seleccion indica el tamaño del resultado que quiero, y finalmente data es mi vector fuente.
+
+```{r}
+resultados <- permutations(10, 3, v = data_scientists)
+nrow(resultados)
+resultados
+```
+
+Ya hemos calculado todos los resultados posibles. Podemos sobre este resultado calcular la probabilidad de que Fredy gane la competencia y que Pamela quede en segundo lugar.
+
+```{r}
+mean(resultados[, 1] == "Freddy" & resultados[, 2] == "Pamela")
+```
+
+### Combinaciones
+
+No importa el orden cuando, por ejemplo, formamos grupos de a 2 para que participen en la competencia.
+
+```{r}
+resultados <- combinations(10, 2, v = data_scientists)
+nrow(resultados)
+resultados
+```
+
+Si ahora es un solo equipo el que va a ganar el premio, podríamos calcular la probabilidad de que el equipo conformado por Pamela y Enrique sean quienes ganen.
+
+```{r}
+mean((resultados[, 1] == "Pamela" & resultados[, 2] == "Enrique") | 
+     (resultados[, 1] == "Enrique" & resultados[, 2] == "Pamela"))
+```
+
+## Simulaciones
+
+Si bien podemos obtener la probabilidad calculando todas las combinaciones, en R será muy frecuente utilizar Montecarlo para estimar la probabilidad por simulación. Para el caso anterior no tendríamos que generar todas las combinaciones, sino simplemente sacar una muestra de dos personas que serían los miembros del equipo ganador. Recordemos que hemos asumido que todos tienen igualdad de posibilidades de ganar.
+
+Luego, tendríamos que replicar este experimento una y otra vez, almacenar los resultados del muestreo y calcular la proporción de cuántas veces el equipo ganador fue compuesto por Pamela y Enrique.
+
+```{r}
+n <- 10000
+resultado <- replicate(n, {
+      equipo <- sample(data_scientists, 2)
+      cumple_condicion <- (equipo[1] == "Pamela" & equipo[2] == "Enrique") | 
+                          (equipo[2] == "Pamela" & equipo[1] == "Enrique")
+      cumple_condicion
+})
+mean(resultado)
+```
+
+Nótese que, como vimos anteriormente, el valor converge conforme aumentamos la cantidad de veces que repetimos el experimento (n). Hemos simulado repetir el experimento 10 mil veces. Sin embargo, ¿cuántas veces se necesitaría replicar el experimento para confiar en los resultados de la simulación?

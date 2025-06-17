@@ -1,0 +1,239 @@
+---
+title: "14 - Probabilidad - Grandes números."
+output: 
+  html_notebook: 
+    toc: true
+---
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+```
+
+# Data Science con R. Análisis de Datos y algoritmos de predicción con R
+
+Autor: Mg. Daniel Paredes Inilupu. (2020-06-26)
+
+<https://bookdown.org/dparedesi/data-science-con-r/>
+
+## Capítulo 5 Probabilidades discretas
+
+<https://bookdown.org/dparedesi/data-science-con-r/probabilidades-discretas.html>
+
+### Ejercicios
+
+### Ejercicio 1.
+
+Dada un recipiente que contiene 5 bolitas azules, 3 amarillas y 4 grises. ¿Cuál es la probabilidad de que si escoges una bolita al azar ésta sea azul?
+
+```{r}
+bolitas <- rep(c("azul", "amarillo", "gris"), times = c(5, 3, 4))
+
+# Solución utilizando simulación de montecarlo, repitiendo el evento 10,000 veces:
+resultados <- replicate(10000, {
+  sample(bolitas, 1, replace = TRUE)
+  })
+
+prop.table(table(resultados))
+# Solución utilizando la función `mean()`:
+paste("Cálculo teórico:", mean(bolitas == "azul"))
+```
+
+### Ejercicio 2.
+
+¿Cuál es la probabilidad de que al escoger una bolita al azar del recipiente anterior ésta no sea de color azul?
+
+```{r}
+bolitas <- rep(c("azul", "amarillo", "gris"), times = c(5, 3, 4))
+
+# Solución utilizando simulación de montecarlo, repitiendo el evento 10,000 veces:
+resultados <- replicate(10000, {
+  sample(bolitas, 1, replace = TRUE)
+  })
+prop.table(table(resultados))
+prop.table(table(resultados))[1] + prop.table(table(resultados))[3]
+
+paste("Cálculo teórico:", mean(bolitas != "azul"))
+```
+
+### Ejercicio 3.
+
+Ahora vamos a sacar primero una bolita, colocarla fuera de la caja y sacar otra bolita adicional de la caja. ¿Cuál es la probabilidad de que la primera sea azul y la segunda no sea azul?. Esta vez, en vez de crear el vector bolitas, crea las variables numéricas: azul, amarillo y gris asigándole como valor el número de bolitas. Luego calcula matemáticamente las probabilidades.
+
+```{r}
+# Creamos las variables
+azul <- 5
+amarillo <- 3
+gris <- 4
+
+# Calculamos la probabilidad de que la primera bolita sea azul:
+p1Azul <- azul / (azul + amarillo + gris)
+
+# Calculamos la probabilidad de que la segunda sea azul:
+p2Azul <- (azul - 1) / (azul - 1 + amarillo + gris)
+
+# Calculamos el complemento porque piden que la segunda NO sea azul:
+p2NoAzul <- 1 - p2Azul
+
+# Calculamos lo que nos piden:
+p1Azul * p2NoAzul
+```
+
+#### Solución Montecarlo
+
+```{r}
+bolitas <- rep(c("azul", "amarillo", "gris"), times = c(5, 3, 4))
+pares <- list()
+
+resultados <- replicate(1000000, {
+  pares <- append(pares,sample(bolitas, 2, replace = FALSE))
+  pares
+  })
+
+mean(resultados[1,] == "azul" & resultados[2,] != "azul")
+```
+
+### Ejercicio 4.
+
+Ahora repetiremos el experimento anterior, pero después de sacar la primera bolita volvemos a colocarla en la caja y sacamos una bolita más al azar. ¿Cuál es la probabilidad de que la primera bolita sea azul y la segunda no sea azul? Modifica el código en R que creaste anteriormente para calcular esta probabilidad.
+
+```{r}
+# Creamos las variables
+azul <- 5
+amarillo <- 3
+gris <- 4
+
+# Calculamos la probabilidad de que la primera bolita sea azul:
+p1Azul <- azul / (azul + amarillo + gris)
+
+# Calculamos primero la probabilidad de que la segunda sea azul:
+p2Azul <- azul / (azul + amarillo + gris)
+
+# Calculamos el complemento porque piden que la segunda NO sea azul:
+p2NoAzul <- 1 - p2Azul
+
+# Calculamos lo que nos piden:
+p1Azul * p2NoAzul
+```
+
+#### Solución Montecarlo
+
+```{r}
+bolitas <- rep(c("azul", "amarillo", "gris"), times = c(5, 3, 4))
+pares <- list()
+
+resultados <- replicate(10000, {
+  pares <- append(pares,sample(bolitas, 2, replace = TRUE))
+  pares
+  })
+
+mean(resultados[1,] == "azul" & resultados[2,] != "azul")
+```
+
+# Explorando los grandes números
+
+Hasta aquí el libro citado. Seguidamente simularemos los casos sencillos de arrojar un dado, y también una moneda.
+
+## Experimentos Aleatorios discretos.
+
+### Tirando dados
+
+```{r fig.height=10, fig.width=4}
+espacioMuestral <- rep(c(1, 2, 3, 4, 5, 6), times = c(1, 1, 1, 1, 1, 1))
+experimentos <- 1:5
+graficos <- list()
+for (i in experimentos) {
+  cantTiradas <- 10^i
+  resultados <- replicate(cantTiradas, {
+    sample(espacioMuestral, 1, replace = TRUE)
+    })
+  resultados <- tibble(resultados)
+  cv <- sd(as.data.frame(table(resultados))$Freq)/(cantTiradas/6)
+  graficos[[i]] <- ggplot(resultados, aes(resultados)) +
+    geom_histogram(binwidth = 0.5 , center = 0) +
+    scale_x_continuous(breaks = espacioMuestral) +
+    ggtitle(paste("Cantidad de tiradas: ", cantTiradas, " - cv: ", as.character(cv))) + 
+    theme(plot.title = element_text(size=10))
+}
+do.call("grid.arrange", c(graficos, nrow = 5)) 
+```
+
+### Frecuencias relativas
+
+```{r}
+probEventoMontecarlo <- function(espacioMuestral,evento,n) {
+  resultado <- replicate(n, {
+    evento == sample(espacioMuestral, 1)
+    })
+  mean(resultado)
+}
+```
+
+```{r}
+repsExp <- seq(10,10000,10)
+serie <- tibble(n = integer(), prob = double())
+for (i in repsExp) {
+  serie <- add_row(serie, n = i, prob = probEventoMontecarlo(c(1,2,3,4,5,6),1,i))
+}
+```
+
+```{r}
+ggplot(serie, aes(x = n, y = prob)) + 
+  geom_point(alpha = 0.3) +
+  ylim(c(0,0.5))
+```
+
+
+```{r}
+repsExp2 <- seq(100,20000,100)
+serie2 <- tibble(n = integer(), prob = double())
+for (i in repsExp2) {
+  serie2 <- add_row(serie2, n = i, prob = probEventoMontecarlo(c(1,2,3,4,5,6),1,i))
+}
+```
+
+```{r}
+ggplot(serie2, aes(x = n, y = prob)) + 
+  geom_point(alpha = 0.3) + 
+  ylim(c(0,0.5))
+```
+
+
+## Moneda
+
+```{r fig.height=10, fig.width=4}
+espacioMuestral <- rep(c(0,1), times = c(1, 1))
+experimentos <- 1:5
+graficos <- list()
+for (i in experimentos) {
+  cantTiradas <- 10^i
+  resultados <- replicate(cantTiradas, {
+  sample(espacioMuestral, 1, replace = TRUE)
+  })
+  resultados <- tibble(resultados)
+  cv <- sd(as.data.frame(table(resultados))$Freq)/(cantTiradas/6)
+  graficos[[i]] <- ggplot(resultados, aes(resultados)) +
+    geom_histogram(binwidth = 0.5 , center = 0) +
+    scale_x_continuous(breaks = espacioMuestral) +
+    ggtitle(paste("Cantidad de tiradas: ", cantTiradas, " - cv: ", as.character(cv))) + 
+    theme(plot.title = element_text(size=10))
+}
+do.call("grid.arrange", c(graficos, nrow = 5)) 
+```
+
+```{r}
+repsExp3 <- seq(100,20000,100)
+serie3 <- tibble(n = integer(), prob = double())
+for (i in repsExp3) {
+  serie3 <- add_row(serie3, n = i, prob = probEventoMontecarlo(c(1,2),1,i))
+}
+```
+
+```{r}
+ggplot(serie3, aes(x = n, y = prob)) + 
+  geom_point(alpha = 0.3) + 
+  ylim(c(0.25,0.75))
+```
+
