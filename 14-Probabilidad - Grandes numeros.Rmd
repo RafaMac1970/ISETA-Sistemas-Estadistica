@@ -157,7 +157,7 @@ for (i in experimentos) {
     ggtitle(paste("Cantidad de tiradas: ", cantTiradas, " - cv: ", as.character(cv))) + 
     theme(plot.title = element_text(size=10))
 }
-do.call("grid.arrange", c(graficos, nrow = 5)) 
+do.call("grid.arrange", c(graficos, nrow = 7)) 
 ```
 
 ### Frecuencias relativas
@@ -172,7 +172,7 @@ probEventoMontecarlo <- function(espacioMuestral,evento,n) {
 ```
 
 ```{r}
-repsExp <- seq(10,10000,10)
+repsExp <- seq(10,5000,10)
 serie <- tibble(n = integer(), prob = double())
 for (i in repsExp) {
   serie <- add_row(serie, n = i, prob = probEventoMontecarlo(c(1,2,3,4,5,6),1,i))
@@ -224,7 +224,7 @@ do.call("grid.arrange", c(graficos, nrow = 5))
 ```
 
 ```{r}
-repsExp3 <- seq(100,20000,100)
+repsExp3 <- seq(100,10000,100)
 serie3 <- tibble(n = integer(), prob = double())
 for (i in repsExp3) {
   serie3 <- add_row(serie3, n = i, prob = probEventoMontecarlo(c(1,2),1,i))
