@@ -1,0 +1,356 @@
+---
+title: "15 - Distribuciones de probabilidad - Cálculo de probabilidades en R"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Distribuciones de probabilidad
+
+## Distribuciónes Discretas
+
+### Teoría
+
+#### Videos
+
+-   Unamuno. Variables Discretas y Contínuas. <https://www.youtube.com/watch?v=fE8qnpIgkxk&list=PL43954F1FE4A51311>
+-   Unamuno. Distribución Binomial <https://www.youtube.com/watch?v=PXx4pUiPIhQ&list=PL43954F1FE4A51311>
+-   Unamuno. Distribución Multinomial <https://youtu.be/20TTKUI_tcw?si=Cnj9ESHGnphny6m7>
+-   Unamuno. Distribución de Poisson <https://www.youtube.com/watch?v=HbsN93Ducns&list=PL43954F1FE4A51311>
+
+#### Libro
+
+Miguel R. Wilhelmi (2004). Combinatoria y Probabilidad. Universidad de Granada. España. 275 pgs. Capítulo 7. Función de probabilidad de una variable aleatoria discreta. <https://www.ugr.es/~batanero/pages/ARTICULOS/librowhilhelmi.pdf>
+
+## Distribuciónes Contínuas
+
+### Teoría
+
+#### Videos
+
+-   Unamuno. Variables contínuas. Función de densidad de probabilidad. Introducción 1 <https://youtu.be/2U8X838ZikM?si=mkJN7mvNuv4ADASR>
+-   Unamuno. Variables contínuas. Función de densidad de probabilidad. Introducción 2 <https://youtu.be/DNhsHlYtK74?si=jWVrWE5khzLnSIk1>
+-   Unamuno. Variables contínuas. Función de densidad de probabilidad. Variable Normal, curva de Gauss  <https://youtu.be/zsFdDwl04Yc?si=Da7h9IC0yCTrIWow>
+-   Unamuno. Variables contínuas. Función de densidad de probabilidad. Normalización curva de Gauss <https://youtu.be/8cHsvq0FwZo?si=xH3-2RP_iZXToitw>
+-   Unamuno. Variables contínuas. 
+
+#### Libro
+
+Levin, Richard, David Rubin (2004). Estadística para administración y economía. (7ma ed.). Capítulo 5: Distribucionesde Probabilidad. 5.6: Distribución Normal. Pearson Educación de México. México, 952pgs. <https://www.academia.edu/9701898/Estad%C3%ADstica_para_Administraci%C3%B3n_y_Econom%C3%ADa_7ma_Edici%C3%B3n_Richard_I_Levin_and_David_S_Rubin>
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+# Bioestadística con R.
+
+Christian J. Acal González y Miguel Ángel Montero Alonso (2021). Bioestadística con R. Práctica 4. Cálculo de probabilidades en R. Universidad de Granada. <https://digibug.ugr.es/bitstream/handle/10481/70802/Practica4_bioestad%C3%ADsticaR.pdf?sequence=1&isAllowed=y>
+
+
+# 4.1 Cálculo de probabilidades en R
+
+En la práctica anterior se vieron los distintos tipos de datos que pueden representarse, así como el modo de describirlos y resumirlos en el caso de disponer de una muestra de una población. En este Tema el objetivo es describir y resumir los datos de toda la población. Tanto para la práctica anterior (descripción de poblaciones) como para el actual (y los que siguen), es crucial la teoría de la probabilidad en la que existen múltiples modelos teóricos que resultan de utilidad para modelizar un gran número de situaciones reales. La teoría de probabilidad es una rama de la Estadística que abarcaría muchísimo tiempo estudiarla al detalle. En el presente curso se intenta dar una visión general de esta rama, enfocando la metodología desde un modo muy utilitario y evitando complejidades innecesarias. En particular, en este tema, se introduce el cálculo de probabilidades con R. El concepto de probabilidad surge cuando los resultados de un fenómeno se producen al azar (aleatoriamente). Cuando tales resultados son numéricos (o se pueden convertir en números) se dice que el resultado observado es una variable aleatoria que será discreta o continua según qué valores posibles pueda tomar. Estas variables aleatorias siguen exactamente (o de forma aproximada) unas leyes bien conocidas que son llamadas distribuciones de probabilidad teóricas. Cada una de ellas difieren una de otras sólo en sus parámetros pudiéndoselas estudiar de un modo global. Existen muchas distribuciones de probabilidad pero, dado el carácter introductorio de este curso, se limitará a estudiar la distribución binomial y la distribución de Poisson como ejemplos de distribuciones discretas y la distribución Normal para ilustrar las distribuciones continuas.
+
+## 4.1.1 Distribución Binomial
+
+Casi siempre que un investigador se pregunta por la proporción de individuos que verifican una cierta característica dicotómica (estar enfermo o no, ser varón o no, etc.) subyace en el problema una distribución Binomial. Si de una población se toma una muestra de tamaño n y se anota el número X de individuos de ella que sí verifican la característica, entonces la variable aleatoria X sigue distribución Binomial. Asociada a si cada individuo sigue o no la característica de interés, aparece el término probabilidad/proporción (p) que denota la probabilidad de que el individuo presente la característica o la proporción de individuos que presentan la característica en la población. En consecuencia, esta distribución que se representa como B(n, p), puede verse como el número de éxitos en n repeticiones del experimento con probabilidad p, donde el éxito sería sí se verifica la condición y el experimento sería el hecho de comprobar si el individuo cumple la característica en cuestión. Con respecto al cálculo de probabilidades de una variable aleatoria con distribución Binomial, en R se distinguen cuatro funciones:
+
+• dbinom(x, size=n, prob=p). Devuelve el valor (valores) x de la función masa de probabilidad de una variable con distribución Binomial de parámetros n y p. La función masa de probabilidad es una función que caracteriza a las variables aleatorias discretas y que asigna una determinada probabilidad a cada uno de los valores de la variable.
+
+• pbinom(x, size=n, prob=p, lower.tail = TRUE). Calcula el valor (valores) x de la función de distribución de una distribución Binomial de parámetros n y p. Se define la función de distribución de la variable aleatoria X como la probabilidad de que X tome un valor menor o igual que x, es decir, P[X ≤ x]. Si lower.tail=FALSE, R calcula P[X > x], lo cual ya no sería la función de distribución.
+
+• qbinom(a, size=n, prob=p, lower.tail = TRUE). Determina el cuantil (cuantiles) de una variable con distribución Binomial de parámetros n y p. Por definición, un cuantil es aquel que deja a su izquierda una proporción de valores a, es decir, es aquel valor q tal que P[X ≤ q] = a.
+
+• rbinom(r, size=n, prob=p). Genera r valores aleatorios de una distribución Binomial, B(n,p).
+
+### Ejercicio 1. 
+
+En un ensayo clínico se ha tomado un total de 50 pacientes y la probabilidad de que el paciente fume es 0.35. Claramente, la variable aleatoria que cuenta el número de pacientes fumadores sigue una distribución Binomial de parámetros n = 50 y p = 0.35.
+
+1. Calcular la probabilidad de que exactamente 20 pacientes sean fumadores. Aquí se pide calcular P[X = 20] siendo X una variable aleatoria que representa el número de pacientes fumadores.
+
+```{r}
+n = 50
+p = 0.35
+valor = 20
+dbinom(valor, size = n, prob = p)
+pbinom(valor, size = n, prob = p)
+```
+
+```{r}
+rango = 0:n
+df = data.frame(x = rango, y = dbinom(rango, size = n, prob = p))
+ggplot(df, aes(x = x, y = y, fill = factor(ifelse(x == valor, "Valor", "Resto")))) +
+  geom_bar(stat = "identity", width = 0.75) + xlab("x") + ylab("Densidad") +
+  ggtitle("Distribución Binomial") +
+  scale_fill_manual(name = "", values = c("grey50", "red")) + theme_bw()
+```
+
+2. Obtener la probabilidad de que al menos 15 pacientes sean fumadores. Aquí se pide calcular P[X ≥
+15] = P[X > 14], que sería equivalente a P[X ≥ 15] = 1 − P[X < 15] = 1 − P[X ≤ 14]. Se procede a
+calcular las dos posibilidades con las opciones habilitadas en R.
+
+```{r}
+valor = 14
+pbinom(valor, size = n, prob = p, lower.tail = FALSE)
+1 - pbinom(valor, size = n, prob = p)
+pbinom(valor, size = n, prob = p, lower.tail = TRUE)
+```
+
+```{r}
+ggplot(df, aes(x = x, y = y, fill = factor(ifelse(x > valor, "Valor", "Resto")))) +
+  geom_bar(stat = "identity", width=0.75) + xlab("x") + ylab("Densidad") +
+  ggtitle("Distribución Binomial") +
+  scale_fill_manual(name = "", values = c("grey50", "red")) + theme_bw()
+```
+
+3. Obtener la probabilidad de que entre 10 y 15 pacientes (ambos inclusive) sean fumadores. Se pide
+calcular P[10 ≤ X ≤ 15] = P[X ≤ 15] − P[X < 10] = P[X ≤ 15] − P[X ≤ 9]
+
+```{r}
+valor1 = 15
+valor2 = 9
+pbinom(valor1, size = n, prob = p) - pbinom(valor2, size = n, prob = p)
+```
+
+```{r}
+ggplot(df, aes(x = x, y = y, fill = factor(ifelse(x >= valor2 + 1 & x <= valor1, "Valor", "Resto")))) +
+  geom_bar(stat = "identity", width = 0.75) + xlab("x") + ylab("Densidad") +
+  ggtitle("Distribución Binomial") +
+  scale_fill_manual(name = "", values=c("grey50", "red")) + theme_bw()
+```
+
+4. Calcular el valor de la variable tal que deja a su derecha un 70% de las observaciones. El valor de la variable que deja a su derecha un 70% de las observaciones es el mismo que deja a su izquierda el 30% restante, por lo que se pide calcular el valor q tal que P[X ≤ q] = 0.30.
+
+```{r}
+a = 0.30
+qbinom(a, size = n, prob = p)
+```
+
+```{r}
+ggplot(df, aes(x = x, y = y, fill = factor(ifelse(cumsum(y) <= a, "Valor", "Resto")))) +
+  geom_bar(stat = "identity", width = 0.75) + xlab("x") + ylab("Densidad") +
+  ggtitle("Distribución Binomial") +
+  scale_fill_manual(name = "", values = c("grey50", "red")) + theme_bw()
+```
+
+```{r}
+rbinom(10, size = n, prob = p)
+```
+
+Nota: Como se están generando números aleatorios, cada vez que se ejecute la orden anterior, R generará valores distintos. Si se está interesado en generar siempre los mismos números, se puede fijar una semilla mediante la función set.seed(). Dentro de la función se incluirá un número entero (la semilla) en el que para cada valor, R generará una secuencia de números distinta.
+
+```{r}
+set.seed(1) #Se fija la semilla para producir los mismos valores
+rbinom(10, size = n, prob = p)
+set.seed(1)
+rbinom(10, size = n, prob = p)
+set.seed(2)
+rbinom(10, size = n, prob = p)
+```
+
+## 4.1.2 Distribución Poisson
+
+Se dice que una variable aleatoria X sigue una distribución de Poisson de parámetro λ, abreviadamente X ∼ P(λ), si representa el número de sucesos independientes que ocurren a una velocidad constante en un intervalo de tiempo o en una región del espacio, siendo λ la media de ocurrencias en el intervalo considerado o en la región del espacio considerada. Al ser la distribución de Poisson también una distribución discreta, los valores que se pueden calcular son los mismos que los estudiados para la distribución binomial (función masa de probabilidad, función de distribución, cuantiles y generación de valores aleatorios). La única salvedad radica en que hay que especificar la distribución Poisson y sustituir el parámetro λ por los parámetros n y p de la distribución Binomial, es decir:
+
+• dpois(x, lambda). Devuelve el valor (valores) x de la función masa de probabilidad de una variable con distribución Poisson de parámetro λ.
+
+• ppois(x, lambda, lower.tail = TRUE). Calcula el valor (valores) x de la función de distribución de una distribución Poisson de parámetro λ. Si lower.tail=FALSE, R calcula P[X > x], lo cual ya no sería la función de distribución.
+
+• qpois(a, lambda, lower.tail = TRUE). Determina el cuantil (cuantiles) de una variable con distribución Poisson de parámetro λ.
+
+• rpois(r, lambda). Genera r valores aleatorios de una distribución Poisson de parámetro λ.
+
+Para poner en práctica estas funciones se propone el siguiente ejercicio. 
+
+### Ejercicio 2
+
+En un hospital el número medio de pancreatitis agudas atendidas por día es 0.90. Es fácil comprobar que la variable aleatoria que cuenta el número de pancreatitis agudas atendidas por día sigue una distribución Poisson de parámetro λ = 0.90.
+
+1. Calcular la probabilidad de que en un día dado, el hospital atienda exactamente a 4 pacientes. Se pide calcular P[X = 4].
+
+```{r}
+lambda = 0.90
+valor = 4
+dpois(valor, lambda = lambda)
+```
+
+```{r}
+rango = 0:8
+df = data.frame(x = rango, y = dpois(rango, lambda = lambda))
+ggplot(df, aes(x = x, y = y, fill = factor(ifelse(x == valor, "Valor", "Resto")))) +
+  geom_bar(stat = "identity", width = 0.75) + xlab("x") + ylab("Densidad") +
+  ggtitle("Distribución Poisson") +
+  scale_fill_manual(name = "", values=c("grey50", "red")) + theme_bw()
+```
+
+2. Calcular la probabilidad de que, en un día cualquiera, el hospital atienda como máximo 2 pacientes. Se pide calcular P[X ≤ 2].
+
+```{r}
+valor = 2
+ppois(valor, lambda = lambda)
+```
+
+```{r}
+ggplot(df, aes(x = x, y = y, fill = factor(ifelse(x <= valor, "Valor", "Resto")))) +
+  geom_bar(stat = "identity", width = 0.75) + xlab("x") + ylab("Densidad") +
+  ggtitle("Distribución Poisson") +
+  scale_fill_manual(name = "", values=c("grey50", "red")) + theme_bw()
+```
+
+3. Calcular la probabilidad de que, en un día dado, el hospital reciba entre 1 y 2 pacientes (ambos inclusive). Se pide calcular P[1 ≤ X ≤ 2] = P[X ≤ 2] − P[X < 1] = P[X ≤ 2] − P[X ≤ 0].
+
+```{r}
+valor1 = 2
+valor2 = 0
+ppois(valor1, lambda = lambda) - ppois(valor2, lambda = lambda)
+```
+
+```{r}
+ggplot(df, aes(x = x, y = y, fill = factor(ifelse(x >= valor2 + 1 & x <= valor1, "Valor", "Resto")))) +
+  geom_bar(stat = "identity", width = 0.75) + xlab("x") + ylab("Densidad") +
+  ggtitle("Distribución Poisson") +
+  scale_fill_manual(name = "", values=c("grey50", "red")) + theme_bw()
+```
+
+4. Obtener la mediana de la variable. La mediana coincide con el cuartil 2 que es aquel que divide a la población (muestra) en dos partes iguales, es decir, a la izquierda queda el 50% de los valores y a la derecha el 50% restante.
+
+```{r}
+a = 0.50
+qpois(a, lambda = lambda)
+```
+
+```{r}
+ggplot(df, aes(x = x, y = y, fill = factor(ifelse(cumsum(y) <= a, "Valor", "Resto")))) +
+  geom_bar(stat = "identity", width = 0.75) + xlab("x") + ylab("Densidad") +
+  ggtitle("Distribución Poisson") +
+  scale_fill_manual(name = "", values=c("grey50", "red")) + theme_bw()
+```
+
+```{r}
+r = 8
+rpois(r, lambda = lambda)
+```
+
+## 4.1.3 Distribución Normal
+
+La distribución Normal es la distribución continua más importante en estadística, ya que una gran mayoría de las variables aleatorias de la Naturaleza siguen dicha distribución y porque presenta unas propiedades muy interesantes y sencillas que hace que sea muy utilizada dentro de esta rama. La distribución Normal queda definida por los parámetros µ y σ que representan la media y la desviación típica, respectivamente, de la distribución. En consecuencia, una variable aleatoria con distribución Normal se denotará como X ∼ N(µ, σ).
+
+El tratamiento computacional con R de la distribución Normal es muy similar al que se utiliza con las distribuciones discretas. La principal diferencia radica en que con las distribuciones discretas se trabaja con la función masa de probabilidad y con las distribuciones continuas se usa la función de densidad. La función de densidad de la distribución Normal se calcula a partir de la función dnorm() la cual es análoga a las funciones dbinom() y dpois() de las distribuciones Binomial y Poisson, respectivamente. Sin embargo, el cálculo de probabilidades para valores concretos de una variable continua no tiene sentido, ya que para cualquier variable aleatoria X continua (siga o no distribución Normal) P[X = x] = 0 para cualquier valor de x. En consecuencia, dnorm devuelve el valor de la función de densidad en un punto (o puntos). Asimismo, se detallan a continuación los argumentos de las funciones que se usan en R para el cálculo de probabilidades de una distribución Normal:
+
+• dnorm(x, mean=media, sd=desv.tip). Devuelve el valor (valores) x de la función de densidad de una variable con distribución Normal de parámetros µ y σ.
+
+• pnorm(x, mean=media, sd=desv.tip, lower.tail = TRUE). Calcula el valor (valores) x de la función de distribución de una distribución Normal de parámetros µ y σ. Si lower.tail=FALSE, R calcula P[X > x], lo cual ya no sería la función de distribución.
+
+• qnorm(a, mean=media, sd=desv.tip, lower.tail = TRUE). Determina el cuantil (cuantiles) de una variable con distribución Normal de parámetros µ y σ.
+
+• rqnorm(r, mean=media, sd=desv.tip). Genera r valores aleatorios de una distribución Normal de parámetros µ y σ.
+Notar que si no se especifica los valores de µ y σ, R tomará por defecto µ = 0 y σ = 1.
+Para poner en práctica estas funciones se propone el siguiente ejercicio. 
+
+### Ejercicio 3
+
+Se sabe que el peso en kg de los recién nacidos varones sigue una N(3, 0.3).
+
+1. Calcular la probabilidad de que un bebé varón pese entre 2.8 kg y 3 kg (ambos inclusive). Se pide calcular la probabilidad de que P[2.8 ≤ X ≤ 3] = P[X ≤ 3] − P[X < 2.8] = P[X ≤ 3] − P[X ≤ 2.8], siendo X una variable aleatoria con distribución Normal que representa el peso en gramos de los recién nacidos varones.
+
+```{r}
+media = 3
+desv.tip = 0.30
+valor1 = 3
+valor2 = 2.8
+pnorm(valor1, mean = media, sd = desv.tip) - pnorm(valor2, mean = media, sd = desv.tip)
+```
+
+```{r}
+rango = c(media - 3 * desv.tip, media + 3 * desv.tip)
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media, sd = desv.tip), fill = 'red', xlim = c(valor2, valor1), alpha = 0.5) +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("x") + theme_bw()
+```
+
+2. La probabilidad de que un bebé varón pese más de 3.2 kg. Se pide calcular P[X > 3.2] = 1−P[X ≤ 3.2].
+ 
+```{r}
+valor = 3.2
+pnorm(valor, mean = media, sd = desv.tip, lower.tail = FALSE)
+```
+
+```{r}
+1 - pnorm(valor, media, sd = desv.tip)
+```
+
+```{r}
+rango = c(media - 3 * desv.tip, media + 3 * desv.tip)
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function',fun = dnorm, args = list(mean = media, sd = desv.tip), fill = 'red', xlim = c(valor, max(rango)), alpha = 0.5) +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("x") + theme_bw()
+```
+
+3. La probabilidad de que un bebé varón pese 3.2 kg o menos. Se pide calcular P[X ≤ 3.2].
+
+```{r}
+valor = 3.2
+pnorm(valor, mean = media, sd = desv.tip)
+```
+
+```{r}
+rango = c(media - 3 * desv.tip, media + 3 * desv.tip)
+```
+
+```{r}
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media, sd = desv.tip), fill = 'red', xlim = c(min(rango), valor), alpha = 0.5) +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("x") + theme_bw()
+```
+
+4. El peso mínimo del 15% de los bebés varones que más pesan. Se quiere calcular el 15% de los valores más grandes del peso de los bebés varones recién nacidos. Esto es aquel valor que deje a su derecha el 15% de las observaciones, que a su vez, será también aquel que deja a su izquierda el 85% de las observaciones restantes.
+
+```{r}
+a = 0.85
+qnorm(a, mean = media, sd = desv.tip)
+```
+
+```{r}
+rango = c(media - 3 * desv.tip, media + 3 * desv.tip)
+```
+
+```{r}
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media, sd = desv.tip)) +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media, sd = desv.tip), fill = 'red', xlim = c(min(rango), qnorm(a, mean = media, sd = desv.tip)), alpha = 0.5) +
+  geom_vline(xintercept = qnorm(a, mean = media, sd = desv.tip)) +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("x") + theme_bw()
+```
+
+5. Generar 15 valores aleatorios que sigan la distribución de la variable aleatoria X.
+
+```{r}
+r = 15
+rnorm(r, mean = media, sd = desv.tip)
+```
+
+## 4.2 Extracción de una muestra aleatoria. Generación de números aleatorios
+
+Lo usual es que la matriz de datos esté constituida por una muestra de datos, pero si la matriz de datos fuese toda la población, y de ella se tuviera que extraer una muestra aleatoria, el procedimiento es sencillo. Para el caso general de una población, en la que a sus unidades se les pueden asignar códigos numéricos, el procedimiento habitual para extraer una muestra aleatoria está basado en el método de los números aleatorios. Más concretamente, y utilizando un ejemplo, si se dispone de la base de datos que contiene la información de 94 pacientes diabéticos insulino dependientes (suponiendo que cada unidad tiene asignado un código numérico entre 1 y 94, variable num), y se desea extraer una muestra aleatoria de 40 pacientes de dicha población, se necesitaría generar 40 números aleatorios entre 1 y 94, los cuáles determinarían las 40 unidades de la muestra.
+
+Para la generación de los números aleatorios es aconsejable utilizar la función sample(x,size,replace=FALSE), donde x es un vector de la forma 1:n siendo n el tamaño total de la población, size representa la cantidad de números a simular y replace indica si la extracción de números aleatorios se hace con reemplazamiento (TRUE) o no (FALSE). Para no extraer el número de un mismo individuo más de una vez, hay que indicar replace=FALSE. A continuación se genera 40 números aleatorios entre 1 y 94 que servirán para determinar las 40 unidades de la muestra.
+
+```{r}
+set.seed(1)
+num.aleatorios = sample(1:94, 40, replace = FALSE)
+num.aleatorios = sort(num.aleatorios) #Ordenación de los valores
+num.aleatorios
+```
+
+NOTA: Se ha fijado la semilla set.seed(1) para generar siempre los mismos números aleatorios, puesto que en caso contrario se reproducirían números diferentes cada vez que se ejecute el código. También se ha utilizado la función sort() para ordenar los números aleatorios generados de menor a mayor. Una vez generados los números aleatorios, se procede a extraer las unidades de la muestra, cuyo fichero contiene la información de los 40 pacientes seleccionados.
+
+
+
+
+

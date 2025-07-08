@@ -1,0 +1,212 @@
+---
+title: "16 - Distribuciones de probabilidad - Teorema Central del Límite"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+```{r}
+library(tidyverse)
+library(patchwork)
+help(Distributions) # Esto le permitirá ver distribuciones alternativas
+```
+
+# Teorema Central del Límite
+
+## Teoría
+
+Aquí les dejo un excelente video acerca de este teorema. Es un video muy visual, muy matemático y conceptualmente no he visto nada más completo y correcto.
+
+Canal 3Blue1Brown
+Pero ¿qué es el teorema del límite central?
+<https://youtu.be/zeJD6dqJ5lo?si=obT-ByAeuk2a7J0d>
+
+## Distribución homogénea
+
+Vamos a construir una población de referencia. Para comenzar gueneramos números al azar entre 0 y 100 donde cada número tiene la misma probabilidad de apareccer. Esa población constará de 50000 números en total.
+
+```{r}
+nPop <- 50000
+pop1 <- runif(nPop, min = 0, max = 100)
+# pop1 <- rnorm(nPop, mean = 50, sd = 25)
+# pop1 <- rbinom(nPop, 99, 0.25)
+# pop1 <- rpois(nPop, lambda = 3)
+# pop1 <- rt(nPop, 50, 50)
+ # pop1 <- rchisq(nPop, 3, ncp = 0.5)
+# pop1 <- rgamma(nPop, shape = 2, scale = 5) # Asimétrica
+```
+
+```{r}
+pop1
+```
+
+```{r}
+mean(pop1)
+```
+
+El histograma permite ver la población generada.
+
+```{r}
+hist(pop1, breaks = 100)
+# ggplot(pop1 %>% tibble()) +
+#   aes(pop1) +
+#   geom_histogram(bins = 100, center = 0.5, colour = "blue")
+```
+
+Se generan 4 grupos de datos. Cada uno estará compuesto por las medias de 50 muestras al azar sobre la población de referencia. Cada grupo constará de muestras de 3, 5, 8 y 15 individuos respectivamente. Seguidamente se grafica cada grupo mostrando un histograma de densidad y superpuesta la curva de distribución Normal correspondiente a los coeficientes (mean y sd) calculados sobre las 50 medias de cada muestra tomada.
+
+## n = 3
+
+```{r}
+# Vamos a trabajar con muestras de 3 individuos
+n <- 3
+
+# Creamos una matriz vacía con 3 columnas
+muestras <- matrix(NA, nrow=0, ncol=n)
+
+# Obtenemos muestras de 3 individuos de la población pop1 (con sample) y los agregamos como una fila la la matríz muestras (con rbind). Como repetimos esto 40 veces la matríz termina con 40 filas.
+for (i in c(1:40)) {
+  muestras <- rbind(muestras, sample(pop1, n, replace = FALSE))
+}
+
+# Convertimos la matriz en un tibble
+muestras <- tibble(muestras)
+
+# Calculamos la media a cada fila. rowwise hace que el summarise se calcule por fila, y el bind_cols impide que perdamos las columnas.
+muestras <-  muestras %>% bind_cols(
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+  )
+muestras
+```
+
+
+```{r}
+gr1 <- ggplot(muestras, aes(x = media)) + 
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean(muestras$media), sd = sd(muestras$media))) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 20, alpha = 0.4) +
+  # xlim(c(0, 100)) +
+  ylab("Densidad") + 
+  ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
+  xlab("valor") + 
+  theme_bw()
+```
+
+```{r}
+shapiro3 <- shapiro.test(muestras$media)
+```
+
+## n = 8
+
+```{r}
+n <- 8
+muestras <- matrix(NA, nrow=0, ncol=n)
+for (i in c(1:40)) {
+  muestras <- rbind(muestras, sample(pop1, n, replace = FALSE))
+}
+muestras <- tibble(muestras)
+
+muestras <-  muestras %>% bind_cols(
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+  )
+muestras
+```
+
+```{r}
+gr2 <- ggplot(muestras, aes(x = media)) + 
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean(muestras$media), sd = sd(muestras$media))) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 20, alpha = 0.4) +
+  # xlim(c(0, 100)) +
+  ylab("Densidad") + 
+  ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
+  xlab("valor") + 
+  theme_bw()
+```
+
+```{r}
+shapiro8 <- shapiro.test(muestras$media)
+```
+
+## n = 15
+
+```{r}
+n <- 15
+muestras <- matrix(NA, nrow=0, ncol=n)
+for (i in c(1:40)) {
+  muestras <- rbind(muestras, sample(pop1, n, replace = FALSE))
+}
+muestras <- tibble(muestras)
+
+muestras <-  muestras %>% bind_cols(
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+  )
+muestras
+```
+```{r}
+gr3 <- ggplot(muestras, aes(x = media)) + 
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean(muestras$media), sd = sd(muestras$media))) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 20, alpha = 0.4) +
+  # xlim(c(0, 100)) +
+  ylab("Densidad") + 
+  ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
+  xlab("valor") + 
+  theme_bw()
+```
+
+```{r}
+shapiro15 <- shapiro.test(muestras$media)
+```
+
+## n = 30
+
+```{r}
+n <- 30
+muestras <- matrix(NA, nrow=0, ncol=n)
+for (i in c(1:40)) {
+  muestras <- rbind(muestras, sample(pop1, n, replace = FALSE))
+}
+muestras <- tibble(muestras)
+
+muestras <-  muestras %>% bind_cols(
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+  )
+muestras
+```
+```{r}
+gr4 <- ggplot(muestras, aes(x = media)) + 
+  stat_function(fun = dnorm, n = 101, args = list(mean = mean(muestras$media), sd = sd(muestras$media))) +
+  geom_area(stat = 'function') +
+  geom_histogram(aes(y = ..density..),bins = 20, alpha = 0.4) +
+  # xlim(c(0, 100)) +
+  ylab("Densidad") + 
+  ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
+  xlab("valor") + 
+  theme_bw()
+```
+
+```{r}
+shapiro30 <- shapiro.test(muestras$media)
+```
+
+## Gráficos finales comparados
+
+```{r warning=FALSE}
+gr1 + gr2 + gr3 + gr4
+```
+
+
+## Pruebas de normalidad
+
+```{r}
+paste("Prueba de Shapiro para Normalidad de n=3")
+print(shapiro3)
+paste("Prueba de Shapiro para Normalidad de n=8")
+print(shapiro8)
+paste("Prueba de Shapiro para Normalidad de n=15")
+print(shapiro15)
+paste("Prueba de Shapiro para Normalidad de n=30")
+print(shapiro30)
+```
+

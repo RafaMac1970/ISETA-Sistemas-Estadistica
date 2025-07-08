@@ -1,0 +1,194 @@
+---
+title: "02 - Data Frames"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Estudiante: SuNombre
+
+Para realizar estos ejercicios use como referencia el documento "02 - DataFrames.Rmd".
+
+Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna. Agregue al nombre del archivo el suyo al final (02 - Ejercicios - DataFrames - SuNombre Apellido.Rmd), y me lo envía por email.
+
+Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la actividad. Esto no es el modo habitual de trabajo, pero se pretende aquí que usted descubra cuándo necesita las librerías extra.
+
+# Tidyverse y estructuras Tidy.
+
+```{r}
+library(tidyverse)
+```
+
+
+## Fuel Consumption
+
+-   Cargue los datos del archivo "FuelConsumption.xlsx" que está en la carpeta "datos". Los dato fueron obtenidos del siguiente sitio: <https://kaggle.com/datasets/krupadharamshi/fuelconsumption?resource=download> En el sitio encontrará referencias para comprender los datos.
+
+```{r}
+library(readxl)
+FuelConsumption <- read_excel("../datos/FuelConsumption.xlsx")
+```
+
+-   Asegurese de controlar el tipo de datos de cada columna. Por ejemplo, CYLINDERS debería ser integer, MAKE podría ser factor. Decida usted qué tipo de datos representa mejor a cada variable.
+
+```{r}
+FuelConsumption$CYLINDERS <- as.integer(FuelConsumption$CYLINDERS)
+FuelConsumption$"VEHICLE CLASS" <- as.factor(FuelConsumption$"VEHICLE CLASS")
+FuelConsumption$FUEL <- as.ordered(FuelConsumption$FUEL)
+FuelConsumption
+```
+
+-   Cree al menos una columna usando información de las otras.
+
+```{r}
+FuelConsumption$EficienciaEmisiones <- FuelConsumption$COEMISSIONS / FuelConsumption$`FUEL CONSUMPTION`
+```
+
+-   Convierta el dataset a Tidy. Hágalo como le parezca, tendremos tiempo de discutir estas decisiones. Puede usar la función pivot_longer().
+
+```{r}
+nombres <- c("ENGINE SIZE","CYLINDERS","FUEL CONSUMPTION","COEMISSIONS","EficienciaEmisiones")
+FuelConsumptionTidy <- FuelConsumption %>% 
+  pivot_longer(all_of(nombres), names_to = "variable", values_to = "valor")
+```
+
+-   Cree un nuevo tibble con información parcial del dataset anterior. Puede filtrar y reducir la cantidad de filas y elegir algunas columnas.
+
+```{r}
+FuelConsumptionTidy2 <- FuelConsumptionTidy[2:8] %>% 
+  filter(MAKE  %in%  c("AUDI","BMW")) %>% # filter() es una función de dplyrque es un paquede de tidyverse
+  subset(FUEL == "Z") %>% # subset() es muy similar a filter() pero del R-base
+  select("VEHICLE CLASS", "variable", "valor") # es la forma de seleccionar columnas por sus nombres
+FuelConsumptionTidy2
+```
+
+
+-   Guarde los datos del nuevo tibble en un archivo.csv externo. Verifique que puede leerlos fuera de R y volver a cargarlos a R.
+
+```{r}
+write_csv(FuelConsumptionTidy2, "../datos/FuelConsumptionTidy2.csv")
+```
+
+
+-   Guarde los datos del nuevo tibble y los del archivo original en dos tablas de una base de datos SQLite. Verifique que puede leerlos fuera de R y volver a cargarlos a R.
+
+```{r}
+library(RSQLite)
+conn <- dbConnect(RSQLite::SQLite(), "../datos/ejercicioDataFrames.db")
+dbWriteTable(conn, "fuelConsumptionTidy", FuelConsumptionTidy)
+dbWriteTable(conn, "fuelConsumptionTidy2", FuelConsumptionTidy2)
+dbWriteTable(conn, "fuelConsumption", FuelConsumption)
+```
+
+
+## Girasol
+
+Los siguientes datos fueron obtenidos del libro:
+
+-   Batista William (2020). Introducción a la inferencia estadística aplicada. 2da Ed. Editorial Facultad de Agronomía. 272 pgs. <https://www.agro.uba.ar/catalog/introducci-n-la-inferencia-estad-stica-aplicada-3ra-edici-n>
+
+Los datos son la "Altura de cada planta de girasol (cm)", medidas en parcelas experimentales sembradas en dos densidades (plantas por m2) diferentes. Se midieron 40 plantas pertenecientes a cada uno de los 2 tratamientos de densidad:
+
+Parcelas de 5 pl/m2. 213 221 220 210 205 224 215 212 225 216 207 205 215 213 213 215 214 199 215 215 210 201 209 204 197 202 221 221 226 219 215 222 212 208 208 219 198 217 208 193
+
+Parcelas de 10 pl/m2. 230 221 223 209 233 230 231 221 213 214 219 238 229 224 230 226 208 216 222 218 222 219 222 223 234 211 226 217 233 211 231 220 219 226 227 226 218 215 224 229
+
+-   Cree un tibble con la información del experimento.
+
+```{r}
+girasol <- tibble(
+  "5 pl/m2" = c(213, 221, 220, 210, 205, 224, 215, 212, 225, 216, 207, 205, 215, 213, 213, 215, 214, 199, 215, 215, 210, 201, 209, 204, 197, 202, 221, 221, 226, 219, 215, 222, 212, 208, 208, 219, 198, 217, 208, 193),
+  "10 pl/m2" = c(230, 221, 223, 209, 233, 230, 231, 221, 213, 214, 219, 238, 229, 224, 230, 226, 208, 216, 222, 218, 222, 219, 222, 223, 234, 211, 226, 217, 233, 211, 231, 220, 219, 226, 227, 226, 218, 215, 224, 229)
+)
+
+girasol
+```
+
+
+-   Guarde esa información en un archivo .csv y en otra tabla de la base de datos SQLite.
+
+```{r}
+write_csv(girasol, "../datos/ejercicioDataFramesGirasol.csv")
+dbWriteTable(conn, "girasol", girasol)
+```
+
+## Acceder a la información de un tibble
+
+### Fuel Consumption
+
+-   Extraiga el dato contenido en una celda.
+
+```{r}
+FuelConsumption[[5,3]]
+```
+
+-   Extraiga todos los datos de un automovil en particular.
+
+```{r}
+FuelConsumption[59,]
+```
+
+-   Muestre los valores de una variable para todos los automóviles disponibles.
+
+```{r}
+FuelConsumption[,4]
+```
+
+En este caso puede que quiera ver los datos anteriores pero descartando lo que se repite
+
+```{r}
+unique(FuelConsumption[,4])
+```
+
+-   Calcule el consumo de combustible promedio de los vehículos con 4 cilindros.
+
+```{r}
+cuatroCilindros <- FuelConsumption %>% filter(CYLINDERS == 4)
+mean(cuatroCilindros$`FUEL CONSUMPTION`)
+```
+
+-   Muestre las emisiones de CO2 de los autos compactos de AUDI.
+
+```{r}
+audi <- FuelConsumption %>% filter(MAKE == "AUDI", `VEHICLE CLASS` == "COMPACT")
+audi$COEMISSIONS
+```
+
+
+### Girasol
+
+-   ¿Cuál es el promedio de altura de cada tratamiento?
+
+```{r}
+mean(girasol[[1]])
+mean(girasol[[2]])
+```
+
+También se puede calcular todos los índices de Tedencia Central y Varianza...
+
+```{r}
+library(plotrix)
+library(moments)
+source("../funciones/ic95.R")
+source("../funciones/quantiles.R")
+source("../funciones/calcularMediana.R")
+
+nombres <- c("5 pl/m2", "10 pl/m2")
+girasolTidy <- girasol %>%  pivot_longer(nombres, names_to = "Densidad", values_to = "Altura") %>% group_by(Densidad)
+
+indicesGirasol <- girasolTidy %>% reframe(n = n(), min = min(Altura), q1 = q1(Altura), mediana = median(Altura), q3 = q3(Altura), Max = max(Altura), media = mean(Altura), varianza = var(Altura), sd = sd(Altura), cv = sd/media, EE = std.error(Altura), asimetria = skewness(Altura), curtosis = kurtosis(Altura), "IC95-" = ic95(Altura)[1], "IC95+" = ic95(Altura)[2])
+
+indicesGirasol
+```
+
+... o hacer un boxplot
+
+```{r}
+ggplot(girasolTidy, aes(x = Densidad, y = Altura)) + 
+  geom_boxplot()
+```
+
+```{r}
+dbWriteTable(conn, "girasolTidy", girasolTidy)
+```
+
