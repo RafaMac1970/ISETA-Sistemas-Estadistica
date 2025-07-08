@@ -1,0 +1,195 @@
+---
+title: "Distribución t de Student - Shiny"
+---
+
+```{r}
+# Instalar y cargar paquetes necesarios
+if (!requireNamespace("shiny", quietly = TRUE)) {
+  install.packages("shiny")
+}
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  install.packages("ggplot2")
+}
+if (!requireNamespace("shinythemes", quietly = TRUE)) {
+  install.packages("shinythemes")
+}
+
+library(shiny)
+library(ggplot2)
+library(shinythemes)
+
+# Interfaz de usuario
+ui <- fluidPage(
+  theme = shinytheme("cerulean"),
+  titlePanel("Distribución t de Student: Cálculo y Visualización"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("df", "Grados de libertad (df):", value = 5, min = 1, step = 1),
+      numericInput("x", "Valor x:", value = 0, step = 0.1),
+      numericInput("x_min", "Valor mínimo (x_min):", value = -2, step = 0.1),
+      numericInput("x_max", "Valor máximo (x_max):", value = 2, step = 0.1),
+      numericInput("num_samples", "Número de muestras:", value = 100, min = 1, step = 1),
+      actionButton("calc", "Calcular"),
+      hr(),
+      h4("Fórmulas Teóricas"),
+      withMathJax(),
+      p("La función de densidad de probabilidad de una distribución t de Student es:"),
+      p("$$f(x; \\nu) = \\frac{\\Gamma\\left(\\frac{\\nu + 1}{2}\\right)}{\\sqrt{\\nu \\pi} \\Gamma\\left(\\frac{\\nu}{2}\\right)} \\left(1 + \\frac{x^2}{\\nu}\\right)^{-\\frac{\\nu + 1}{2}}$$"),
+      p("La función de distribución acumulativa es:"),
+      p("$$F(x; \\nu) = \\int_{-\\infty}^{x} f(t; \\nu) \\, dt$$"),
+      p("La función cuantílica es:"),
+      p("$$Q(p) = t_{\\nu}^{-1}(p)$$"),
+      p("La generación de números aleatorios sigue la función:"),
+      p("$$X \\sim t(\\nu)$$")
+    ),
+    
+    mainPanel(
+      tabsetPanel(
+        tabPanel("dt", plotOutput("dtPlot"), verbatimTextOutput("dtRes")),
+        tabPanel("pt", plotOutput("ptPlot"), verbatimTextOutput("ptRes")),
+        tabPanel("qt", plotOutput("qtPlot"), verbatimTextOutput("qtRes")),
+        tabPanel("rt", plotOutput("rtPlot"), verbatimTextOutput("rtRes")),
+        tabPanel("Rango y Acumulada", 
+                 plotOutput("rangeProbPlot"), 
+                 verbatimTextOutput("rangeProbRes"),
+                 plotOutput("lowerTailPlot"), 
+                 verbatimTextOutput("lowerTailRes"),
+                 verbatimTextOutput("upperTailRes"))
+      )
+    )
+  )
+)
+
+# Servidor
+server <- function(input, output) {
+  
+  observeEvent(input$calc, {
+    df <- input$df
+    x <- input$x
+    x_min <- input$x_min
+    x_max <- input$x_max
+    num_samples <- input$num_samples
+    
+    # dt
+    output$dtRes <- renderPrint({
+      prob <- dt(x, df)
+      paste("f(X =", x, ") =", prob)
+    })
+    
+    output$dtPlot <- renderPlot({
+      x_vals <- seq(-5, 5, length.out = 100)
+      y_vals <- dt(x_vals, df)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "steelblue") +
+        geom_point(aes(x = x, y = dt(x, df)), color = "red", size = 3) +
+        labs(title = "Función de densidad de probabilidad (dt)",
+             x = "x",
+             y = "f(X = x)") +
+        theme_minimal()
+    })
+    
+    # pt
+    output$ptRes <- renderPrint({
+      prob_cum <- pt(x, df)
+      paste("P(X <=", x, ") =", prob_cum)
+    })
+    
+    output$ptPlot <- renderPlot({
+      x_vals <- seq(-5, 5, length.out = 100)
+      y_vals <- pt(x_vals, df)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_point(aes(x = x, y = pt(x, df)), color = "red", size = 3) +
+        labs(title = "Función de distribución acumulativa (pt)",
+             x = "x",
+             y = "P(X ≤ x)") +
+        theme_minimal()
+    })
+    
+    # qt
+    output$qtRes <- renderPrint({
+      quantile <- qt(pt(x, df), df)
+      paste("Q(P(X <=", x, ")) =", quantile)
+    })
+    
+    output$qtPlot <- renderPlot({
+      p_vals <- seq(0, 1, by = 0.01)
+      y_vals <- qt(p_vals, df)
+      ggplot(data.frame(p = p_vals, q = y_vals), aes(p, q)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_point(aes(x = pt(x, df), y = qt(pt(x, df), df)), color = "red", size = 3) +
+        labs(title = "Función cuantílica (qt)",
+             x = "Probabilidad",
+             y = "Cuantil") +
+        theme_minimal()
+    })
+    
+    # rt
+    output$rtRes <- renderPrint({
+      samples <- rt(num_samples, df)
+      paste("Muestras:", paste(samples, collapse = ", "))
+    })
+    
+    output$rtPlot <- renderPlot({
+      samples <- rt(num_samples, df)
+      ggplot(data.frame(samples = samples), aes(samples)) +
+        geom_histogram(binwidth = 0.1, fill = "steelblue", color = "black") +
+        labs(title = "Generación de números aleatorios (rt)",
+             x = "Valor",
+             y = "Frecuencia") +
+        theme_minimal()
+    })
+    
+    # Rango y probabilidades acumuladas
+    output$rangeProbRes <- renderPrint({
+      prob_range <- pt(x_max, df) - pt(x_min, df)
+      paste("P(", x_min, "≤ X ≤", x_max, ") =", prob_range)
+    })
+    
+    output$rangeProbPlot <- renderPlot({
+      x_vals <- seq(-5, 5, length.out = 100)
+      y_vals <- dt(x_vals, df)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "gray") +
+        geom_area(data = data.frame(x = x_vals[x_vals >= x_min & x_vals <= x_max], 
+                                    y = y_vals[x_vals >= x_min & x_vals <= x_max]), 
+                  aes(x, y), fill = "steelblue", alpha = 0.7) +
+        geom_point(aes(x = x, y = dt(x, df)), color = "red", size = 3) +
+        labs(title = paste("P(", x_min, "≤ X ≤", x_max, ")"),
+             x = "x",
+             y = "f(X = x)") +
+        theme_minimal()
+    })
+    
+    output$lowerTailRes <- renderPrint({
+      prob_lower <- pt(x, df)
+      paste("P(X <=", x, ") =", prob_lower)
+    })
+    
+    output$lowerTailPlot <- renderPlot({
+      x_vals <- seq(-5, 5, length.out = 100)
+      y_vals <- pt(x_vals, df)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_point(aes(x = x, y = pt(x, df)), color = "red", size = 3) +
+        geom_vline(xintercept = x, color = "orange") +
+        labs(title = paste("P(X <=", x, ")"),
+             x = "x",
+             y = "P(X ≤ x)") +
+        theme_minimal()
+    })
+    
+    output$upperTailRes <- renderPrint({
+      prob_upper <- 1 - pt(x, df)
+      paste("P(X >", x, ") =", prob_upper)
+    })
+    
+  })
+}
+
+# Ejecutar la aplicación
+shinyApp(ui = ui, server = server)
+
+```
+

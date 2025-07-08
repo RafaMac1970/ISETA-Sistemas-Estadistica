@@ -1,0 +1,194 @@
+---
+title: "Distribución Binomial - Shiny"
+---
+
+```{r}
+# Instalar y cargar paquetes necesarios
+if (!requireNamespace("shiny", quietly = TRUE)) {
+  install.packages("shiny")
+}
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  install.packages("ggplot2")
+}
+if (!requireNamespace("shinythemes", quietly = TRUE)) {
+  install.packages("shinythemes")
+}
+
+library(shiny)
+library(ggplot2)
+library(shinythemes)
+
+# Interfaz de usuario
+ui <- fluidPage(
+  theme = shinytheme("cerulean"),
+  titlePanel("Distribución Binomial: Cálculo y Visualización"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("n", "Número de ensayos (n):", value = 10, min = 1, step = 1),
+      numericInput("p", "Probabilidad de éxito (p):", value = 0.5, min = 0, max = 1, step = 0.01),
+      numericInput("x", "Valor x:", value = 5, min = 0, step = 1),
+      numericInput("x_min", "Valor mínimo (x_min):", value = 3, min = 0, step = 1),
+      numericInput("x_max", "Valor máximo (x_max):", value = 7, min = 0, step = 1),
+      numericInput("num_samples", "Número de muestras:", value = 100, min = 1, step = 1),
+      actionButton("calc", "Calcular"),
+      hr(),
+      h4("Fórmulas Teóricas"),
+      withMathJax(),
+      p("La función de masa de probabilidad de una distribución binomial es:"),
+      p("$$P(X = x) = \\binom{n}{x} p^x (1-p)^{n-x}$$"),
+      p("La función de distribución acumulativa es:"),
+      p("$$P(X \\leq x) = \\sum_{k=0}^{x} \\binom{n}{k} p^k (1-p)^{n-k}$$"),
+      p("La función cuantílica es:"),
+      p("$$Q(p) = \\inf \\{x \\in \\mathbb{N} : P(X \\leq x) \\geq p\\}$$"),
+      p("La generación de números aleatorios sigue la función:"),
+      p("$$X \\sim \\text{Binomial}(n, p)$$")
+    ),
+    
+    mainPanel(
+      tabsetPanel(
+        tabPanel("dbinom", plotOutput("dbinomPlot"), verbatimTextOutput("dbinomRes")),
+        tabPanel("pbinom", plotOutput("pbinomPlot"), verbatimTextOutput("pbinomRes")),
+        tabPanel("qbinom", plotOutput("qbinomPlot"), verbatimTextOutput("qbinomRes")),
+        tabPanel("rbinom", plotOutput("rbinomPlot"), verbatimTextOutput("rbinomRes")),
+        tabPanel("Rango y Acumulada", 
+                 plotOutput("rangeProbPlot"), 
+                 verbatimTextOutput("rangeProbRes"),
+                 plotOutput("lowerTailPlot"), 
+                 verbatimTextOutput("lowerTailRes"),
+                 verbatimTextOutput("upperTailRes"))
+      )
+    )
+  )
+)
+
+# Servidor
+server <- function(input, output) {
+  
+  observeEvent(input$calc, {
+    n <- input$n
+    p <- input$p
+    x <- input$x
+    x_min <- input$x_min
+    x_max <- input$x_max
+    num_samples <- input$num_samples
+    
+    # dbinom
+    output$dbinomRes <- renderPrint({
+      prob <- dbinom(x, n, p)
+      paste("P(X =", x, ") =", prob)
+    })
+    
+    output$dbinomPlot <- renderPlot({
+      x_vals <- 0:n
+      y_vals <- dbinom(x_vals, n, p)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_bar(stat = "identity", fill = "steelblue") +
+        geom_point(aes(x = x, y = dbinom(x, n, p)), color = "red", size = 3) +
+        labs(title = "Función de masa de probabilidad (dbinom)",
+             x = "x",
+             y = "P(X = x)") +
+        theme_minimal()
+    })
+    
+    # pbinom
+    output$pbinomRes <- renderPrint({
+      prob_cum <- pbinom(x, n, p)
+      paste("P(X <=", x, ") =", prob_cum)
+    })
+    
+    output$pbinomPlot <- renderPlot({
+      x_vals <- 0:n
+      y_vals <- pbinom(x_vals, n, p)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_point(aes(x = x, y = pbinom(x, n, p)), color = "red", size = 3) +
+        labs(title = "Función de distribución acumulativa (pbinom)",
+             x = "x",
+             y = "P(X ≤ x)") +
+        theme_minimal()
+    })
+    
+    # qbinom
+    output$qbinomRes <- renderPrint({
+      quantile <- qbinom(pbinom(x, n, p), n, p)
+      paste("Q(P(X <=", x, ")) =", quantile)
+    })
+    
+    output$qbinomPlot <- renderPlot({
+      p_vals <- seq(0, 1, by = 0.01)
+      y_vals <- qbinom(p_vals, n, p)
+      ggplot(data.frame(p = p_vals, q = y_vals), aes(p, q)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_point(aes(x = pbinom(x, n, p), y = qbinom(pbinom(x, n, p), n, p)), color = "red", size = 3) +
+        labs(title = "Función cuantílica (qbinom)",
+             x = "Probabilidad",
+             y = "Cuantil") +
+        theme_minimal()
+    })
+    
+    # rbinom
+    output$rbinomRes <- renderPrint({
+      samples <- rbinom(num_samples, n, p)
+      paste("Muestras:", paste(samples, collapse = ", "))
+    })
+    
+    output$rbinomPlot <- renderPlot({
+      samples <- rbinom(num_samples, n, p)
+      ggplot(data.frame(samples = samples), aes(samples)) +
+        geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+        labs(title = "Generación de números aleatorios (rbinom)",
+             x = "Valor",
+             y = "Frecuencia") +
+        theme_minimal()
+    })
+    
+    # Rango y probabilidades acumuladas
+    output$rangeProbRes <- renderPrint({
+      prob_range <- sum(dbinom(x_min:x_max, n, p))
+      paste("P(", x_min, "≤ X ≤", x_max, ") =", prob_range)
+    })
+    
+    output$rangeProbPlot <- renderPlot({
+      x_vals <- 0:n
+      y_vals <- dbinom(x_vals, n, p)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_bar(stat = "identity", fill = ifelse(x_vals >= x_min & x_vals <= x_max, "steelblue", "gray"), alpha = 0.7) +
+        geom_point(aes(x = x, y = dbinom(x, n, p)), color = "red", size = 3) +
+        labs(title = paste("P(", x_min, "≤ X ≤", x_max, ")"),
+             x = "x",
+             y = "P(X = x)") +
+        theme_minimal()
+    })
+    
+    output$lowerTailRes <- renderPrint({
+      prob_lower <- pbinom(x, n, p)
+      paste("P(X <=", x, ") =", prob_lower)
+    })
+    
+    output$lowerTailPlot <- renderPlot({
+      x_vals <- 0:n
+      y_vals <- pbinom(x_vals, n, p)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_point(aes(x = x, y = pbinom(x, n, p)), color = "red", size = 3) +
+        geom_vline(xintercept = x, color = "orange") +
+        labs(title = paste("P(X <=", x, ")"),
+             x = "x",
+             y = "P(X ≤ x)") +
+        theme_minimal()
+    })
+    
+    output$upperTailRes <- renderPrint({
+      prob_upper <- 1 - pbinom(x , n, p)
+      paste("P(X >", x, ") =", prob_upper)
+    })
+    
+  })
+}
+
+# Ejecutar la aplicación
+shinyApp(ui = ui, server = server)
+
+```
+

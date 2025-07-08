@@ -1,0 +1,112 @@
+---
+title: "Distribución Multinomial - Shiny"
+---
+
+```{r}
+# Instalar y cargar paquetes necesarios
+if (!requireNamespace("shiny", quietly = TRUE)) {
+  install.packages("shiny")
+}
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  install.packages("ggplot2")
+}
+if (!requireNamespace("shinythemes", quietly = TRUE)) {
+  install.packages("shinythemes")
+}
+
+library(shiny)
+library(ggplot2)
+library(shinythemes)
+
+# Función para calcular la probabilidad multinomial
+dmultinom_prob <- function(x, size, prob) {
+  return(dmultinom(x, size, prob))
+}
+
+# Interfaz de usuario
+ui <- fluidPage(
+  theme = shinytheme("cerulean"),
+  titlePanel("Distribución Multinomial: Cálculo y Visualización"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("size", "Número de ensayos (size):", value = 10, min = 1, step = 1),
+      numericInput("x1", "Conteo para la primera categoría:", value = 3, min = 0, step = 1),
+      numericInput("x2", "Conteo para la segunda categoría:", value = 3, min = 0, step = 1),
+      numericInput("x3", "Conteo para la tercera categoría:", value = 4, min = 0, step = 1),
+      numericInput("prob1", "Probabilidad para la primera categoría:", value = 0.3, min = 0, max = 1, step = 0.01),
+      numericInput("prob2", "Probabilidad para la segunda categoría:", value = 0.3, min = 0, max = 1, step = 0.01),
+      numericInput("prob3", "Probabilidad para la tercera categoría:", value = 0.4, min = 0, max = 1, step = 0.01),
+      numericInput("num_samples", "Número de muestras:", value = 100, min = 1, step = 1),
+      actionButton("calc", "Calcular"),
+      hr(),
+      h4("Fórmulas Teóricas"),
+      withMathJax(),
+      p("La función de probabilidad de una distribución multinomial es:"),
+      p("$$P(X = x) = \\frac{n!}{x_1! x_2! \\cdots x_k!} p_1^{x_1} p_2^{x_2} \\cdots p_k^{x_k}$$"),
+      p("donde \\(n\\) es el número de ensayos, \\(x_i\\) es el número de éxitos para la categoría \\(i\\), y \\(p_i\\) es la probabilidad de éxito para la categoría \\(i\\).")
+    ),
+    
+    mainPanel(
+      tabsetPanel(
+        tabPanel("dmultinom", plotOutput("dmultinomPlot"), verbatimTextOutput("dmultinomRes")),
+        tabPanel("rmultinom", plotOutput("rmultinomPlot"), verbatimTextOutput("rmultinomRes"))
+      )
+    )
+  )
+)
+
+# Servidor
+server <- function(input, output) {
+  
+  observeEvent(input$calc, {
+    size <- input$size
+    x <- c(input$x1, input$x2, input$x3)
+    prob <- c(input$prob1, input$prob2, input$prob3)
+    num_samples <- input$num_samples
+    
+    # dmultinom
+    output$dmultinomRes <- renderPrint({
+      prob_value <- dmultinom(x, size, prob)
+      paste("P(X =", paste(x, collapse = ", "), ") =", prob_value)
+    })
+    
+    output$dmultinomPlot <- renderPlot({
+      ggplot(data.frame(x = x, prob = prob), aes(factor(x), prob)) +
+        geom_bar(stat = "identity", fill = "steelblue") +
+        labs(title = "Función de probabilidad multinomial (dmultinom)",
+             x = "Categoría",
+             y = "Probabilidad") +
+        theme_minimal()
+    })
+    
+    # rmultinom
+    output$rmultinomRes <- renderPrint({
+      samples <- rmultinom(num_samples, size, prob)
+      samples_text <- apply(samples, 2, function(row) paste("(", paste(row, collapse = ", "), ")", sep = ""))
+      paste("Muestras:", paste(samples_text, collapse = "; "))
+    })
+    
+    output$rmultinomPlot <- renderPlot({
+      samples <- t(rmultinom(num_samples, size, prob))
+      samples_df <- as.data.frame(samples)
+      colnames(samples_df) <- paste("Categoría", 1:ncol(samples_df), sep = " ")
+      samples_df$id <- 1:nrow(samples_df)
+      samples_melt <- reshape2::melt(samples_df, id.vars = "id")
+      
+      ggplot(samples_melt, aes(x = value, fill = variable)) +
+        geom_histogram(position = "dodge", binwidth = 1) +
+        labs(title = "Generación de números aleatorios (rmultinom)",
+             x = "Conteo",
+             y = "Frecuencia") +
+        theme_minimal() +
+        scale_fill_brewer(palette = "Set1")
+    })
+  })
+}
+
+# Ejecutar la aplicación
+shinyApp(ui = ui, server = server)
+
+```
+

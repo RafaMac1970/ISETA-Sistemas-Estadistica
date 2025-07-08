@@ -1,0 +1,192 @@
+---
+title: "Distribución de Poisson - Shiny"
+---
+
+```{r}
+# Instalar y cargar paquetes necesarios
+if (!requireNamespace("shiny", quietly = TRUE)) {
+  install.packages("shiny")
+}
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  install.packages("ggplot2")
+}
+if (!requireNamespace("shinythemes", quietly = TRUE)) {
+  install.packages("shinythemes")
+}
+
+library(shiny)
+library(ggplot2)
+library(shinythemes)
+
+# Interfaz de usuario
+ui <- fluidPage(
+  theme = shinytheme("cerulean"),
+  titlePanel("Distribución de Poisson: Cálculo y Visualización"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("lambda", "Media (λ):", value = 5, min = 0, step = 0.1),
+      numericInput("x", "Valor x:", value = 5, min = 0, step = 1),
+      numericInput("x_min", "Valor mínimo (x_min):", value = 3, min = 0, step = 1),
+      numericInput("x_max", "Valor máximo (x_max):", value = 7, min = 0, step = 1),
+      numericInput("num_samples", "Número de muestras:", value = 100, min = 1, step = 1),
+      actionButton("calc", "Calcular"),
+      hr(),
+      h4("Fórmulas Teóricas"),
+      withMathJax(),
+      p("La función de masa de probabilidad de una distribución de Poisson es:"),
+      p("$$P(X = x) = \\frac{e^{-\\lambda} \\lambda^x}{x!}$$"),
+      p("La función de distribución acumulativa es:"),
+      p("$$P(X \\leq x) = \\sum_{k=0}^{x} \\frac{e^{-\\lambda} \\lambda^k}{k!}$$"),
+      p("La función cuantílica es:"),
+      p("$$Q(p) = \\inf \\{x \\in \\mathbb{N} : P(X \\leq x) \\geq p\\}$$"),
+      p("La generación de números aleatorios sigue la función:"),
+      p("$$X \\sim \\text{Poisson}(\\lambda)$$")
+    ),
+    
+    mainPanel(
+      tabsetPanel(
+        tabPanel("dpois", plotOutput("dpoisPlot"), verbatimTextOutput("dpoisRes")),
+        tabPanel("ppois", plotOutput("ppoisPlot"), verbatimTextOutput("ppoisRes")),
+        tabPanel("qpois", plotOutput("qpoisPlot"), verbatimTextOutput("qpoisRes")),
+        tabPanel("rpois", plotOutput("rpoisPlot"), verbatimTextOutput("rpoisRes")),
+        tabPanel("Rango y Acumulada", 
+                 plotOutput("rangeProbPlot"), 
+                 verbatimTextOutput("rangeProbRes"),
+                 plotOutput("lowerTailPlot"), 
+                 verbatimTextOutput("lowerTailRes"),
+                 verbatimTextOutput("upperTailRes"))
+      )
+    )
+  )
+)
+
+# Servidor
+server <- function(input, output) {
+  
+  observeEvent(input$calc, {
+    lambda <- input$lambda
+    x <- input$x
+    x_min <- input$x_min
+    x_max <- input$x_max
+    num_samples <- input$num_samples
+    
+    # dpois
+    output$dpoisRes <- renderPrint({
+      prob <- dpois(x, lambda)
+      paste("P(X =", x, ") =", prob)
+    })
+    
+    output$dpoisPlot <- renderPlot({
+      x_vals <- 0:max(x_max, 10)
+      y_vals <- dpois(x_vals, lambda)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_bar(stat = "identity", fill = "steelblue") +
+        geom_point(aes(x = x, y = dpois(x, lambda)), color = "red", size = 3) +
+        labs(title = "Función de masa de probabilidad (dpois)",
+             x = "x",
+             y = "P(X = x)") +
+        theme_minimal()
+    })
+    
+    # ppois
+    output$ppoisRes <- renderPrint({
+      prob_cum <- ppois(x, lambda)
+      paste("P(X <=", x, ") =", prob_cum)
+    })
+    
+    output$ppoisPlot <- renderPlot({
+      x_vals <- 0:max(x_max, 10)
+      y_vals <- ppois(x_vals, lambda)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_point(aes(x = x, y = ppois(x, lambda)), color = "red", size = 3) +
+        labs(title = "Función de distribución acumulativa (ppois)",
+             x = "x",
+             y = "P(X ≤ x)") +
+        theme_minimal()
+    })
+    
+    # qpois
+    output$qpoisRes <- renderPrint({
+      quantile <- qpois(ppois(x, lambda), lambda)
+      paste("Q(P(X <=", x, ")) =", quantile)
+    })
+    
+    output$qpoisPlot <- renderPlot({
+      p_vals <- seq(0, 1, by = 0.01)
+      y_vals <- qpois(p_vals, lambda)
+      ggplot(data.frame(p = p_vals, q = y_vals), aes(p, q)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_point(aes(x = ppois(x, lambda), y = qpois(ppois(x, lambda), lambda)), color = "red", size = 3) +
+        labs(title = "Función cuantílica (qpois)",
+             x = "Probabilidad",
+             y = "Cuantil") +
+        theme_minimal()
+    })
+    
+    # rpois
+    output$rpoisRes <- renderPrint({
+      samples <- rpois(num_samples, lambda)
+      paste("Muestras:", paste(samples, collapse = ", "))
+    })
+    
+    output$rpoisPlot <- renderPlot({
+      samples <- rpois(num_samples, lambda)
+      ggplot(data.frame(samples = samples), aes(samples)) +
+        geom_histogram(binwidth = 1, fill = "steelblue", color = "black") +
+        labs(title = "Generación de números aleatorios (rpois)",
+             x = "Valor",
+             y = "Frecuencia") +
+        theme_minimal()
+    })
+    
+    # Rango y probabilidades acumuladas
+    output$rangeProbRes <- renderPrint({
+      prob_range <- sum(dpois(x_min:x_max, lambda))
+      paste("P(", x_min, "≤ X ≤", x_max, ") =", prob_range)
+    })
+    
+    output$rangeProbPlot <- renderPlot({
+      x_vals <- 0:max(x_max, 10)
+      y_vals <- dpois(x_vals, lambda)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_bar(stat = "identity", fill = ifelse(x_vals >= x_min & x_vals <= x_max, "steelblue", "gray"), alpha = 0.7) +
+        geom_point(aes(x = x, y = dpois(x, lambda)), color = "red", size = 3) +
+        labs(title = paste("P(", x_min, "≤ X ≤", x_max, ")"),
+             x = "x",
+             y = "P(X = x)") +
+        theme_minimal()
+    })
+    
+    output$lowerTailRes <- renderPrint({
+      prob_lower <- ppois(x, lambda)
+      paste("P(X <=", x, ") =", prob_lower)
+    })
+    
+    output$lowerTailPlot <- renderPlot({
+      x_vals <- 0:max(x_max, 10)
+      y_vals <- ppois(x_vals, lambda)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_point(aes(x = x, y = ppois(x, lambda)), color = "red", size = 3) +
+        geom_vline(xintercept = x, color = "orange") +
+        labs(title = paste("P(X <=", x, ")"),
+             x = "x",
+             y = "P(X ≤ x)") +
+        theme_minimal()
+    })
+    
+    output$upperTailRes <- renderPrint({
+      prob_upper <- 1 - ppois(x, lambda)
+      paste("P(X >", x, ") =", prob_upper)
+    })
+    
+  })
+}
+
+# Ejecutar la aplicación
+shinyApp(ui = ui, server = server)
+
+```
+

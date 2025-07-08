@@ -1,0 +1,200 @@
+---
+title: "Distribución Normal - Shiny"
+---
+
+```{r}
+# Instalar y cargar paquetes necesarios
+if (!requireNamespace("shiny", quietly = TRUE)) {
+  install.packages("shiny")
+}
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  install.packages("ggplot2")
+}
+if (!requireNamespace("shinythemes", quietly = TRUE)) {
+  install.packages("shinythemes")
+}
+
+library(shiny)
+library(ggplot2)
+library(shinythemes)
+
+# Interfaz de usuario
+ui <- fluidPage(
+  theme = shinytheme("cerulean"),
+  titlePanel("Distribución Normal: Cálculo y Visualización"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("mean", "Media (μ):", value = 0, step = 0.1),
+      numericInput("sd", "Desviación estándar (σ):", value = 1, step = 0.1),
+      numericInput("x", "Valor x:", value = 0, step = 0.1),
+      numericInput("x_min", "Valor mínimo (x_min):", value = -1, step = 0.1),
+      numericInput("x_max", "Valor máximo (x_max):", value = 1, step = 0.1),
+      numericInput("num_samples", "Número de muestras:", value = 100, min = 1, step = 1),
+      actionButton("calc", "Calcular"),
+      hr(),
+      h4("Fórmulas Teóricas"),
+      withMathJax(),
+      p("La función de densidad de probabilidad de una distribución normal es:"),
+      p("$$f(x) = \\frac{1}{\\sigma \\sqrt{2\\pi}} e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}$$"),
+      p("La función de distribución acumulativa es:"),
+      p("$$F(x) = \\frac{1}{2} \\left[1 + \\operatorname{erf}\\left(\\frac{x-\\mu}{\\sigma\\sqrt{2}}\\right)\\right]$$"),
+      p("La función cuantílica es:"),
+      p("$$Q(p) = \\mu + \\sigma \\sqrt{2} \\operatorname{erf}^{-1}(2p - 1)$$"),
+      p("La generación de números aleatorios sigue la función:"),
+      p("$$X \\sim \\text{Normal}(\\mu, \\sigma)$$")
+    ),
+    
+    mainPanel(
+      tabsetPanel(
+        tabPanel("dnorm", plotOutput("dnormPlot"), verbatimTextOutput("dnormRes")),
+        tabPanel("pnorm", plotOutput("pnormPlot"), verbatimTextOutput("pnormRes")),
+        tabPanel("qnorm", plotOutput("qnormPlot"), verbatimTextOutput("qnormRes")),
+        tabPanel("rnorm", plotOutput("rnormPlot"), verbatimTextOutput("rnormRes")),
+        tabPanel("Rango y Acumulada", 
+                 plotOutput("rangeProbPlot"), 
+                 verbatimTextOutput("rangeProbRes"),
+                 plotOutput("lowerTailPlot"), 
+                 verbatimTextOutput("lowerTailRes"),
+                 verbatimTextOutput("upperTailRes"))
+      )
+    )
+  )
+)
+
+# Servidor
+server <- function(input, output) {
+  
+  observeEvent(input$calc, {
+    mean <- input$mean
+    sd <- input$sd
+    x <- input$x
+    x_min <- input$x_min
+    x_max <- input$x_max
+    num_samples <- input$num_samples
+    
+    # dnorm
+    output$dnormRes <- renderPrint({
+      prob <- dnorm(x, mean, sd)
+      paste("f(X =", x, ") =", prob)
+    })
+    
+    output$dnormPlot <- renderPlot({
+      x_vals <- seq(mean - 4 * sd, mean + 4 * sd, length.out = 100)
+      y_vals <- dnorm(x_vals, mean, sd)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "steelblue") +
+        geom_point(aes(x = x, y = dnorm(x, mean, sd)), color = "red", size = 3) +
+        labs(title = "Función de densidad de probabilidad (dnorm)",
+             x = "x",
+             y = "f(X = x)") +
+        theme_minimal()
+    })
+    
+    # pnorm
+    output$pnormRes <- renderPrint({
+      prob_cum <- pnorm(x, mean, sd)
+      paste("P(X <=", x, ") =", prob_cum)
+    })
+    
+    output$pnormPlot <- renderPlot({
+      x_vals <- seq(mean - 4 * sd, mean + 4 * sd, length.out = 100)
+      y_vals <- pnorm(x_vals, mean, sd)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_point(aes(x = x, y = pnorm(x, mean, sd)), color = "red", size = 3) +
+        labs(title = "Función de distribución acumulativa (pnorm)",
+             x = "x",
+             y = "P(X ≤ x)") +
+        theme_minimal()
+    })
+    
+    # qnorm
+    output$qnormRes <- renderPrint({
+      quantile <- qnorm(pnorm(x, mean, sd), mean, sd)
+      paste("Q(P(X <=", x, ")) =", quantile)
+    })
+    
+    output$qnormPlot <- renderPlot({
+      p_vals <- seq(0, 1, by = 0.01)
+      y_vals <- qnorm(p_vals, mean, sd)
+      ggplot(data.frame(p = p_vals, q = y_vals), aes(p, q)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_point(aes(x = pnorm(x, mean, sd), y = qnorm(pnorm(x, mean, sd), mean, sd)), color = "red", size = 3) +
+        labs(title = "Función cuantílica (qnorm)",
+             x = "Probabilidad",
+             y = "Cuantil") +
+        theme_minimal()
+    })
+    
+    # rnorm
+    output$rnormRes <- renderPrint({
+      samples <- rnorm(num_samples, mean, sd)
+      paste("Muestras:", paste(samples, collapse = ", "))
+    })
+    
+    output$rnormPlot <- renderPlot({
+      samples <- rnorm(num_samples, mean, sd)
+      ggplot(data.frame(samples = samples), aes(samples)) +
+        geom_histogram(binwidth = 0.1 * sd, fill = "steelblue", color = "black") +
+        labs(title = "Generación de números aleatorios (rnorm)",
+             x = "Valor",
+             y = "Frecuencia") +
+        theme_minimal()
+    })
+    
+    # Rango y probabilidades acumuladas
+    output$rangeProbRes <- renderPrint({
+      prob_range <- pnorm(x_max, mean, sd) - pnorm(x_min, mean, sd)
+      paste("P(", x_min, "≤ X ≤", x_max, ") =", prob_range)
+    })
+    
+    output$rangeProbPlot <- renderPlot({
+      x_vals <- seq(mean - 4 * sd, mean + 4 * sd, length.out = 100)
+      y_vals <- dnorm(x_vals, mean, sd)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "gray") +
+        geom_area(data = data.frame(x = x_vals[x_vals >= x_min & x_vals <= x_max], 
+                                    y = y_vals[x_vals >= x_min & x_vals <= x_max]), 
+                  aes(x, y), fill = "steelblue", alpha = 0.7) +
+        geom_point(aes(x = x, y = dnorm(x, mean, sd)), color = "red", size = 3) +
+        labs(title = paste("P(", x_min, "≤ X ≤", x_max, ")"),
+             x = "x",
+             y = "f(X = x)") +
+        theme_minimal()
+    })
+    
+    output$lowerTailRes <- renderPrint({
+      prob_lower <- pnorm(x, mean, sd)
+      paste("P(X <=", x, ") =", prob_lower)
+    })
+    
+    output$lowerTailPlot <- renderPlot({
+      x_vals <- seq(mean - 4 * sd, mean + 4 * sd, length.out = 100)
+      y_vals <- pnorm(x_vals, mean, sd)
+      ggplot(data.frame(x = x_vals, y = y_vals), aes(x, y)) +
+        geom_line(color = "steelblue", size = 1) +
+        geom_area(data = data.frame(x = x_vals[x_vals <= x], 
+                                    y = y_vals[x_vals <= x]), 
+                  aes(x, y), fill = "steelblue", alpha = 0.7) +
+        geom_point(aes(x = x, y = pnorm(x, mean, sd)), color = "red", size = 3) +
+        geom_vline(xintercept = x, color = "orange") +
+        labs(title = paste("P(X <=", x, ")"),
+             x = "x",
+             y = "P(X ≤ x)") +
+        theme_minimal()
+    })
+    
+    output$upperTailRes <- renderPrint({
+      prob_upper <- 1 - pnorm(x, mean, sd)
+      paste("P(X >", x, ") =", prob_upper)
+    })
+    
+  })
+}
+
+# Ejecutar la aplicación
+shinyApp(ui = ui, server = server)
+
+```
+
