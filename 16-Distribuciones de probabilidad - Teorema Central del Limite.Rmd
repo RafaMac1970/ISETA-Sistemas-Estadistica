@@ -21,9 +21,9 @@ Canal 3Blue1Brown
 Pero ¿qué es el teorema del límite central?
 <https://youtu.be/zeJD6dqJ5lo?si=obT-ByAeuk2a7J0d>
 
-## Distribución homogénea
+## Distribución
 
-Vamos a construir una población de referencia. Para comenzar gueneramos números al azar entre 0 y 100 donde cada número tiene la misma probabilidad de apareccer. Esa población constará de 50000 números en total.
+Vamos a construir una población de referencia. Para comenzar gueneramos números al azar entre 0 y 100 donde cada número tiene la misma probabilidad de apareccer (runif, r es porque la función genera números al azar de esa distribución (viene de random) y unif viene de uniforme. Esa población constará de 50000 números en total.
 
 ```{r}
 nPop <- 50000
@@ -44,7 +44,7 @@ pop1
 mean(pop1)
 ```
 
-El histograma permite ver la población generada.
+### El histograma permite ver la población generada.
 
 ```{r}
 hist(pop1, breaks = 100)
@@ -53,9 +53,11 @@ hist(pop1, breaks = 100)
 #   geom_histogram(bins = 100, center = 0.5, colour = "blue")
 ```
 
+## Experimentos
+
 Se generan 4 grupos de datos. Cada uno estará compuesto por las medias de 50 muestras al azar sobre la población de referencia. Cada grupo constará de muestras de 3, 5, 8 y 15 individuos respectivamente. Seguidamente se grafica cada grupo mostrando un histograma de densidad y superpuesta la curva de distribución Normal correspondiente a los coeficientes (mean y sd) calculados sobre las 50 medias de cada muestra tomada.
 
-## n = 3
+### n = 3
 
 ```{r}
 # Vamos a trabajar con muestras de 3 individuos
@@ -79,6 +81,7 @@ muestras <-  muestras %>% bind_cols(
 muestras
 ```
 
+#### Creamos un gráfico por tratamiento.
 
 ```{r}
 gr1 <- ggplot(muestras, aes(x = media)) + 
@@ -88,15 +91,17 @@ gr1 <- ggplot(muestras, aes(x = media)) +
   # xlim(c(0, 100)) +
   ylab("Densidad") + 
   ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
-  xlab("valor") + 
+  xlab("valor") + xlim(c(0, 100)) +
   theme_bw()
 ```
+
+#### También le hacemos una prueba de normalidad a cada tratamiento
 
 ```{r}
 shapiro3 <- shapiro.test(muestras$media)
 ```
 
-## n = 8
+### n = 8
 
 ```{r}
 n <- 8
@@ -120,7 +125,7 @@ gr2 <- ggplot(muestras, aes(x = media)) +
   # xlim(c(0, 100)) +
   ylab("Densidad") + 
   ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
-  xlab("valor") + 
+  xlab("valor") + xlim(c(0, 100)) +
   theme_bw()
 ```
 
@@ -128,7 +133,7 @@ gr2 <- ggplot(muestras, aes(x = media)) +
 shapiro8 <- shapiro.test(muestras$media)
 ```
 
-## n = 15
+### n = 15
 
 ```{r}
 n <- 15
@@ -151,7 +156,7 @@ gr3 <- ggplot(muestras, aes(x = media)) +
   # xlim(c(0, 100)) +
   ylab("Densidad") + 
   ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
-  xlab("valor") + 
+  xlab("valor")  + xlim(c(0, 100)) +
   theme_bw()
 ```
 
@@ -159,7 +164,7 @@ gr3 <- ggplot(muestras, aes(x = media)) +
 shapiro15 <- shapiro.test(muestras$media)
 ```
 
-## n = 30
+### n = 30
 
 ```{r}
 n <- 30
@@ -182,7 +187,7 @@ gr4 <- ggplot(muestras, aes(x = media)) +
   # xlim(c(0, 100)) +
   ylab("Densidad") + 
   ggtitle(sprintf("Media de la muestra con n = %.2f", n)) + 
-  xlab("valor") + 
+  xlab("valor") + xlim(c(0, 100)) +
   theme_bw()
 ```
 
@@ -190,10 +195,10 @@ gr4 <- ggplot(muestras, aes(x = media)) +
 shapiro30 <- shapiro.test(muestras$media)
 ```
 
-## Gráficos finales comparados
+### Gráficos finales comparados
 
-```{r warning=FALSE}
-gr1 + gr2 + gr3 + gr4
+```{r fig.height=15, fig.width=5, warning=FALSE}
+gr1 / gr2 / gr3 / gr4 
 ```
 
 

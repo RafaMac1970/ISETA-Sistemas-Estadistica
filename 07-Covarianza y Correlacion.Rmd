@@ -1,0 +1,222 @@
+---
+title: "21 - Covarianza y Correlación"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(ggExtra)
+library(patchwork)
+library(GGally)
+```
+
+# Covarianza
+
+Definición:
+
+La covarianza mide la relación lineal entre dos variables. Si la covarianza es positiva, significa que ambas variables tienden a aumentar o disminuir juntas. Si es negativa, cuando una variable aumenta, la otra tiende a disminuir.
+
+Fórmula para la covarianza muestral:
+
+Para dos variables X e Y:
+
+$$ 
+\text{Cov}(X, Y) = \frac{\sum_{i=1}^{n} (X_i - \bar{X})(Y_i - \bar{Y})}{n - 1}
+$$
+
+Si se trata de la población el denominador es n.
+
+```{r}
+help(cov)
+```
+
+```{r}
+iSp <- iris %>% filter(Species == "setosa") # setosa versicolor virginica
+cov(iSp$Sepal.Length, iSp$Sepal.Width)
+cov(iSp$Petal.Length, iSp$Sepal.Length)
+```
+
+Interpretación: El valor de la covarianza nos dice si existe una relación lineal positiva o negativa entre las dos variables. La magnitud del índice generalmente es irrelevante y depende mucho de la cantidad de observaciones. Para que la magnitud pueda interpretarse el n de las dos muestras debe ser igual, y además los valores de cada variable en las dos muestras deben variar enun rango similar. Estas condiciones son muy raras de conseguir.
+
+Como ejemplo de esto último comparemos las covarianzas en dos datasets diferentes (mire además los gráficos más abajo):
+
+```{r}
+cov(iris$Sepal.Length, iris$Sepal.Width)
+nrow(iris) # nrow devuelve la cantidad de filas del dataset (n)
+cov(diamonds$price, diamonds$carat)
+nrow(diamonds)
+```
+
+# Correlación
+
+Definición: La correlación es una medida estandarizada de la relación lineal entre dos variables. Es adimensional y toma valores entre -1 y 1, donde:
+
+-   1 indica una correlación positiva perfecta.
+-   -1 indica una correlación negativa perfecta.
+-   0 indica que no hay correlación lineal. Fórmula:
+
+Para dos variables X e Y:
+
+## Pearson
+
+Hay una muy buena explicación de este índice en <https://es.wikipedia.org/wiki/Coeficiente_de_correlaci%C3%B3n_de_Pearson>
+
+$$
+\text{Cor}(X, Y) = \frac{\text{Cov}(X, Y)}{\sigma_X \sigma_Y}
+$$
+
+## Spearman
+
+Hay una muy buena explicación de este índice en <https://es.wikipedia.org/wiki/Coeficiente_de_correlaci%C3%B3n_de_Spearman>
+
+El coeficiente de correlación de Spearman (ρ -para la población- o rs -para la muestra-) se calcula a partir de los rangos de los datos:
+
+$$
+\rho = 1 - \frac{6 \sum_{i=1}^{n} d_i^2}{n(n^2 - 1)}
+$$
+
+Donde:
+
+-   di es la diferencia entre los rangos de las dos variables para el i-ésimo par.
+-   n es el número de observaciones.
+
+## Kendall
+
+El coeficiente de correlación de Kendall (τ) mide la asociación entre dos variables y se basa en la concordancia y discordancia de pares de observaciones:
+
+$$
+\tau = \frac{2(P - Q)}{n(n-1)}
+$$
+
+Donde:
+
+-   P es el número de pares concordantes.
+-   Q es el número de pares discordantes.
+-   n es el número de observaciones.
+
+Para calcular P y Q se usa el mismo procedimiento que en el índice de Spearman.
+
+## Diferencias entre los índices:
+
+-   Pearson: Ideal para medir la relación lineal entre dos variables continuas. Muy sensible a valores atípicos.
+-   Spearman: Utilizado cuando las variables no siguen una distribución normal o cuando se espera una relación monótona. Menos sensible a valores atípicos.
+-   Kendall: Similar a Spearman, pero es más robusto cuando hay muchos empates en los datos o cuando el tamaño de la muestra es pequeño.
+
+| Propiedad o Característica      | Pearson                                                | Spearman o Kendall                                                              |
+|:---------------------------|:-----------------|:--------------------------|
+| Tipo de relación                | lineal                                                 | Monótona (puede ser no lineal)                                                  |
+| Sensibilidad a valores atípicos | Alta                                                   | Menor sensibilidad                                                              |
+| Escala                          | Intervalo o razón                                      | Ordinal (rango)                                                                 |
+| Significado del valor           | Medida de la fuerza y dirección de una relación lineal | Medida de la fuerza y dirección de una relación monótona                        |
+| Uso común                       | Relaciones lineales entre variables continuas          | Datos ordinales o cuando la relación es monótona, pero no necesariamente lineal |
+| Asume normalidad de datos       | Sí, idealmente                                         | No                                                                              |
+| Adecuado para datos con empates | No                                                     | Si                                                                              |
+
+```{r}
+iSp <- iris %>% filter(Species == "setosa") # setosa versicolor virginica
+cov(iSp$Sepal.Length, iSp$Sepal.Width)
+cor(iSp$Sepal.Length, iSp$Sepal.Width) # Por defecto usa Pearson
+cor(iSp$Sepal.Length, iSp$Sepal.Width, method = "spearman")
+cor(iSp$Sepal.Length, iSp$Sepal.Width, method = "kendall")
+```
+
+```{r}
+cov(iSp$Petal.Length, iSp$Sepal.Length)
+cor(iSp$Petal.Length, iSp$Sepal.Length)
+```
+
+# Graficando
+
+```{r}
+# Gráfico de dispersión para Sepal.Length y Sepal.Width
+ggplot(iSp, aes(x = Sepal.Length, y = Sepal.Width)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+
+```
+
+```{r}
+# Cálculo de la covarianza y correlación entre precio y quilates (carat)
+cov(diamonds$price, diamonds$carat)
+cor(diamonds$price, diamonds$carat)
+```
+
+```{r}
+# Gráfico de dispersión para precio y quilates
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+## Conclusiones
+
+Covarianza: Nos da una idea de la dirección de la relación entre dos variables.
+
+Correlación: Nos dice la fuerza y dirección de esa relación, normalizada para que sea independiente de las unidades de medida.
+
+# Test de correlación
+
+El test nos da mucha más información, se trata de un test de hipótesis donde H0: corr(X,Y) = 0. Es decir que la hipótesis nula es que no hay correlación entre las dos variables, por lo tanto si el p-value es bajo significa que la correlación es estadísticamente significativa.
+
+```{r}
+# Esto para las tres especies de iris juntas
+cor.test(iris$Sepal.Length, iris$Sepal.Width)
+cor.test(iris$Sepal.Length, iris$Sepal.Width, method = "spearman")
+cor.test(iris$Sepal.Length, iris$Sepal.Width, method = "kendall")
+
+# Esto para sólo una especie de iris
+cor.test(iSp$Sepal.Length, iSp$Sepal.Width)
+cor.test(iSp$Sepal.Length, iSp$Sepal.Width, method = "spearman")
+cor.test(iSp$Sepal.Length, iSp$Sepal.Width, method = "kendall")
+```
+
+Cuando la base de datos es muy grande el valor p suele ser más bajo. Observe los grados de libertad.
+
+```{r}
+cor.test(diamonds$price, diamonds$carat)
+cor.test(diamonds$price, diamonds$carat, method = "spearman")
+cor.test(diamonds$price, diamonds$carat, method = "kendall")
+```
+
+También se puede pedir una matriz de correlación a un dataset o tibble
+
+```{r}
+cor(diamonds[,c(1,5:10)])
+```
+
+Matrices gráficas de correlación
+
+## Matriz gráfica de correlación
+
+```{r fig.height=10, fig.width=12, message=FALSE, warning=FALSE}
+iris %>% 
+   ggpairs(aes(color = Species, alpha = 0.5))
+ # ggpairs(columns = c(1,5:10), aes(color = cut, alpha = 0.5))
+ # ggpairs(columns = c(2:4), aes(color = cut, alpha = 0.5))
+```
+
+## Diagramas de dispersión, o gráficos de puntos. Con gráficos marginales
+
+```{r}
+p <- ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species, size = Sepal.Length, alpha = 0.3)) +
+      geom_point() +
+      theme(legend.position="none")
+ 
+p1 <- ggMarginal(p, type="histogram")
+
+p2 <- ggMarginal(p, type="histogram", fill = "slateblue", xparams = list(  bins=10))
+ 
+p3 <- ggMarginal(p, type="density")
+ 
+p4 <- ggMarginal(p, type="boxplot")
+
+```
+
+```{r}
+library("cowplot")
+# Graficar en grilla
+plot_grid(p1,p2,p3,p4, labels = "AUTO")
+```

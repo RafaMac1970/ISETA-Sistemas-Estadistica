@@ -1,0 +1,230 @@
+---
+title: "07 - Análisis Exploratorio de Datos (EDA, Exploratory Data Analysis)"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+# diamonds
+
+## Mirar la estructura y extensión
+
+```{r}
+
+help(diamonds)
+diamonds
+```
+
+```{r}
+summary(diamonds)
+```
+
+## Transformar a tidy
+
+```{r}
+nombres <- c("carat","depth","table","price","x","y","z")
+diamondsTidy <- tibble(diamonds) %>% pivot_longer(all_of(nombres), names_to = "Variable", values_to = "valor")
+diamondsTidy
+```
+
+## Calcular índices por grupo
+
+Se puede calcular los índices que se desee a cada grupo de interés. Creamos un nuevo data set con los índices que nos interese comparar.
+
+En este caso la moda no tiene sentido, por eso la excluyo de las estadísticas.
+
+```{r}
+source("funciones/funcionesPersonales.R")
+library(moments) # esta librería es necesaria para skewness
+
+indicesDiamonds <- diamondsTidy %>% 
+  group_by(cut,color,clarity,Variable) %>% 
+  reframe(n = n(), min = min(valor), q1 = q1(valor), mediana = median(valor), q3 = q3(valor), RIQ = q3 - q1, Max = max(valor), RAbs = Max - min, media = mean(valor), varianza = var(valor), sd = sd(valor), cv = sd/media, EE = std.error(valor), asimetria = skewness(valor), curtosis = kurtosis(valor), "IC95-" = ic95(valor)[1], "IC95+" = ic95(valor)[2])
+indicesDiamonds
+```
+
+Arriba se muestra el procedimiento, además armé una función que hace lo mismo.
+
+```{r}
+ # source("funciones/todosLosIndices.R")
+ # 
+ # # Primero armar el tibble agrupado de acuerdo a la agregación que se desee
+ # unTibbleAgrupado <- diamondsTidy %>% group_by(cut,color,clarity,Variable)
+ # 
+ # # Luego puede invocar la función
+ # todosLosIndices(unTibbleAgrupado)
+```
+
+## Matriz gráfica de correlación
+
+```{r fig.height=15, fig.width=15, message=FALSE, warning=FALSE}
+library(GGally)
+
+diamonds %>% 
+  subset(y < 20) %>% subset(z < 10) %>% # para quitar 3 puntos outliers
+   ggpairs(aes(color = cut, alpha = 0.5))
+ # ggpairs(columns = c(1,5:10), aes(color = cut, alpha = 0.5))
+ # ggpairs(columns = c(2:4), aes(color = cut, alpha = 0.5))
+```
+
+```{r}
+cor(diamonds[,c(1,5:10)])
+```
+```{r}
+library(Hmisc)
+
+diamondsCorr <- rcorr(as.matrix(diamonds[,c(1,5:10)]))
+diamondsCorr
+```
+
+```{r}
+library(heatmaply)
+
+heatmaply_cor(
+  cor(diamonds[,c(1,5:10)]),
+  node_type = "scatter",
+  point_size_mat = 1-(diamondsCorr$P),
+  xlab = "Features", 
+  ylab = "Features",
+  k_col = 2, 
+  k_row = 2
+)
+```
+
+
+```{r}
+diamonds[,c(1,5:10)]
+```
+
+
+## Histograma y Densidad para una variable (Ej. "depth")
+
+```{r message=FALSE, warning=FALSE}
+ gr1 <- diamondsTidy %>% filter(Variable == "depth") %>% ggplot(aes(valor, after_stat(density))) + 
+   geom_histogram() +
+   geom_density(aes(valor, color = cut)) +
+   facet_grid(vars(color), vars(clarity))
+gr1
+```
+
+```{r}
+unaTablita <- table(cut(diamonds$depth, breaks = seq(44,80,2)))
+paste("Frecuencias Absolutas")
+unaTablita
+paste("")
+paste("Frecuencias Relativas")
+prop.table(unaTablita)
+```
+
+
+
+## Box Plot (seguidos con ej. "depth")
+
+```{r fig.height=10, fig.width=12}
+gr2 <- ggplot(diamonds, aes(x = cut, y = depth)) + 
+  geom_boxplot() +
+  facet_grid(rows = vars(color), cols = vars(clarity))
+gr2
+```
+
+## Diagramas de Violín con Box Plot superpuesto
+
+```{r fig.height=10, fig.width=14, message=FALSE, warning=FALSE}
+gr3 <- ggplot(diamonds, aes(x = cut, y = depth)) + 
+  geom_violin() +
+  geom_boxplot(alpha = 0.3) +
+#  geom_jitter(alpha = 0.1) +
+  facet_grid(rows = vars(color), cols = vars(clarity))
+gr3
+```
+
+# iris
+
+### *Iris setosa*
+
+[![Iris setosa](https://www.plantpref.co.uk/user/products/large/irisseto2.jpg){width="300"}](https://search.brave.com/images?q=iris+setosa&source=web&img=104)
+
+### *Iris versicolor*
+
+[![Iris versicolor](https://www.jardin2m.com/Content/Images/Vegetaux/29IRVERS.jpg){width="300"}](https://duckduckgo.com/?q=Iris+versicolor&t=brave&iax=images&ia=images)
+
+### *Iris virginica*
+
+[![Iris virginica](https://s3.amazonaws.com/eit-planttoolbox-prod/media/images/Iris-virginica--Justin-Meissen--CC-BY-SA.jpg){width="300"}](https://duckduckgo.com/?q=Iris+virginica&t=brave&iax=images&ia=images)
+
+## Mirar la estructura y extensión
+
+```{r}
+help(iris)
+miIris <- iris
+```
+
+```{r}
+miIris$Flower <- 1:150
+```
+
+
+```{r}
+summary(miIris)
+```
+
+## Transformar a tidy
+
+```{r}
+nombres <- c("Sepal.Length","Sepal.Width","Petal.Length","Petal.Width")
+irisTidy <- tibble(miIris) %>% pivot_longer(nombres, names_to = "Variable", values_to = "valor")
+irisTidy
+```
+
+## Calcular índices por grupo
+
+En este caso la moda no tiene sentido, por eso la excluyo de las estadísticas.
+
+
+```{r}
+ source("funciones/todosLosIndices.R")
+
+ # Primero armar el tibble agrupado de acuerdo a la agregación que se desee
+ unTibbleAgrupado <- irisTidy %>% group_by(Species,Variable)
+
+ # Luego puede invocar la función
+ todosLosIndices(unTibbleAgrupado)
+```
+
+## Matriz gráfica de correlación
+
+```{r fig.height=10, fig.width=12, message=FALSE, warning=FALSE}
+library(GGally)
+
+iris %>% 
+   ggpairs(aes(color = Species, alpha = 0.5))
+ # ggpairs(columns = c(1,5:10), aes(color = cut, alpha = 0.5))
+ # ggpairs(columns = c(2:4), aes(color = cut, alpha = 0.5))
+```
+
+## Diagramas de dispersión, o gráficos de puntos. Con gráficos marginales
+
+```{r}
+library(ggExtra)
+
+p <- ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species, size = Sepal.Length, alpha = 0.3)) +
+      geom_point() +
+      theme(legend.position="none")
+ 
+ggMarginal(p, type="boxplot")
+
+```
+
+
+```{r}
+gr1 <- ggplot(iris, aes(x=Petal.Length, fill = Species, alpha = 0.4)) +
+  geom_histogram() +
+  geom_boxplot(aes(x =  Petal.Length, y = 30), width = 5)
+gr1
+```
+
