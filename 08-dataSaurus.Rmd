@@ -29,7 +29,7 @@ dsd
 write_csv(dsd, "datos/dsd.csv")
 ```
 
-
+Calculando los índices puede observarse que todos los dataset tienen la misma media, desvío estándar (sd) y tamaño de muestra (n) tanto en la variable X como en la Y. En otras medidas de desvío como la mediana hay algunas diferencias, en general pequeñas.
 
 ```{r}
 resumen <- dsd %>% 
@@ -50,6 +50,7 @@ ggplot(dsd, aes(y = y)) +
   facet_wrap(~dataset)
 ```
 
+En los boxplot puede verse que la mediana y los RIQ varian algo aunque poco entre datasets.
 
 ```{r fig.height=15, fig.width=9}
 misColores <- c("#00afbb", "#e7b800","#fc4e07", "deeppink", "chartreuse", "midnightblue","#29BF12", "#00A5CF", "#DE1A1A","#574AE2", "#FFBF00", "grey45", "grey22")
