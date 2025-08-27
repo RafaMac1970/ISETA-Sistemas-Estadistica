@@ -1,0 +1,538 @@
+---
+title: "05 - Ejercicios - Tendencia central y varianza - Reflejos"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Experimento para estimar la velocidad de reacción de cuatro individuos
+
+## Materiales y métodos
+
+Se realizó un muestreo de los tiempos de reacción de cuatro individuos. Para esto una persona (sujeto) apoyó el brazo apoyado y con su mano asomando sobre uno de los costados de una mesa. Otra persona (aplicador) sostuvo una regla de 30cm de largo de modo que el 0 (cero) de la regla quede entre los dedos pulgar e índice del sujeto (con el cero en el extremo bajo de la regla). El aplicador suelta la regla sin previo aviso y el sujeto debe detener la caída de la regla presionando sus dedos sobre la misma. Este procedimiento se realizó 30 (treinta) veces seguidas a cada sujeto.
+
+Los resultados se registraron en la planilla "REFLEJOS.csv" que se encuentra en la carpeta "datos". Los datos fueron recopilados por el curso de "Estadística" del año 2023, de la carrera de "Análisis de Sistemas" del ISETA.
+
+## Carga de librerías
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(patchwork)
+library(plotrix)
+library(moments)
+```
+
+## Carga de datos
+
+```{r}
+# Carga los datos desde un archivo CSV (asegúrate de que el archivo CSV está en el directorio de trabajo)
+data <- read.csv("../datos/REFLEJOS.csv", header = TRUE, sep = ";")
+
+data <- data %>%
+  mutate(NACHO = as.numeric(gsub(",", ".", NACHO)))%>%
+  mutate(LAUTA = as.numeric(gsub(",", ".", LAUTA)))%>%
+  mutate(MARIO = as.numeric(gsub(",", ".", MARIO)))%>%
+  mutate(RAFA = as.numeric(gsub(",", ".", RAFA)))
+
+# Visualiza los primeros registros de la estructura original
+head(data)
+```
+
+### Reorganización y cálculo del tiempo de reacción a partir de los datos de distancia de caída.
+
+Para el cálculo del tiempo durante el cual la regla cayó en caída libre usamos el cálculo teórico siguiente:
+
+$$
+Dist_{(t)}= Dist_{(t0)} + V_{(t0)} . t + \frac{g * t^2}{2}
+$$
+
+Donde Dist es la distancia (en cm) medida sobre la regla. t0 se refiere a lo que ocurre en el inicio del experimento. En este caso la regla está con el cero entre los dedos, por lo tanto la distancia inicial (en t0) es cero.
+
+-   V(t0) es la velocidad inicial, que en nuestro caso también es nula porque la regla está quieta en el momento de soltarla.
+-   g es la aceleración de la gravedad, en nuestro caso 981 cm/s\^2
+-   t es el momento en el que realizamos en cálculo. En nuestro caso es la incógnita, es el tiempo (medido en s) que el sujeto tarda en detener la caída de la regla.
+
+$$
+Dist_{(t)}= 0 + 0 + \frac{981 * t^2}{2}
+$$
+Luego tenemos que despejarlo en la ecuación:
+
+$$
+t = \sqrt{\frac{2 . Dist_{(t)}}{981}}
+$$
+Con esta teoría (física de caída libre) podemos crear una nueva variable calculada a partir del dato de Distancia para cada una de las veces que se soltó la regla. Aprovechamos además para darle al tibble formato tidy.
+ 
+```{r}
+# Reorganiza los datos en una estructura tidy
+data_tidy <- data %>%
+  pivot_longer(cols = -ORDEN, names_to = "NOMBRE", values_to = "VALOR") %>%
+  mutate(DISTANCIA = VALOR, TIEMPO = sqrt(2 * DISTANCIA / 981)) %>% select(ORDEN, NOMBRE, DISTANCIA, TIEMPO)
+
+# Visualiza los primeros registros de la estructura tidy
+head(data_tidy)
+
+# La siguiente línea permite descartar datos extremos que posiblemente sean distorsivos. Esta decisión debe tomarse luego de mirar la distribución de los datos crudos.
+
+# data_tidy <- data_tidy %>% filter(DISTANCIA < 30)
+```
+
+Conservamos la información de ORDEN en el que se obtuvieron los datos para poder verificar si a lo largo del experimento hubo cambios en la reacción de cada sujeto (ser sección "Variaciones durante el experimento").
+
+```{r}
+write_csv(data_tidy, "../datos/reflejos_tidy.csv")
+```
+
+## Descripción general de la información
+
+### Histogramas
+
+```{r}
+# Crea un histograma para cada nombre
+ggplot(data_tidy, aes(x = DISTANCIA, fill = NOMBRE)) +
+  geom_histogram(binwidth = 2, position = "dodge") +
+  labs(title = "Histogramas por Nombre", x = "DISTANCIA", y = "Frecuencia") +
+  facet_wrap(vars(NOMBRE)) +
+  theme_minimal()
+```
+
+```{r}
+# Crea un histograma para cada nombre
+ggplot(data_tidy, aes(x = TIEMPO, fill = NOMBRE)) +
+  geom_histogram(binwidth = 0.015, position = "dodge") +
+  labs(title = "Histogramas por Nombre", x = "Tiempo", y = "Frecuencia") +
+  facet_wrap(vars(NOMBRE)) +
+  theme_minimal()
+```
+
+#### Observaciones:
+
+-   La dispersión de los datos de MARIO es mucho mayor que la del resto, además no parece ser "normal". Esto probablemente se deba a que el operario que soltó la regla fué diferente al resto.
+-   Los datos de tiempo y los de distancia tienen histogramas con forma similar (lo que era previsible) sin embargo tienen alguna diferencia que podría cambiar las conclusiones que podemos extraer de ambos análisis.
+-   Los rangos de variación de los datos de LAUTA, NACHO y RAFA son similares.
+
+### DISTANCIA
+
+#### Tendencia central y dispersión
+
+Primero calculamos los índices más frecuentes usados en la descripción de los datos
+
+```{r}
+source("../funciones/ic95.R")
+source("../funciones/quantiles.R")
+source("../funciones/calcularMediana.R")
+```
+
+
+```{r}
+indicesReflejosDist <- data_tidy %>% 
+  group_by(NOMBRE) %>% 
+  reframe(n = n(), min = min(DISTANCIA), q1 = q1(DISTANCIA), mediana = median(DISTANCIA), q3 = q3(DISTANCIA), Max = max(DISTANCIA), media = mean(DISTANCIA), varianza = var(DISTANCIA), sd = sd(DISTANCIA), cv = sd/media, EE = std.error(DISTANCIA), asimetria = skewness(DISTANCIA), curtosis = kurtosis(DISTANCIA), "IC95-" = ic95(DISTANCIA)[1], "IC95+" = ic95(DISTANCIA)[2])
+indicesReflejosDist
+```
+
+```{r}
+filter(indicesReflejosDist, NOMBRE =="LAUTA")$media
+```
+
+#### Box Plot
+
+Es conveniente mostrar gráficamente la información anterior.
+
+```{r}
+ggplot(data_tidy, aes(x = NOMBRE, y = DISTANCIA, fill = NOMBRE)) +
+  geom_boxplot() +
+  stat_boxplot(geom = "errorbar",
+               width = 0.25) +
+  geom_jitter(width = 0.1) +
+  xlab("Nombre") + ylab("Distancia de caída (cm)") +
+  ylim(0,30)
+```
+
+#### Test de normalidad
+
+##### QQ Plot
+
+```{r}
+ggplot(data_tidy, aes(sample = DISTANCIA, color = NOMBRE)) + 
+  stat_qq() + 
+  stat_qq_line() + 
+  facet_wrap(vars(NOMBRE))
+```
+
+##### Test de Shapiro-Wilk
+
+Se puede verificar que la información de LAUTA se aleja de la normalidad y eso probablemente se deba a los valores extremos que probablemente representan fallos en la ejecución del experimento y no variabilidad esperable en la reacción del sujeto.
+
+En este caso los p-value testean la Hipotesis nula, H0 "Los datos se distribuyen igual a una distribución Normal".
+
+```{r}
+# Realiza el test de normalidad Shapiro-Wilk para cada NOMBRE
+shapiro_results <- data_tidy %>%
+  group_by(NOMBRE) %>%
+  summarize(p_value = shapiro.test(DISTANCIA)$p.value)
+
+# Muestra los resultados
+print(shapiro_results)
+```
+
+#### Observaciones:
+
+-   Las medias y las medianas son similares en todos los casos indicando que no hay asimetrías importantes.
+-   El coeficiente de variación de MARIO es del 51%, respecto del 18% del resto, lo que confirma las apreciaciones visuales previas.
+-   La asimetría y kurtosis de LAUTA es mayor al resto, lo que puede observarse en los histogramas también, mostrando que los tiempo de reacción fueron cortos en mayor cantidad de las pruebas.
+-   Los intervalos de confianza muestran mucha superposición, lo que muestra que la variabilidad entre pruebas de una persona es mayor a las diferencias que existen entre las medias de las personas.
+-   Existen algunos datos extremos que quizás valga la pena excluir del análisis (datos de distancia mayor o igual a 30cm, quees el límite de la regla).
+
+### TIEMPO
+
+#### Tendencia central y dispersión
+
+```{r}
+indicesReflejosTiempo <- data_tidy %>% 
+  group_by(NOMBRE) %>% 
+  reframe(n = n(), min = min(TIEMPO), q1 = q1(TIEMPO), mediana = median(TIEMPO), q3 = q3(TIEMPO), Max = max(TIEMPO), media = mean(TIEMPO), varianza = var(TIEMPO), sd = sd(TIEMPO), cv = sd/media, EE = std.error(TIEMPO), asimetria = skewness(TIEMPO), curtosis = kurtosis(TIEMPO), "IC95-" = ic95(TIEMPO)[1], "IC95+" = ic95(TIEMPO)[2])
+indicesReflejosTiempo
+```
+
+#### Box Plot
+
+```{r}
+ggplot(data_tidy, aes(x = NOMBRE, y = TIEMPO, fill = NOMBRE)) +
+  geom_boxplot() +
+  stat_boxplot(geom = "errorbar",
+               width = 0.25) +
+  geom_jitter(width = 0.1) +
+  xlab("Nombre") + ylab("Tiempo de reacción (segundos)") +
+  ylim(0,0.25)
+```
+
+#### Test de normalidad
+
+##### QQ Plot
+
+```{r}
+ggplot(data_tidy, aes(sample = TIEMPO, color = NOMBRE)) + 
+  stat_qq() + 
+  stat_qq_line() + 
+  facet_wrap(vars(NOMBRE))
+```
+
+##### Test de Shapiro-Wilk
+
+Se repite el lo observado en la DISTANCIA.
+
+```{r}
+# Realiza el test de normalidad Shapiro-Wilk para cada NOMBRE
+shapiro_results <- data_tidy %>%
+  group_by(NOMBRE) %>%
+  summarize(p_value = shapiro.test(TIEMPO)$p.value)
+
+# Muestra los resultados
+print(shapiro_results)
+
+```
+#### Observaciones:
+
+-   Los coeficiente de variacióndel TIEMPO son sensiblemente menores a los de DISTANCIA, además las asimetrías y kurtosis son más similares entre individuos, lo que indica que esta variable es más robusta que la anterior.
+-   El resto de las observaciones siguensiendo pertinentes al observar el TIEMPO.
+
+
+## MODIFICACIÓN del dataset!!!
+
+Se propone volver a la línea 76 y descomentarla para descartar los datos en que la DISTANCIA sea mayor a 30.
+
+## Test de Hipótesis
+
+### Comparación de distribuciones de densidad
+
+```{r}
+# Crea un gráfico de densidad con una línea vertical para la media por NOMBRE
+grafDistancia1 <- ggplot(data_tidy, aes(x = DISTANCIA, fill = NOMBRE)) +
+  geom_density(alpha = 0.5) +
+  geom_vline(data = data_tidy %>% group_by(NOMBRE) %>% summarise(mean_value = mean(DISTANCIA)),
+             aes(xintercept = mean_value, color = NOMBRE), linetype = "dashed", linewidth = 1) +
+  labs(title = "Distribución y Medias por NOMBRE", x = "DISTANCIA", y = "Densidad") +
+  facet_grid(rows = vars(NOMBRE)) +
+  theme_minimal()
+```
+
+```{r}
+# Crea un gráfico de densidad con una línea vertical para la media por NOMBRE
+grafTiempo1 <- ggplot(data_tidy, aes(x = TIEMPO, fill = NOMBRE)) +
+  geom_density(alpha = 0.5) +
+  geom_vline(data = data_tidy %>% group_by(NOMBRE) %>% summarise(mean_value = mean(TIEMPO)),
+             aes(xintercept = mean_value, color = NOMBRE), linetype = "dashed", linewidth = 1) +
+  labs(title = "Distribución y Medias por NOMBRE", x = "TIEMPO", y = "Densidad") +
+  facet_grid(rows = vars(NOMBRE)) +
+  theme_minimal()
+```
+
+```{r fig.height=10, fig.width=7}
+grafDistancia1 / grafTiempo1
+```
+
+### Comparaciones múltiples
+
+Cuando se hace una comparación con un Test de Hipótesis se calcula la probabilidad de cometer Error de tipo I. Por lo tanto con cada nueva comparación se aumenta la probabilidad de cometer dicho error. Para corregir este problema hay varias alternativas, aquí mostramos dos. La más frecuentemente usada es Tukey, aquí además mostramos el ajuste de Holm, que corrige los p-values de acuerdo a la cantidad de comparaciones que se hagan. Tambien existen las pruebas de Bonferroni y la de Scheffe. Bonferroni es probablemente la más cauta de las alternativas (multiplica cada p-value por el total de comparaciones a realizar) y Holm la más "liberal".
+
+Se puede ver que en las dos variables (distancia y tiempo) las únicas comparaciones que no rechazan H0 (y por lo tanto no podemos decir que las diferencias son significativas) son:
+
+-   Nacho y Lauta (p-value Distancia = 0.0789, p-value Tiempo = 0.170),
+-   Nacho y Rafa (p-value Distancia = 0.2756, p-value Tiempo = 0.400).
+
+Todas las demás sí son significativas.
+
+#### Distancia
+
+##### Tukey
+
+```{r}
+# Realiza un test de Tukey para comparar las medias entre los niveles de "NOMBRE"
+tukey_results <- TukeyHSD(aov(DISTANCIA ~ NOMBRE, data = data_tidy), ordered = TRUE)
+
+# Muestra un resumen de los resultados
+print(tukey_results)
+
+```
+
+##### Holm, Bonferroni y otros
+
+```{r}
+# Realiza pruebas t de todos contra todos. Puede usar métodos "holm", "hochberg", "hommel", "bonferroni", "BH", "BY",  "fdr", "none"
+pairwise_results <- pairwise.t.test(data_tidy$DISTANCIA, data_tidy$NOMBRE, p.adjust.method = "holm")
+
+# Muestra un resumen de los resultados
+print(pairwise_results)
+
+```
+
+#### Tiempo
+
+##### Tukey
+
+```{r}
+# Realiza un test de Tukey para comparar las medias entre los niveles de "NOMBRE"
+tukey_results <- TukeyHSD(aov(TIEMPO ~ NOMBRE, data = data_tidy), ordered = TRUE)
+
+# Muestra un resumen de los resultados
+print(tukey_results)
+
+```
+
+##### Holm, Bonferroni y otros
+
+```{r}
+# Realiza pruebas t de todos contra todos. Puede usar métodos "holm", "hochberg", "hommel", "bonferroni", "BH", "BY",  "fdr", "none"
+pairwise_results <- pairwise.t.test(data_tidy$TIEMPO, data_tidy$NOMBRE, p.adjust.method = "holm")
+
+# Muestra un resumen de los resultados
+print(pairwise_results)
+
+```
+
+### Comparaciones de a pares
+
+Se pueden realizar comparaciones entre dos personas, pero no es correcto realizarlas cuando se van a realizar otras más, debido el problema antes señalado del aumento de la probabilidad de cometer Error de tipo I.
+
+Aquí un ejemplo.
+
+Puede verse que en este caso se encuentran diferencias significativas entre Nacho y Lauta que no son significativas al hacer la comparación junto a muchas otras comparaciones como en el caso anterior.
+
+Además se hacce la comparación a "dos colas", a "cola izquierda" y a "cola derecha".
+
+```{r}
+# Selecciona los datos para los nombres "NACHO" y "LAUTA"
+data_subset <- data_tidy %>% filter(NOMBRE %in% c("NACHO", "RAFA"))
+
+# Realiza una prueba t para comparar los dos nombres. alternative = c("two.sided", "less", "greater")
+t_test_result <- t.test(TIEMPO ~ NOMBRE, data = data_subset, alternative = "two.sided")
+print(t_test_result)
+t_test_result <- t.test(TIEMPO ~ NOMBRE, data = data_subset, alternative = "less")
+print(t_test_result)
+t_test_result <- t.test(TIEMPO ~ NOMBRE, data = data_subset, alternative = "greater")
+print(t_test_result)
+
+```
+
+```{r}
+# MARIO 2, LAUTA 1, NACHO 3, RAFA 4  Estos son los índices y estan ordenados de menor a mayor
+menor <- 1
+mayor <- 3
+
+media1 <- indicesReflejosTiempo[[mayor,8]]
+media2 <- indicesReflejosTiempo[[menor,8]]
+sd1 <- indicesReflejosTiempo[[mayor,10]]
+sd2 <- indicesReflejosTiempo[[menor,10]]
+alfa1 <- qnorm(0.05, media1, sd1)
+alfa2 <-qnorm(0.95, media2, sd2)
+nombre1 <- indicesReflejosTiempo[[mayor,1]]
+nombre2 <- indicesReflejosTiempo[[menor,1]]
+
+rango <- c(-0.05, 0.3)
+
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media1, sd = sd1), color = 'red') +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media2, sd = sd2), color = 'blue') +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media1, sd = sd1), fill = 'red', xlim = c( min(rango),alfa1), alpha = 0.5) +
+  annotate(
+    "text", label = nombre1,
+    x = 0.25, y = 15, size = 4, colour = "red") +
+  geom_vline(aes(xintercept = media1), linetype = "dashed", size = 1, color = "red") +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media2, sd = sd2), fill = 'blue', xlim = c(alfa2, max(rango)), alpha = 0.5) +
+  annotate(
+    "text", label = nombre2,
+    x = 0, y = 15, size = 4, colour = "blue") +
+  geom_vline(aes(xintercept = media2), linetype = "dashed", size = 1, color = "blue") +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("Tiempo (seg)") + theme_bw()
+```
+
+## Variaciones durante el experimento
+
+### Graficando en función del ORDEN
+
+```{r}
+ggplot(data_tidy, aes(x = ORDEN, y = DISTANCIA, color = NOMBRE)) +
+  geom_point() +
+  geom_smooth(method=loess, se=TRUE) +
+  geom_line() + 
+  facet_wrap(vars(NOMBRE))
+```
+
+```{r}
+ggplot(data_tidy, aes(x = ORDEN, y = TIEMPO, color = NOMBRE)) +
+  geom_point() +
+  geom_smooth(method=loess, se=TRUE) +
+  geom_line() + 
+  facet_wrap(vars(NOMBRE))
+```
+
+La variable de TIEMPO fué calculada en base a la medición de DISTANCIA, por lo tanto cuando gracicamos relacionandouna variable con la otra es lógico que no haya variabilidad entre los datos y que la forma de la curva responda a un movimiento uniformemente variado (MRUV). Se muestra aquí el gráfico para que se vea claramente qué valores son más afectados.
+
+```{r}
+ggplot(data_tidy, aes(x = DISTANCIA, y = TIEMPO, color = NOMBRE)) +
+  geom_point( alpha = 0.5) +
+  #geom_smooth(method=lm, se=FALSE) +
+  #geom_jitter() +
+  geom_line()
+
+```
+
+## Simulación Montecarlo
+
+Se generandatos al azar repetando los parámetros calculados y suponiendo una distribución Normal.
+
+```{r}
+indicesReflejosTiempo
+```
+
+### Tiempo de reacción
+
+```{r fig.height=8, fig.width=5}
+Lauta <- rnorm(n = 10000, mean = indicesReflejosTiempo[[1,8]], sd =	indicesReflejosTiempo[[1,10]])
+Mario <- rnorm(n = 10000, mean = indicesReflejosTiempo[[2,8]], sd =	indicesReflejosTiempo[[2,10]])
+Nacho <- rnorm(n = 10000, mean = indicesReflejosTiempo[[3,8]], sd =	indicesReflejosTiempo[[3,10]])
+Rafa <- rnorm(n = 10000, mean = indicesReflejosTiempo[[4,8]], sd =	indicesReflejosTiempo[[4,10]])
+
+dataSim <- tibble(Lauta,Mario,Nacho,Rafa)
+
+dataSimTidy <- dataSim %>%
+  pivot_longer(everything(),names_to = "Nombre", values_to = "Tiempo") %>% group_by(Nombre)
+
+ggplot(dataSimTidy, aes(x = Tiempo, color = Nombre)) +
+  geom_histogram(bins = 40) +
+  labs(title = "Histogramas por Nombre", x = "Tiempo de reacción", y = "Frecuencia") +
+  facet_wrap(vars(Nombre), ncol = 1) +
+  theme_minimal()
+```
+
+## ANEXO:
+
+### Otros gráficos que podrían resultar interesantes
+
+```{r}
+# Crea un histograma para cada nombre
+ggplot(data_tidy, aes(x = DISTANCIA, fill = NOMBRE)) +
+  geom_density(alpha = 0.4) +
+  labs(title = "Densidades por Nombre", x = "DISTANCIA", y = "Frecuencia") +
+  theme_minimal()
+
+```
+
+#### Comparación en pares. Distribuciones normales.
+
+El primer chunk es para elegir las dos personas a comparar. Los dos siguientes grafican por separado Distancia y Tiempo. La líneas verticales indican las medias. Las áreas representanel 5% de la distribución.
+
+```{r}
+# MARIO 2, LAUTA 1, NACHO 3, RAFA 4  Estos son los índices y estan ordenados de menor a mayor
+menor <- 1
+mayor <- 4
+```
+
+```{r}
+media1 <- indicesReflejosDist[[mayor,8]]
+media2 <- indicesReflejosDist[[menor,8]]
+sd1 <- indicesReflejosDist[[mayor,10]]
+sd2 <- indicesReflejosDist[[menor,10]]
+alfa1 <- qnorm(0.05, media1, sd1)
+alfa2 <-qnorm(0.95, media2, sd2)
+nombre1 <- indicesReflejosDist[[mayor,1]]
+nombre2 <- indicesReflejosDist[[menor,1]]
+
+rango <- c(-10, 40)
+
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media1, sd = sd1), color = 'red') +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media2, sd = sd2), color = 'blue') +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media1, sd = sd1), fill = 'red', xlim = c( min(rango),alfa1), alpha = 0.5) +
+  annotate(
+    "text", label = nombre1,
+    x = 30, y = 0.1, size = 4, colour = "red") +
+  geom_vline(aes(xintercept = media1), linetype = "dashed", size = 1, color = "red") +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media2, sd = sd2), fill = 'blue', xlim = c(alfa2, max(rango)), alpha = 0.5) +
+  annotate(
+    "text", label = nombre2,
+    x = 0, y = 0.1, size = 4, colour = "blue") +
+  geom_vline(aes(xintercept = media2), linetype = "dashed", size = 1, color = "blue") +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("Distancia (cm)") + theme_bw()
+```
+
+```{r}
+media1 <- indicesReflejosTiempo[[mayor,8]]
+media2 <- indicesReflejosTiempo[[menor,8]]
+sd1 <- indicesReflejosTiempo[[mayor,10]]
+sd2 <- indicesReflejosTiempo[[menor,10]]
+alfa1 <- qnorm(0.05, media1, sd1)
+alfa2 <-qnorm(0.95, media2, sd2)
+nombre1 <- indicesReflejosTiempo[[mayor,1]]
+nombre2 <- indicesReflejosTiempo[[menor,1]]
+
+rango <- c(-0.05, 0.3)
+
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media1, sd = sd1), color = 'red') +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media2, sd = sd2), color = 'blue') +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media1, sd = sd1), fill = 'red', xlim = c( min(rango),alfa1), alpha = 0.5) +
+  annotate(
+    "text", label = nombre1,
+    x = 0.25, y = 15, size = 4, colour = "red") +
+  geom_vline(aes(xintercept = media1), linetype = "dashed", size = 1, color = "red") +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media2, sd = sd2), fill = 'blue', xlim = c(alfa2, max(rango)), alpha = 0.5) +
+  annotate(
+    "text", label = nombre2,
+    x = 0, y = 15, size = 4, colour = "blue") +
+  geom_vline(aes(xintercept = media2), linetype = "dashed", size = 1, color = "blue") +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("Tiempo (seg)") + theme_bw()
+```
+
+### Otras formas gráficas de comparar
+
+Esto es raro, porque cada punto corresponde a una línea de ORDEN. Si hay cierta tendencia significa que los dos nombres progresaron similarmente.
+
+```{r}
+ggplot(data, aes(x = LAUTA, y = MARIO)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(10, 30) +
+  ylim(10, 30)
+```

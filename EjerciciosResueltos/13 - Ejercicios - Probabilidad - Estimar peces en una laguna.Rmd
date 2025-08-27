@@ -1,0 +1,175 @@
+---
+title: "Probabilidad - Ejercicio - Estimar la cantidad peces en una laguna"
+output: html_notebook
+---
+
+# Simulación acerca de cómo estimar la cantidad peces que hay en una laguna
+
+### Fuente: Miró, Ricardo (2006). Números combinatorios y probabilidades. Colección Ciencia Jóven #2, EUDEBA. 176pgs.
+
+Capítulo 4. 3 (pg. 52).
+
+El objetivo del ejercicio es estimar la cantidad de peces que hay en una laguna. El verbo estimar es distinto que el verbo contar. Si fuera posible contar los peces en una laguna de la misma manera en que es posible contar los peces en una pecera, el asunto estaría terminado. Pero en este caso sólo podemos estimar. Estimar es obtener un número que se aproxime a la cantidad real que deseamos conocer.
+
+Es interesante discutir qué circunstancias pueden hacer fallar los cálculos y en qué sentido sesgarían el resultado.
+
+Aquí se realiza una simulación del problema.
+
+## Tenemos una laguna con cierta cantidad desconocida de peces.
+
+```{r}
+library(tidyverse)
+
+# Esta es nuestra incógnita.
+cantidadDePeces <- sample(500:1000,1, replace = FALSE)
+
+# Alternativa. es equivalente pero con replace = TRUE, en este caso cualquier método sirve
+# cantidadDePeces <- round(runif(n=1, min=200, max=1000))
+#class(cantidadDePeces)
+```
+
+
+## Primero pescamos cierta cantidad de peces, los marcamos y liberamos nuevamente en la población original.
+Es importante que la pesca sea lo más aleatoria posible, cosa que en la realidad es muy difícil. Piense en las dificultades metodológicas y las implicancias que tienen para sus conclusiones.
+
+```{r}
+# Primero se crea la población de peces sin marcar
+pez <- c()
+marcado <- c()
+
+for (i in 1:cantidadDePeces){
+  pez[i] <- i
+  marcado[i] <- FALSE
+}
+poblacionDePeces <- tibble(pez,marcado)
+
+# Aquí se crean las funciones de pescar y marcar
+pescar <- function(poblacion, cantidad) {
+  sample(poblacion$pez, cantidad)
+}
+
+# Me gusta más esta idea, pero tengo que acomodar aguas abajo tambien
+#pescar <- function(poblacion, cantidad) {
+#  slice_sample(poblacion, cantidad)
+#}
+
+marcar <- function(poblacionTotal, poblacionPescada) {
+  for (j in poblacionPescada) {
+    poblacionTotal[j,]$marcado <- TRUE
+  }
+  return(poblacionTotal)
+}
+
+# Aquí se pesca y marca una determinada porblación
+cantidadMarcados <- 100
+poblacionDePeces <- marcar(poblacionDePeces, pescar(poblacionDePeces,cantidadMarcados))
+
+# esto es para mostrar que la cosa viene bien
+summary(poblacionDePeces)
+
+```
+
+
+
+## Luego se vuelven a realizar una pesca y se registra la cantidad de peces marcados y no marcados recuperados.
+
+```{r}
+cantidadAPescar = 75
+nuevaPesca <- tibble(y = pescar(poblacionDePeces,cantidadAPescar))
+nuevaPesca <- slice(poblacionDePeces,nuevaPesca$y)
+#nuevaPesca <- semi_join(poblacionDePeces,nuevaPesca, join_by(pez == y))
+
+summary(nuevaPesca)
+
+print("Estimación del tamaño de la población: ")
+round(cantidadMarcados / mean(nuevaPesca$marcado == TRUE))
+
+```
+
+# Simulación para evaluar la sensibilidad de la intensidad de marcado y el tamaño de la segunda pesca.
+
+```{r}
+# Tratamientos en elexperimento
+nivelesCantidadMarcados <- seq(50, 300, 50)
+nivelesNuevaPesca <- seq(50, 300, 50)
+
+# Primero se crea la población de peces sin marcar
+pez <- c()
+marcado <- c()
+
+for (i in 1:cantidadDePeces){
+  pez[i] <- i
+  marcado[i] <- FALSE
+}
+poblacionDePeces <- tibble(pez,marcado)
+
+# Se usaran las funciones de pescar y marcar anteriores
+
+```
+
+```{r}
+dataExperimento <- tribble(~marcados, ~pescados, ~estimacion)
+
+for (i in nivelesCantidadMarcados) {
+  for (j in nivelesNuevaPesca) {
+    for (k in 1:10) {
+      poblacion <- marcar(poblacionDePeces, pescar(poblacionDePeces,i))
+      pesca <- tibble(y = pescar(poblacion,j))
+      pesca <- slice(poblacion,pesca$y)
+      est <- round(i / mean(pesca$marcado == TRUE))
+      dataExperimento <- add_row(dataExperimento, marcados = factor(i), pescados = factor(j), estimacion = est)
+    }
+  }
+}
+dataExperimento
+```
+
+```{r}
+ggplot(dataExperimento, aes(x = marcados, y = estimacion, group = pescados, colour = pescados)) + 
+#  geom_line() +
+  geom_boxplot(aes(group = marcados)) +
+  geom_jitter(width = 0.1) +
+  ylim(c(0,2500)) +
+  theme_classic() + 
+  geom_hline(yintercept = cantidadDePeces)
+
+```
+
+```{r}
+dataExperimento2 <- dataExperimento %>% group_by(marcados, pescados) %>% reframe(media = mean(estimacion))
+```
+
+
+```{r}
+ 
+ggplot(dataExperimento2, aes(x = marcados, y = media, group = pescados, colour = pescados)) + 
+  geom_boxplot(aes(group = marcados)) +
+  geom_line() +
+  geom_jitter(width = 0.1) +
+  ylim(c(0,1100)) +
+  theme_classic() + 
+  geom_hline(yintercept = cantidadDePeces)
+
+```
+
+```{r}
+ggplot(dataExperimento, aes(x = pescados, y = estimacion, group = marcados, colour = marcados)) + 
+#  geom_line() +
+  geom_boxplot(aes(group = pescados)) +
+  geom_jitter(width = 0.1) +
+  ylim(c(0,2500)) +
+  theme_classic() + 
+  geom_hline(yintercept = cantidadDePeces)
+
+```
+
+```{r}
+ggplot(dataExperimento2, aes(x = pescados, y = media, group = marcados, colour = marcados)) + 
+  geom_boxplot(aes(group = pescados)) +
+  geom_line() +
+  geom_jitter(width = 0.1) +
+  ylim(c(0,1100)) +
+  theme_classic() + 
+  geom_hline(yintercept = cantidadDePeces)
+
+```

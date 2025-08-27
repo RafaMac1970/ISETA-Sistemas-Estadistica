@@ -39,9 +39,9 @@ cov(iSp$Sepal.Length, iSp$Sepal.Width)
 cov(iSp$Petal.Length, iSp$Sepal.Length)
 ```
 
-Interpretación: El valor de la covarianza nos dice si existe una relación lineal positiva o negativa entre las dos variables. La magnitud del índice generalmente es irrelevante y depende mucho de la cantidad de observaciones. Para que la magnitud pueda interpretarse el n de las dos muestras debe ser igual, y además los valores de cada variable en las dos muestras deben variar enun rango similar. Estas condiciones son muy raras de conseguir.
+Interpretación: El valor de la covarianza nos dice si existe una relación lineal positiva o negativa entre las dos variables. La magnitud del índice generalmente es irrelevante y depende mucho de la cantidad de observaciones. Para que la magnitud pueda interpretarse el n de las dos muestras debe ser igual, y además los valores de cada variable en las dos muestras deben variar en un rango similar. Estas condiciones son muy raras de conseguir.
 
-Como ejemplo de esto último comparemos las covarianzas en dos datasets diferentes (mire además los gráficos más abajo):
+Como ejemplo de esto último comparemos las covarianzas en dos datasets diferentes (mire además los gráficos más abajo, enla sección "Graficando"):
 
 ```{r}
 cov(iris$Sepal.Length, iris$Sepal.Width)
@@ -201,8 +201,9 @@ iris %>%
 ## Diagramas de dispersión, o gráficos de puntos. Con gráficos marginales
 
 ```{r}
-p <- ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species, size = Sepal.Length, alpha = 0.3)) +
+p <- ggplot(iris, aes(x = Petal.Length, y = Petal.Width, color = Species, size = Sepal.Length, alpha = 0.2)) +
       geom_point() +
+      geom_smooth(method = "lm", se = FALSE) +
       theme(legend.position="none")
  
 p1 <- ggMarginal(p, type="histogram")
@@ -218,5 +219,5 @@ p4 <- ggMarginal(p, type="boxplot")
 ```{r}
 library("cowplot")
 # Graficar en grilla
-plot_grid(p1,p2,p3,p4, labels = "AUTO")
+plot_grid(p1, p2, p3, p4, labels = "AUTO")
 ```

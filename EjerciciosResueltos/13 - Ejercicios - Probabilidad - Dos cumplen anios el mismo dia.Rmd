@@ -1,0 +1,146 @@
+---
+title: "Ejercicios - Probabilidad - Dos cumplen años el mismo día"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+Adaptado de: 
+
+<https://bookdown.org/dparedesi/data-science-con-r/probabilidades-discretas.html#combinaciones-y-permutaciones>
+
+# Pregunta disparadora:
+
+¿Cuántas personas debe haber reunidas para que la probabilidad de que dos de ellas cumplan años el mismo día sea mayor al 50%?
+
+# Ejercicio:
+
+Hay una reunión de 50 personas. Utilizando simulación de Montecarlo estimemos cuál es la probabilidad de qué hayan al menos dos personas que cumplan años el mismo día. (Obviemos a los que cumplen años el 29 de febrero).
+
+Primero listemos todos los días del año disponible para cumpleaños:
+
+```{r}
+dias <- 1:365
+```
+
+Generemos una muestra aleatoria de 50 números del vector dias, pero ésta vez con reemplazo porque una persona podría tener el mismo día, y almacenémoslo en la variable personas
+
+```{r}
+personas <- sample(dias, 50, replace = TRUE)
+```
+
+Para validar si alguno de los valores se repite usaremos la función duplicated() que nos valida si dentro del vector hay valores duplicados:
+
+```{r}
+personas
+```
+
+
+```{r}
+duplicated(personas)
+```
+
+Finalmente, para determinar si hubo algún valor TRUE utilizamos la función any():
+
+```{r}
+any(duplicated(personas))
+```
+
+El resultado nos indica si es verdadero o no que hayan al menos dos personas que cumplan el mismo día años. Para estimar por simulación de Montecarlo cuál es la probabilidad tenemos que repetir el experimento muchas veces y sacar la proporción de cuántas veces nos sale como resultado TRUE.
+
+```{r}
+# Simulación de Montecarlo con 10 mil repeticiones
+veces <- 10000
+resultados <- replicate(veces, {    
+    personas <- sample(dias, 50, replace = TRUE)
+    # Retorna un valor lógico de si hay duplicados
+    any(duplicated(personas))
+})
+# Probabilidad:
+mean(resultados) 
+```
+
+Vemos que la probabilidad estimada es muy alta, arriba del 95%. ¿Qué pasaría si tengo un grupo de 25 personas?
+
+Para ello, modificamos el código anterior y creamos la variable clase que nos indicará el número de personas en ese grupo:
+
+```{r}
+veces <- 10000
+resultados <- replicate(veces, {    
+    personas <- sample(dias, 8, replace = TRUE)
+    any(duplicated(personas))
+})
+mean(resultados) 
+```
+
+Creemos ahora la función estimaProbabilidad y estimemos usando esta función la probabilidad de encontrar al menos dos personas con el mismo día de cumpleaños en un grupo de 25 personas. Ésta vez tenemos que especificar que el muestreo es con "reemplazo" porque por default la función sample() es "sin reemplazo".
+
+```{r}
+estimaProbabilidad <- function(cantPersonas, veces = 1000){
+    resultados <- replicate(veces, {
+        personas <- sample(dias, cantPersonas, replace = TRUE)
+        any(duplicated(personas))
+    })
+    mean(resultados) 
+}
+estimaProbabilidad(25)
+```
+
+Finalmente, si ya tenemos una función que nos calcula en base al número de personas en un grupo podemos crear un vector numérico con el total de personas de diferentes grupos y luego aplicarle la función que hemos creado. El resultado lo podemos almacenar en la variable prob.
+
+```{r}
+# Creamos 80 distintos grupos de personas
+# El primer grupo con 1 persona, el último grupo con 80 personas
+grupos <- 1:80
+# Estimamos la probabilidad dependiendo del número de personas por grupo
+prob <- sapply(grupos, estimaProbabilidad)
+prob
+```
+
+Así, si colocamos en un gráfico de dispersión podemos ver cómo incrementa la probabilidad conforme hay más estudiantes:
+
+```{r}
+probabilidades <- tibble(
+  n = grupos,
+  probabilidad = prob
+)
+
+ggplot(probabilidades, aes(n, probabilidad)) +
+  geom_point() +
+  xlab("Número de alumnos en cada clase") +
+  geom_hline(yintercept=0.5)
+```
+
+Ya podemos impresionar a nuestros amigos de distintos grupos diciéndoles que, si están en un salón de 60 personas, "les pueden apostar" que hay dos personas en ese salón que cumplen años el mismo día. No es definitiva, pero las chances están muy a nuestro favor. Arriba de 23 personas la probablilidad ya es mayor a 50%, puede apostar dependiendo del riesgo que queiera correr.
+
+## Cálculo teórico
+
+```{r}
+total <- 1; 
+probs <- tibble("tamanioGrupo" = integer(), "teorico" = double(), "simulado" = double())
+for(i in 1:80) { 
+  total = total * ((366 - i) / 365) # Esto es la probabilidad de que un grupo de i personas NO cumplan años el mismo día
+  probs[i,1] <- i
+  probs[i,2] <- 1 - total # Uno menos la probabilidad de que las i personas No cumplan el mismo día es la probabilidaad de que al menos dos personas Si cumplan el mismo día. Son conjuntos complementarios.
+  probs[i,3] <- probabilidades[[i,2]] # esto agrega los datos de la simulación al tibble
+}
+probs
+```
+
+```{r}
+ggplot(probs) + 
+  aes(x = tamanioGrupo, y = teorico) +
+  geom_line(alpha = 0.5) +
+  geom_point(aes(x = tamanioGrupo, y = simulado),alpha = 0.5)
+```
+
+```{r}
+ggplot(probs) + 
+  aes(x = teorico, y = simulado) +
+  geom_point(alpha = 0.5) + 
+  geom_abline(intercept = 0, slope = 1, alpha = 0.5)
+```
+

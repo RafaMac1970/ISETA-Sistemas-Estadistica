@@ -1,0 +1,178 @@
+---
+title: "Probabilidad - Carrera"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+Este ejercicio se propone en el libro:
+
+Miguel R. Wilhelmi (2004). Combinatoria y Probabilidad. Universidad de Granada. España. 275 pgs. <https://www.ugr.es/~batanero/pages/ARTICULOS/librowhilhelmi.pdf>
+
+El libro propone realizar el ejercicio analógicamente y luego simularlo en una computadora para comparar los resultados con los obtenidos empíricamente y los calculados teóricamente. En este notebook realizaremos la simulación.
+
+## Un juego: La Carrera.
+
+Se trata de un juego de dados. El juego es para dos personas. Se necesita un tablero como el que se muestra a continuación (con once filas numeradas del 2 al 12 y 11 columnas, la última de las cuales está marcada con la palabra meta), 10 fichas de dos colores distintos (5 de cada color) y dos dados (numerados del 1 al 6).
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r echo=FALSE}
+a <- (2:12)
+b <- c("","","","","","","","","","","")
+c <- c("","M","E","T","A","","M","E","T","A","")
+dibujoTablero <- tibble("Suma"=a,"1"=b,"2"=b,"3"=b,"4"=b,"5"=b,"6"=b,"7"=b,"8"=b,"9"=b,"10"=b,"Meta"=c)
+```
+
+```{r echo=FALSE}
+library(knitr)
+library(kableExtra)
+kable(dibujoTablero) %>%
+  row_spec(0:11, align = "c") %>%
+#  kable_minimal() %>%
+  kable_styling(latex_options = "jira") %>%
+  column_spec(c(2,4,6,8,10), background =  "#f3f3f3") %>%
+  kable_paper("striped")
+```
+
+## Reglas de juego
+
+1.  Alternativamente, cada uno de los contrincantes, escoge un número comprendido entre 2 y 12 (posibles resultados en la suma de un par de dados), colocando una ficha en la casilla correspondiente a dicho número en la primera columna. Una vez distribuidos 10 de los 11 números (5 de cada color), se empieza a jugar. (en esta simulación las fichas se distribuyen al azar)
+
+2.  Por turno, lanzan los dados cada uno de los contrincantes. Si la suma de los dados es uno de los números escogidos por el lanzador, éste desplaza la ficha correspondiente hacia delante una casilla.
+
+3.  Si la suma de los dados es el número que no ha sido escogido por ninguno de los dos adversarios, el jugador del turno escoge una de sus fichas (la que quiera) y la mueve hacia delante una casilla. (esta regla no la hemos implementado en esta simulación)
+
+4.  Si la suma de los dados es un número del adversario, las fichas quedan como están.
+
+5.  Gana el jugador que consigue llevar una de sus fichas hasta la meta.
+
+## Elementos básicos para el juego
+
+```{r}
+sumaDeTablero <- c("2"=0, "3"=0, "4"=0, "5"=0, "6"=0, "7"=0, "8"=0, "9"=0, "10"=0, "11"=0, "12"=0)
+posiciones <- c("2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12")
+colores <- c("2"="NULL", "3"="NULL", "4"="NULL", "5"="NULL", "6"="NULL", "7"="NULL", "8"="NULL", "9"="NULL", "10"="NULL", "11"="NULL", "12"="NULL")
+unDado <- rep(c(1, 2, 3, 4, 5, 6), times = c(1, 1, 1, 1, 1, 1))
+todosLosTableros <- tibble("2"=double(), "3"=double(), "4"=double(), "5"=double(), "6"=double(), "7"=double(), "8"=double(), "9"=double(), "10"=double(), "11"=double(), "12"=double())
+```
+
+## Simulación
+
+Se juega varias veces cada partida y se registran los resultados.
+
+```{r}
+contador <- 0
+resultados <- c()
+repeat {
+# Reseteamos el tablero
+  tablero <- c("2"=0, "3"=0, "4"=0, "5"=0, "6"=0, "7"=0, "8"=0, "9"=0, "10"=0, "11"=0, "12"=0)
+# Repartimos las fichas en sus posiciones iniciales
+  seleccion1 <- sample(posiciones, 10, replace = FALSE)
+  for (i in seleccion1) {
+    colores[i] <- "White"
+  }
+  seleccion2 <- sample(seleccion1, 5, replace = FALSE)
+  for (i in seleccion2) {
+    colores[i] <- "Black"
+  }
+# Reseteamos el ganador
+  ganador <- NULL
+# Simulamos un juego completo
+  while (is.null(ganador)) {
+# Blancas tiran los dados
+    dado1 <- sample(unDado, 1, replace = TRUE)
+    dado2 <- sample(unDado, 1, replace = TRUE)
+    suma <- as.character(dado1 + dado2)
+# Se mueve la ficha y se verifica si ganó una de ellas
+    if (colores[suma] ==  "White")
+       {
+         tablero[suma] <- tablero[suma] + 1
+         if (tablero[suma] > 10) { ganador <- as.numeric(suma)
+            } else {
+                    # nada que hacer
+                }
+       }
+# Negras tiran los dados
+    dado1 <- sample(unDado, 1, replace = TRUE)
+    dado2 <- sample(unDado, 1, replace = TRUE)
+    suma <- as.character(dado1 + dado2)
+# Se mueve la ficha y se verifica si ganó una de ellas
+    if (colores[suma] ==  "Black")
+       {
+         tablero[suma] <- tablero[suma] + 1
+         if (tablero[suma] > 10) { ganador <- as.numeric(suma)
+          } else {
+             # nada que hacer
+                }
+    }
+  }
+  contador <- contador + 1
+  
+# Agrego cada tablero a un registro del final de cada juego
+  for (i in posiciones) {
+    todosLosTableros[contador,i] <- tablero[i]
+  }
+  
+# Agrego todas las movidas a una planilla de totales
+  for (i in posiciones) {
+    sumaDeTablero[i] <- sumaDeTablero[i] + tablero[i]
+  }
+
+# Se agrega el ganador a una lista
+  resultados <- c(resultados, ganador)
+
+  if (contador >= 1000) {
+    break
+  }
+}
+todosLosTableros
+resultados
+sumaDeTablero
+```
+
+```{r}
+hist(resultados)
+```
+
+```{r}
+barplot(sumaDeTablero)
+```
+
+```{r}
+summary(todosLosTableros)
+```
+```{r}
+library(tidyverse)
+```
+
+```{r}
+todosLosTablerosTidy <- pivot_longer(todosLosTableros, cols = 1:11, names_to = "Suma")
+totalDadosLanzados <- todosLosTablerosTidy %>% 
+  summarise(total = sum(value))
+totalDadosLanzados <- totalDadosLanzados[["total"]]
+```
+
+```{r}
+indicesTodosLosTableros <- todosLosTablerosTidy %>% 
+  group_by(Suma) %>%  
+  reframe(n = n(), frecAbs = sum(value), frecRel = frecAbs/totalDadosLanzados, media = mean(value), mediana = median(value), sd = sd(value), varianza = var(value), cv = sd/media) %>%
+  arrange(as.numeric(Suma))
+```
+
+
+```{r}
+kable(indicesTodosLosTableros) %>%
+  row_spec(0:11, align = "c") %>%
+  kable_styling(latex_options = "jira") %>%
+  kable_paper("striped")
+# %>%
+#   column_spec(4, color = spec_color(indicesTodosLosTableros$frecRel[2:12])) 
+# %>%
+#   column_spec(9, color = spec_color(indicesTodosLosTableros$cv[2:12]))
+```
+
+

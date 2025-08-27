@@ -1,0 +1,64 @@
+---
+title: "Ejercicios - Probabilidad - Taxis en la ciudad"
+output: html_notebook
+---
+
+# Simulación acerca de cómo contar los taxis en una ciudad
+### Fuente: Miró, Ricardo (2006). Números combinatorios y probabilidades. Colección Ciencia Jóven #2, EUDEBA. 176pgs.
+Capítulo 8.9 (pg. 135).
+El objetivo del ejercicio es estimar la cantidad de taxis que hay en una ciudad determinada (Ej. Buenos Aires).
+Para ello una persona se para en una esquina de la ciudad (preferentemente una esquina con mucha circulación de taxis) y registra las matrículas de todos los taxis que pasan (están escritas en la puerta). Se supone que las matrículas van desde el 1 hasta la cantidad total de taxis habilitados. Luego la cantidad total de taxis será el promedio de los números de matrícula multiplicado por 2.
+
+El mismo ejercicio puede hacerse con billetes para conocer la cantidad de dinero circulante. Hay que estimarlo para cada denominación.
+Es interesante discutir las diferencias y pensar qué circunstancias pueden hacer fallar los cálculos y en qué sentido sesgarían el resultado.
+
+Aquí se realiza una simulación del problema.
+
+## Simulación (con un ejemplo)
+
+```{r}
+# Cada número es el número de matrícula de cada taxi existente
+poblacionDeTaxis <- seq(1,30000,1)
+nPoblacionDeTaxis  <- length(poblacionDeTaxis)
+# No todos los taxis están activos en el momento del muestreo
+poblacionActivaDeTaxis <- sample(poblacionDeTaxis, 15000, replace = FALSE)
+# Muestreamos la población activa
+muestraDeTaxis <- sample(poblacionActivaDeTaxis, 40, replace = FALSE)
+# Calculamos la estimación
+media <- mean(muestraDeTaxis)
+media * 2
+```
+
+## Armado de un Data Frame (tidy) para explorar el efecto del tamaño de muestras sobre la estimación.
+
+```{r}
+tamaniosDeMuestra <- seq(5, 200, 5)
+nTamaniosDeMuestra <- length(tamaniosDeMuestra)
+
+cantidadDeLineas <- 5
+
+muestreoTaxis <- data.frame()
+
+for (i in 1:nTamaniosDeMuestra){
+  for (j in 1:cantidadDeLineas){
+     muestra <- c(tamaniosDeMuestra[i], j, mean(sample(poblacionActivaDeTaxis, tamaniosDeMuestra[i], replace = FALSE)) * 2)
+     muestreoTaxis <- rbind(muestreoTaxis, muestra)
+  }
+}
+muestreoTaxis[,2] <- as.factor(muestreoTaxis[,2])
+muestreoTaxis
+```
+
+### Luego graficamos
+
+```{r fig.height=5, fig.width=10}
+#library(tidyverse)
+library(ggplot2)
+
+ggplot(muestreoTaxis, aes(x = muestreoTaxis[,1], y = muestreoTaxis[,3], color = muestreoTaxis[,2])) +
+  geom_line() +
+  ylim(0,nPoblacionDeTaxis * 1.2) +
+  geom_hline(yintercept= nPoblacionDeTaxis) +
+  xlab('Tamaño de la muestra (n)') +
+  ylab('Estimación (media de la muestra * 2)')
+```
