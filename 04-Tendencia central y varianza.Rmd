@@ -151,7 +151,7 @@ $$
 ### Varianza de una muestra
 
 $$
-s^{2}={\frac{{\displaystyle \sum_{i=1}^{n}\left(x_{i}-\overline{x}\right)^{2}}}{n-1}}
+s^{2}={\frac{{\displaystyle \sum_{i=1}^{n}\left-(x_{i}-\overline{x}\right)^{2}}}{n-1}}
 $$
 
 ### Devío Estándar poblacional

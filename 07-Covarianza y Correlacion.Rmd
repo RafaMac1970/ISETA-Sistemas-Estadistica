@@ -41,7 +41,7 @@ cov(iSp$Petal.Length, iSp$Sepal.Length)
 
 Interpretación: El valor de la covarianza nos dice si existe una relación lineal positiva o negativa entre las dos variables. La magnitud del índice generalmente es irrelevante y depende mucho de la cantidad de observaciones. Para que la magnitud pueda interpretarse el n de las dos muestras debe ser igual, y además los valores de cada variable en las dos muestras deben variar en un rango similar. Estas condiciones son muy raras de conseguir.
 
-Como ejemplo de esto último comparemos las covarianzas en dos datasets diferentes (mire además los gráficos más abajo, enla sección "Graficando"):
+Como ejemplo de esto último comparemos las covarianzas en dos datasets diferentes (mire además los gráficos más abajo, en la sección "Graficando"):
 
 ```{r}
 cov(iris$Sepal.Length, iris$Sepal.Width)
@@ -106,7 +106,7 @@ Para calcular P y Q se usa el mismo procedimiento que en el índice de Spearman.
 -   Kendall: Similar a Spearman, pero es más robusto cuando hay muchos empates en los datos o cuando el tamaño de la muestra es pequeño.
 
 | Propiedad o Característica      | Pearson                                                | Spearman o Kendall                                                              |
-|:---------------------------|:-----------------|:--------------------------|
+|:--------------------------|:-----------------|:--------------------------|
 | Tipo de relación                | lineal                                                 | Monótona (puede ser no lineal)                                                  |
 | Sensibilidad a valores atípicos | Alta                                                   | Menor sensibilidad                                                              |
 | Escala                          | Intervalo o razón                                      | Ordinal (rango)                                                                 |
