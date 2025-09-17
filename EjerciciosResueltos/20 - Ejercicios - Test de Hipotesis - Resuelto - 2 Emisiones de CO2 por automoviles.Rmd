@@ -1,0 +1,112 @@
+---
+title: "20 - Ejercicios - Pruebas de Hipótesis"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+Los siguientes ejercicios fueron tomados de:
+
+-   Batista William (2020). Introducción a la inferencia estadística aplicada. 2da Ed. Editorial Facultad de Agronomía. 272 pgs. <https://www.agro.uba.ar/catalog/introducci-n-la-inferencia-estad-stica-aplicada-3ra-edici-n>
+
+```{r}
+library(tidyverse)
+library(patchwork)
+library(BSDA)
+```
+
+# Ejercicios
+
+## 2. Emisiones de CO2 por automóviles (Sofía Silvera)
+
+Una compañía productora de automotores asegura que los autos del modelo que ofrece para ser equipado como taxi cumplen en promedio con la norma de la Agencia de Protección Ambiental de los Estados Unidos que establece que estos vehículos deben emitir menos de 2,5 gramos de monóxido de carbono por kilómetro. Para decidir si dar por cierta esta afirmación se decide obtener una muestra aleatoria de 25 de estos vehículos matriculados como taxis en la ciudad de San Francisco y medir el nivel de emisión de monóxido de carbono de cada uno. Con los datos obtenidos se calcula la media muestral (2,44 g/km) y el estimador insesgado de la varianza (0,021 g2/k㎡).
+
+a.  Formular hipótesis estadísticas apropiadas para tomar la decisión en cuestión. Enunciar el significado de cada hipótesis en términos del fenómeno de interés.
+
+> H0: mu >= 2.5 (Los vehículos emiten al menos 2.5 g/km de CO2)
+> H1: mu < 2.5 (Los vehículos emiten menos de 2.5 g/km de CO2)
+
+b.  Seleccionar un nivel de significación apropiado. ¿Qué implica el valor elegido?
+
+> 5% de probabilidad de rechazar la hipótesis nula cuando es verdadera.
+
+```{r}
+alfa1 <- 0.05  # Nivel de significación
+cat("Nivel de significación elegido: alfa =", alfa1, "\n")
+```
+
+
+c.  ¿En qué consiste el procedimiento para generar los datos necesarios para poner a prueba las hipótesis propuestas?
+
+```{r}
+# parámetros dados
+n1 <- 25  # Tamaño de la muestra
+media_muestral1 <- 2.44  # Media muestral en g/km
+varianza_muestral1 <- 0.021  # Varianza muestral en g^2/km^2
+mu_01 <- 2.5  # Media bajo H0 en g/km
+
+# Calcula la desviación estándar muestral
+desviacion_estandar1 <- sqrt(varianza_muestral1)
+
+# Calcula el estadístico t para una prueba de una cola
+t1 <- (media_muestral1 - mu_01) / (desviacion_estandar1 / sqrt(n1))
+```
+
+d.  Dando por cierto que los niveles de emisión registrados son realizaciones de variables aleatorias con distribución Normal, calcular el valor-p. ¿Qué probabilidad representa?
+
+```{r}
+valor_p1 <- pt(t1, df = n1 - 1)
+cat("Estadístico t:", t1, "\n")
+cat("Valor-p:", valor_p1, "\n")
+```
+
+
+e.  Concluir y explicar la conclusión en términos del fenómeno de interés.
+
+```{r}
+if (valor_p1 < alfa1) {
+  cat("se rechaza la hipótesis nula y concluyo que los vehículos emiten menos de 2.5 g/km de CO2.\n")
+} else {
+  cat("No rechaz la hipótesis nula. No hay evidencia suficiente para concluir que los vehículos emiten menos de 2.5 g/km de CO2.\n")
+}
+```
+
+
+f.  ¿A qué población se extiende la inferencia realizada?
+
+
+```{r}
+
+cat("La inferencia realizada se extiende a todos los vehículos de este modelo equipados como taxis en la ciudad de San Francisco.\n")
+
+```
+
+## Extras
+
+### IC95%
+
+```{r}
+# Calcula el intervalo de confianza del 95%
+t_critico1 <- qt(1 - alfa1/2, df = n1 - 1)
+error_estandar1 <- desviacion_estandar1 / sqrt(n1)
+limite_inferior1 <- media_muestral1 - t_critico1 * error_estandar1
+limite_superior1 <- media_muestral1 + t_critico1 * error_estandar1
+
+# Muestra intervalo de confianza
+cat("Intervalo de confianza del 95% para la media de emisiones de CO2: [", limite_inferior1, ",", limite_superior1, "]\n")
+```
+
+### Graficar
+
+```{r}
+rango = c(min(mu_01 - 5 * error_estandar1, media_muestral1), mu_01 + 1 * error_estandar1) # Esto establece el rango de graficado en el eje x
+
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dnorm, n = 101, args = list(mean = media_muestral1, sd = error_estandar1)) +
+  geom_area(stat = 'function', fun = dnorm, args = list(mean = media_muestral1, sd = error_estandar1), fill = '#ff0018', xlim = c(rango[2], mu_01), alpha = 0.5) +
+  geom_vline(xintercept = media_muestral1) +
+  geom_vline(xintercept = mu_01) +
+  geom_label(aes(x = media_muestral1, y = -1, label = round(media_muestral1,3)))  +
+  ylab("Densidad") + ggtitle("Distribución Normal") + xlab("Emisiones de CO2 (g/km)") +
+  theme_classic()
+```
