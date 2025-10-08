@@ -1,0 +1,110 @@
+---
+title: "Power Analisis"
+---
+
+```{r}
+library(shiny)
+library(ggplot2)
+library(patchwork)
+
+ui <- fluidPage(
+  titlePanel("Cálculo de Potencia y Beta con Distribuciones T no Central"),
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("mu", "Media de la población (mu):", min = 0, max = 20, value = 7),
+      sliderInput("sigma", "Desviación estándar de la población (sigma):", min = 1, max = 10, value = 4),
+      sliderInput("media", "Media muestral:", min = 0, max = 20, value = 10),
+      sliderInput("s", "Desviación estándar muestral (s):", min = 1, max = 10, value = 4),
+      sliderInput("n", "Tamaño de la muestra (n):", min = 5, max = 100, value = 25),
+      sliderInput("alfa", "Nivel de significación (alfa):", min = 0.001, max = 0.1, value = 0.01, step = 0.001)
+    ),
+    mainPanel(
+      plotOutput("distPlot", height = "700px")
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+    mu <- input$mu
+    sigma <- input$sigma
+    media <- input$media
+    s <- input$s
+    n <- input$n
+    alfa <- input$alfa
+    df <- n - 1
+
+    # --- Parámetro de no centralidad (estadísticamente correcto: usa sigma) ---
+    ncp <- sqrt(n) * (media - mu) / sigma
+
+    # valor crítico (cola izquierda)
+    tcrit <- qt(alfa, df = df)
+    beta <- 1 - pt(tcrit, df = df, ncp = ncp)
+
+    # --- GRID en t ---
+    t_vals <- seq(-8, 8, length.out = 2000)
+    y_H0_t <- dt(t_vals, df = df)                # t central (H0)
+    y_H1_t <- dt(t_vals, df = df, ncp = ncp)     # t no central (H1)
+
+    datos_t <- data.frame(t = t_vals, H0 = y_H0_t, H1 = y_H1_t)
+
+    # --- Gráfico 1: escala t (con áreas correctamente sombreadas) ---
+    g1 <- ggplot(datos_t, aes(x = t)) +
+      geom_line(aes(y = H0), color = "blue", size = 1) +
+      geom_line(aes(y = H1), color = "red", linetype = "dotdash", size = 1) +
+      # área tipo I: bajo H0, t <= tcrit
+      geom_ribbon(data = subset(datos_t, t <= tcrit), aes(ymin = 0, ymax = H0),
+                  fill = "blue", alpha = 0.3) +
+      # área tipo II: bajo H1, t > tcrit
+      geom_ribbon(data = subset(datos_t, t > tcrit), aes(ymin = 0, ymax = H1),
+                  fill = "red", alpha = 0.3) +
+      geom_vline(xintercept = tcrit, linetype = "dashed") +
+      annotate("text", x = tcrit, y = max(y_H0_t, y_H1_t) * 0.9,
+               label = paste0("t\u03B1 = ", round(tcrit, 3)), angle = 90, vjust = -0.5) +
+      annotate("text", x = -6, y = max(y_H0_t, y_H1_t) * 0.7,
+               label = paste("Potencia =", round(1 - beta, 3))) +
+      annotate("text", x = -6, y = max(y_H0_t, y_H1_t) * 0.62,
+               label = paste("\u03B2 =", round(beta, 3))) +
+      labs(title = "Distribuciones en escala t",
+           x = "Estadístico t", y = "Densidad") +
+      theme_minimal()
+
+    # --- Transformar a escala X (no estandarizada) ---
+    # Aquí uso sigma como factor de escala (distribución de la media poblacional)
+    scale_pop <- sigma / sqrt(n)   # escala para Xbar bajo H0/H1 (si interpretamos sigma como verdadero)
+    x_vals <- mu + t_vals * scale_pop   # transformar t -> X
+
+    # Aplicar cambio de variable: f_X(x) = f_T(t) * (1/scale)
+    fX_H0 <- y_H0_t / scale_pop
+    fX_H1 <- y_H1_t / scale_pop
+
+    datos_x <- data.frame(x = x_vals, H0 = fX_H0, H1 = fX_H1)
+
+    # punto crítico en escala X (coherente con la transformación)
+    xcrit <- mu + tcrit * scale_pop
+
+    # --- Gráfico 2: escala X (áreas consistentes con escala no estandarizada) ---
+    g2 <- ggplot(datos_x, aes(x = x)) +
+      geom_line(aes(y = H0), color = "blue", size = 1) +
+      geom_line(aes(y = H1), color = "red", linetype = "dotdash", size = 1) +
+      # área tipo I (X <= xcrit) bajo H0
+      geom_ribbon(data = subset(datos_x, x <= xcrit), aes(ymin = 0, ymax = H0),
+                  fill = "blue", alpha = 0.3) +
+      # área tipo II (X > xcrit) bajo H1
+      geom_ribbon(data = subset(datos_x, x > xcrit), aes(ymin = 0, ymax = H1),
+                  fill = "red", alpha = 0.3) +
+      geom_vline(xintercept = xcrit, linetype = "dashed") +
+      annotate("text", x = xcrit, y = max(fX_H0, fX_H1) * 0.9,
+               label = paste0("\u03BC\u2091 = ", round(xcrit, 3)), angle = 90, vjust = -0.5) +
+      labs(title = "Misma comparación en la escala de la media muestral (\u0305X)",
+           x = expression(bar(X)), y = "Densidad") +
+      theme_minimal()
+
+    # --- Combinar verticalmente ---
+    g1 / g2
+  })
+}
+
+shinyApp(ui = ui, server = server)
+
+```

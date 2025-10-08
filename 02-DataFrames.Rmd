@@ -119,7 +119,7 @@ unDataFrame3
 ### 4. Crear el data frame leyendo los datos de un archivo .csv
 
 ```{r}
-#library(readr)
+# library(readr)
 unDataFrame4 <- read.csv("datos/datitos1.csv")
 unDataFrame4
 ```
@@ -290,7 +290,7 @@ unTibble3
 Nótese que es muy similar al caso de la creación de un data frame. La diferencia es sutil, antes lo hacíamos con "read.csv" y ahora "read_csv" usamos el guión bajo en lugar del punto.
 
 ```{r}
-#library(readr)
+# library(readr)
 unTibble4 <- read_csv("datos/datitos1.csv")
 unTibble4
 ```

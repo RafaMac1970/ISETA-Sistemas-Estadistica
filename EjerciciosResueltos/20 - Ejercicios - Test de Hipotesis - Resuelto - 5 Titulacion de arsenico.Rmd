@@ -1,0 +1,90 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Ejercicios
+
+## 5. Titulación de arsénico
+
+Para evaluar la exactitud de una nueva técnica de tulación para medir el contenido de arsénico en el agua una laboratorista prepara una solución acuosa que contiene exactamente 50.10\^-3 mg de arsénico por litro. Luego, toma al azar 30 alicuctas de la solución y en cada una mide el contenido de arsénico con la técnica propuesta. Con los datos que genera, calcula la media muestral (52,18.10\^-3 mg/1) y el estimador del desvío estándar (2,59.10\^-3 mg/1).
+
+a.  Bajo los supuestos de distribución Normal y de independencia de las titulaciones ¿los datos permiten concluir, con ⍺ = 0.05, que la esperanza de las titulaciones difiere del contenido de arsénico de la solución?
+b.  Explicar qué es el nivel de significación ⍺ = 0.05 en términos de este problema.
+c.  Identificar la población de referencia y las variables aleatorias en este experimento. ¿Qué limitación importante tiene el procedimiento experimental seguido?
+d.  Construir e interpretar un intervalo de confianza 0.95 para la esperanza de las titulaciones.
+
+### Resolución
+
+a.1.    Formular hipótesis estadísticas
+
+$$
+H0: mu = 0.05 mg/L 
+\\
+H1: mu ≠ 0.05 mg/L 
+$$
+a.2.    Calcular el estadístico de prueba y el valor crítico
+
+```{r}
+# Datos del problema
+mu0 <- 50e-3      # media poblacional verdadera (mg/L)
+xbar <- 52.18e-3  # media muestral (mg/L)
+s <- 2.59e-3      # desviación estándar muestral (mg/L)
+n <- 30           # tamaño muestral
+
+# Estadístico t
+SE <- s / sqrt(n)
+t_stat <- (xbar - mu0) / SE
+df <- n - 1
+
+# Valor crítico para un alpha de 5% (0.05)
+t_crit <- qt(0.975, df)
+
+# Resultados
+paste("t =", round(t_stat, 3), "con", df, "gl\n")
+paste("t crítico =", round(t_crit, 3), "con", df, "gl\n")
+
+if (t_stat > t_crit) {
+  paste("→ Se rechaza H0: ", t_stat , " es mayor que ",  t_crit)
+} else {
+  paste("→ No se rechaza H0: ", t_stat , " es menor que ",  t_crit)
+}
+```
+
+a.3.    Calcular el valor-p
+
+```{r}
+# p-valor (dos colas)
+p_value <- 2 * (1 - pt(abs(t_stat), df))
+
+paste("p-valor =", signif(p_value, 3), "\n")
+
+# Conclusión
+if (p_value < 0.05) {
+  paste("→ Se rechaza H0: la media difiere significativamente de", mu0, "mg/L\n")
+} else {
+  paste("→ No se rechaza H0: no hay evidencia de diferencia significativa\n")
+}
+```
+
+b.  Explicar qué es el nivel de significación ⍺ = 0.05 en términos de este problema.
+
+> El alfa es el límite que me impongo como probabilidad de error de tipo I máximo aceptable. Significa que si se realizara el mismo experimento 100 veces, el promedio de las 30 alícuotas medidas deberían ser menores a 50 mg/l en al menos 95 de esos casos.
+
+c.  Identificar la población de referencia y las variables aleatorias en este experimento. ¿Qué limitación importante tiene el procedimiento experimental seguido?
+
+> La población de referencia es la solución elaborada. Hay dos variables aleatorias involucradas: 1. La concentración de la solución de referencia tiene variaciones cada vez que se prepara. 2. Cada titulación realizada. 
+
+> La limitación más importante es que el método supone que una muestra preparada en el laboratorio es equivalente a una muestra de agua tomada del ambiente. En la naturaleza el arsénico puede tener interacciones con otras substancias disueltas (que estan ausentes en la solución preparada en el laboratorio - agua destilada + arsénico).
+
+d.  Construir e interpretar un intervalo de confianza 0.95 para la esperanza de las titulaciones.
+
+```{r}
+# Intervalo de confianza del 95%
+IC_inf <- xbar - t_crit * SE
+IC_sup <- xbar + t_crit * SE
+
+paste("IC 95% =", round(IC_inf, 5), "a", round(IC_sup, 5), "mg/L\n")
+```
+
+> Este IC significa que si tomo una alícuota de la solución preparada y la titulo, el valor obtenido en el 95% de los casos estará entre los valores del intérvalo.

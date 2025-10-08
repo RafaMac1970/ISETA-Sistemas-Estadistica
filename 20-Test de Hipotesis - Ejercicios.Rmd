@@ -30,7 +30,9 @@ a.  Formular las hipótesis estadísticas apropiadas para la prueba requerida.
 $$
 H_{0}: \mu_0 \geq 0.7 \\
 H_{1}: \mu_0 < 0.7
-$$ \> El fabricante quiere decir que sus cigarrilos tienen menos de 0.7 mg de nicotina por cigarrillo, por eso planteamos eso como H1, ya que al rechazar H0, estarímos aceptando esa hipótesis.
+$$
+
+> El fabricante quiere decir que sus cigarrilos tienen menos de 0.7 mg de nicotina por cigarrillo, por eso planteamos eso como H1, ya que al rechazar H0, estarímos aceptando esa hipótesis.
 
 b.  Elegir un nivel de significación para esta prueba.
 
@@ -139,7 +141,7 @@ e.  Sobre la base del resultado obtenido, discutir la conveniencia de adoptar es
 
 ## 4. Pasto para enfardar
 
-En un establecimiento lechero se proyecta utilizar el pasto presente en una pastura de 20 ha para hacer una reserva de fardos de heno con la qual alimentar a las vacas lecheras durante el invierno. Por ello interesa determinar si los fardos a producir alcanzarán para cubrir la necesidad de 90 t de forraje para dicho período. Para concluir al respecto, se decide tomar una muestra de 25 marcos de 1 m² elegidos al azar dentro de la pastura. En cada marco, se cortará todo el forraje y se lo pesará luego de dejaro secar al aire del mismo modo que se hace para elaborar los fardos. Una vez realizadas las mediciones, se encuentra que el promedio de los pesos obtenidos es de 510 gramos/m² y el estimador del desvío estándar es de 100 g/m²
+En un establecimiento lechero se proyecta utilizar el pasto presente en una pastura de 20 ha para hacer una reserva de fardos de heno con la qual alimentar a las vacas lecheras durante el invierno. Por ello interesa determinar si los fardos a producir alcanzarán para cubrir la necesidad de 90 t de forraje para dicho período. Para concluir al respecto, se decide tomar una muestra de 25 marcos de 1 m² elegidos al azar dentro de la pastura. En cada marco, se cortará todo el forraje y se lo pesará luego de dejarlo secar al aire del mismo modo que se hace para elaborar los fardos. Una vez realizadas las mediciones, se encuentra que el promedio de los pesos obtenidos es de 510 gramos/m² y el estimador del desvío estándar es de 100 g/m²
 
 a.  Identificar las unidades muestrales, la muestra y la población.
 b.  Formular hipótesis apropiadas para la evaluación propuesta.
@@ -149,19 +151,11 @@ e.  Explicar el tipo de error que se puede haber cometido en este análisis y cu
 
 ## 5. Titulación de arsénico
 
-Para evaluar la exactitud de una nueva técnica de tulación para medir el contenido de arsénico en el agua una laboratorista prepara una solución acuosa que contiene exactamente 50.10\^-3 mg de arsénico por litro. Luego, toma al azar 30 alicuctas de la solución y en cada una mide el contenido de arsénico con la técnica propuesta. Con los datos que genera, calcula la media muestral (52,18.10\^-3 mg/1) y el estimador del desvío estándar (2,59.10\^-3 mg/1).
+Para evaluar la exactitud de una nueva técnica de titulación para medir el contenido de arsénico en el agua una laboratorista prepara una solución acuosa que contiene exactamente 50.10^-3 mg de arsénico por litro. Luego, toma al azar 30 alicuctas de la solución y en cada una mide el contenido de arsénico con la técnica propuesta. Con los datos que genera, calcula la media muestral (52,18.10^-3 mg/1) y el estimador del desvío estándar (2,59.10^-3 mg/1).
 
 a.  Bajo los supuestos de distribución Normal y de independencia de las titulaciones ¿los datos permiten concluir, con a = 0.05, que la esperanza de las titulaciones difiere del contenido de arsénico de la solución?
 b.  Explicar qué es el nivel de significación a = 0.05 en términos de este problema.
-
-```{=html}
-<!-- -->
-```
 C.  Identificar la población de referencia y las variables aleatorias en este experimento. ¿Qué limitación importante tiene el procedimiento experimental seguido?
-
-```{=html}
-<!-- -->
-```
 d.  Construir e interpretar un intervalo de confianza 0.95 para la esperanza de las titulaciones.
 
 ## 6. Virus en duraznos
@@ -278,15 +272,7 @@ Ganancia de peso de los terneros [g/día]
 
 a.  Identificar las poblaciones, las unidades muestrales, las muestras y los tratamientos.
 b.  Formular y poner a prueba hipótesis para establecer si la aplicación de cobre resulta en mayor ganancia de peso diario promedio de los terneros de pariciones tardias (alfa = 0,01).
-
-```{=html}
-<!-- -->
-```
-C.  Formular y poner a prueba hipótesis para establecer si la aplicación de cobre resulta en mayor ganancia de peso diario promedio de los terneros de pariciones tempranas (alfa = 0,01).
-
-```{=html}
-<!-- -->
-```
+c.  Formular y poner a prueba hipótesis para establecer si la aplicación de cobre resulta en mayor ganancia de peso diario promedio de los terneros de pariciones tempranas (alfa = 0,01).
 d.  ¿Qué error podría haber cometido en cada una de las dos pruebas realizadas? Describirlo en términos de este problema.
 e.  ¿Bajo qué supuestos son válidas las inferencia realizadas en b y c?
 

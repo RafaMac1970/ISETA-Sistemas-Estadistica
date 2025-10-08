@@ -1,0 +1,239 @@
+---
+title: "22 - Power Analisis"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(pwr)
+```
+
+
+# Graficar potencia (power) en función del tamaño de las muestras (n) para diferentes diferencias mínimas a detectar (size effects, d).
+
+## Lo haremos para un t test a una cola (grater)
+
+Donde:
+
+-   sig.level es alpha
+-   d es la diferencia mínima a detectar. Se llama Efecto de tamaño de Cohen, es la diferencia de mínima de medias que se desea detectar dividido por el desvío estándar:. (x0 - mu) / s, es decir que es la diferencia entre medias, pero medida en desvíos estándar.
+-   n es el tamaño de la muestra
+-   alternative es la hipótesis alternativa "less", "greater" o "two.sided". Por defecto usa "greater".
+-   type "two.sample", "one.sample" o "paired" es el tipo de test a realizar Nótese que "one.sample" y "paired" dan el mismo resultado. Por defecto usa "two.sample".
+
+```{r}
+# Calculamos la potencia
+pwr.t.test(sig.level = 0.05, n = 15, d = 0.5, type = "one.sample", alternative = "greater")
+
+# Calculamos la mínima diferencia a detectar
+pwr.t.test(sig.level = 0.05, n = 15, power = .8, type = "one.sample", alternative = "greater")
+
+# Calculamos n
+pwr.t.test(sig.level = 0.05, d = 0.5, power = .9, type = "one.sample", alternative = "greater")
+
+```
+
+Graficamos las distribuciones involucradas y sus parámetros.
+
+Hay una Shiny app para jugar con los parámetros de este ejemplo. "ShinyApps/Power - Shiny.Rmd"
+
+```{r}
+# Población
+mu <- 7
+sigma <- 4
+
+# >>Muestra
+media <- 10
+s <- 4
+n <- 25
+
+# Coeficiente de Cohen d
+d1 <- ( mu - media) / s
+
+#  Estadísticos
+estPr <- ( mu - media) / (s / sqrt(n))
+ncp1 <- ( mu - media) / (sigma / sqrt(n)) # Coeficiente de No Centralidad, Non-Centrality parameter
+
+# Nivel de Significación
+alfa <- 0.01
+tDeAlfa <- qt(alfa, df = n-1)
+beta <- 1 - pt(tDeAlfa, df = n - 1, ncp = ncp1)
+
+# Gráfico
+rango = c(-10, 4)
+
+ggplot(data.frame(x = rango), aes(x = rango)) +
+  stat_function(fun = dt, args = list(df = n - 1)) +
+  stat_function(fun = dt, args = list(df = n - 1, ncp = ncp1), linetype = "dotdash") +
+  geom_area(stat = 'function', fun = dt,  args = list(df = n - 1), fill = 'blue', xlim = c(rango[1], tDeAlfa), alpha = 0.5) +
+  geom_area(stat = 'function', fun = dt,  args = list(df = n - 1, ncp = ncp1), fill = '#ff0018', xlim = c(tDeAlfa, rango[2]), alpha = 0.5) +
+  geom_vline(xintercept = tDeAlfa) +
+  geom_label(aes(x = tDeAlfa, y = -0.03), label = round(tDeAlfa, 3)) + 
+  geom_label(aes(x = tDeAlfa/2, y = 0.1), label = "Beta", color = "red") + 
+  geom_label(aes(x = tDeAlfa/2, y = 0.05), label = round(beta,3), color = "red") + # cat("Beta = ", round(beta,3))
+  geom_label(aes(x = -4, y = 0.15), label = "Potencia") + 
+  geom_label(aes(x = -4, y = 0.1), label = round(1 - beta,3)) + 
+  ylab("Densidad") + ggtitle("Distribuciones T de Student y T No Central") + xlab("estadístico t")
+```
+
+### Primero armamos el Data Frame con las potencias calculadas
+
+```{r echo=TRUE}
+library(pwr)
+
+# Rango de significancias (sig.level) (alpha)
+alphas <- c(0.1, 0.05, 0.01)
+nAlphas <- length(alphas)
+
+# Rango de diferencia mínima a detectar medida en desvíos estándar
+ds <- seq(0.2, 1, 0.2)
+nds <- length(ds)
+
+# Rango de tamaños de muestra
+ns <- seq(4,100,4)
+nns <- length(ns)
+
+# Data frame tidy
+datosPower <- data.frame()
+
+for (i in 1:nAlphas){
+  for (j in 1:nds){
+    for (k in 1:nns){
+     potencia <- c(pwr.t.test(sig.level = alphas[i],
+                                        d = ds[j],
+                                        n = ns[k], 
+                                        type = "paired",
+                                        alternative = "greater"))
+     datosPower <- rbind(datosPower, potencia) 
+    }
+  }
+}
+# Convierto las diferencias y los niveles de significancia a factor para poder graficarlos
+datosPower$d <- as.factor(datosPower$d)
+datosPower$sig.level <- as.factor(datosPower$sig.level)
+datosPower
+```
+
+### Luego graficamos
+
+Comparamos lo que ocurre con la potencia cuando aumentamos el n para varios niveles de d (Coeficiente de Cohen, diferencia mínima a detectar), y 3 niveles de significancia (alfa 0.01, 0.05 ó 0.1).
+
+```{r, fig.width=8, fig.height=12}
+#library(tidyverse)
+library(ggplot2)
+
+grPower <- ggplot(datosPower, aes(x = n, y = power, color = d)) +
+  geom_line() +
+  geom_hline(yintercept=0.9) + 
+  theme(aspect.ratio = 0.5) +
+  facet_wrap('sig.level', ncol = 1)
+grPower
+```
+
+# Otros análisis de potencia
+
+Ejemplo tomado de <https://www.statmethods.net/stats/power.html>
+
+## Para un ANOVA
+
+For a one-way ANOVA comparing 5 groups, calculate the sample size needed in each group to obtain a power of 0.80, when the effect size is moderate (0.25) and a significance level of 0.05 is employed.
+
+```{r}
+pwr.anova.test(k = 5, f = .25, sig.level = .05, power = .8)
+```
+
+## Para un test de hipótesis comparando proporciones
+
+Using a two-tailed test proportions, and assuming a significance level of 0.01 and a common sample size of 30 for each proportion, what effect size can be detected with a power of .75?
+
+```{r echo=TRUE}
+pwr.2p.test(n = 30, sig.level = 0.01, power = 0.75)
+```
+
+## Plot sample size curves for detecting correlations of various sizes.
+
+```{r echo=TRUE}
+# 
+
+library(pwr)
+
+# range of correlations
+r <- seq(.1,.5,.01)
+nr <- length(r)
+
+# power values
+p <- seq(.4,.9,.1)
+np <- length(p)
+
+# obtain sample sizes
+samsize <- array(numeric(nr*np), dim=c(nr,np))
+for (i in 1:np){
+  for (j in 1:nr){
+    result <- pwr.r.test(n = NULL, r = r[j],
+    sig.level = .05, power = p[i],
+    alternative = "two.sided")
+    samsize[j,i] <- ceiling(result$n)
+  }
+}
+
+# set up graph
+xrange <- range(r)
+yrange <- round(range(samsize))
+colors <- rainbow(length(p))
+plot(xrange, yrange, type="n",
+  xlab="Correlation Coefficient (r)",
+  ylab="Sample Size (n)" )
+
+# add power curves
+for (i in 1:np){
+  lines(r, samsize[,i], type="l", lwd=2, col=colors[i])
+}
+
+# add annotation (grid lines, title, legend)
+abline(v=0, h=seq(0,yrange[2],50), lty=2, col="grey89")
+abline(h=0, v=seq(xrange[1],xrange[2],.02), lty=2,
+   col="grey89")
+title("Sample Size Estimation for Correlation Studies\n
+  Sig=0.05 (Two-tailed)")
+legend("topright", title="Power", as.character(p),
+   fill=colors)
+```
+
+# Ejemplo de relación entre sd y n
+
+Esto muestra cómo varía el sd a medida que agrego individuos a una muestra
+
+```{r echo=TRUE}
+popu <- rnorm(50000, mean = 10, sd = 1)
+
+# Data frame tidy
+datos <- data.frame()
+muestra <- c(sample(popu, 1, replace = FALSE))
+
+for (n in 2:1000){
+     muestra <- c(muestra, sample(popu, 1, replace = FALSE))
+     indices <- list(n = n, sd = sd(muestra))
+     datos <- rbind(datos, indices)
+}
+
+ggplot(datos, aes(x = n, y = sd)) +
+  geom_line()
+```
+
+Esto muestra como varía sd a medida que tomo muestras más grandes
+
+```{r echo=TRUE}
+popu <- rnorm(50000, mean = 10, sd = 1)
+
+# Data frame tidy
+datos <- data.frame()
+
+for (n in 2:1000){
+     muestra <- sample(popu, n, replace = FALSE)
+     indices <- list(n = n, sd = sd(muestra))
+     datos <- rbind(datos, indices)
+}
+
+ggplot(datos, aes(x = n, y = sd)) +
+  geom_line()
+```
