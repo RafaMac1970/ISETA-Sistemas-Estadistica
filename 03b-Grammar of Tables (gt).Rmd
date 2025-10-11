@@ -1,0 +1,1492 @@
+---
+title: "03 - Grammar of Tables (gt)"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Lógica básica de trabajo con gt
+
+gt es el nombre de un paquete que implementa la gramática de tablas (grammar of tables). Se trata de un paquete que toma un data set o un tibble y lo formatea para explorar y sintetizar la información.
+
+Aquí se explica el paquete gt porque tiene una lógica general de funcionamiento similar al ggplot2 que es el framework para graficar (que se explicará en otro notebook).
+
+![](images/gt_workflow_diagram.svg)
+
+# Partes de una tabla
+
+![](images/gt_parts_of_a_table.svg)
+
+## Conceptos clave de gt:
+### Flujo básico:
+
+- Preparas tus datos (con dplyr generalmente)
+- Los pasas a gt()
+- Agregas capas de formato y estilo
+
+### Funciones principales:
+
+- tab_header(): Títulos y subtítulos
+- fmt_*(): Formatear números (currency, number, percent, etc.)
+- cols_label(): Renombrar columnas
+- data_color(): Colorear celdas según valores
+- tab_style(): Aplicar estilos personalizados
+- tab_footnote(): Notas al pie
+- tab_source_note(): Fuente de datos
+
+# Cargar librerías y datos
+
+```{r}
+# Instalación (si no lo tienes)
+# install.packages("gt")
+# install.packages("dplyr")
+
+library(gt)
+library(dplyr)
+
+# Cargar el dataset diamonds (viene con ggplot2)
+data(diamonds, package = "ggplot2")
+```
+
+# Tablas básicas y formateadas
+
+## 1. TABLA BÁSICA
+
+Crear una tabla simple (totalmente cruda) con las primeras 10 filas del dataset.
+
+```{r}
+diamonds %>%
+  head(10) %>%
+  gt() # %>%
+# opt_interactive(
+#     use_search = TRUE,
+#     use_filters = TRUE,
+#     use_resizers = TRUE,
+#     use_highlight = TRUE,
+#     use_compact_mode = TRUE,
+#     use_text_wrapping = FALSE,
+#     use_page_size_select = TRUE
+#   )
+```
+
+> La función opt_interactive() puede usarse en cualquier tabla, se agrega al final y listo.
+
+## 2. TABLA CON RESUMEN ESTADÍSTICO
+
+Trabajaremos con el builtin dataset "diamonds", que es muy interesante porque tiene una enorme cantidad de datos y variables muy diferentes.
+
+Resumir datos por corte (cut) y crear una tabla más elaborada. Se usa la función summarise de tudyverse.
+
+```{r}
+tabla_resumen <- diamonds %>%
+  group_by(cut) %>%
+  summarise(
+    cantidad = n(),
+    precio_promedio = mean(price),
+    quilates_promedio = mean(carat),
+    precio_max = max(price)
+  ) %>%
+  gt() %>%
+  # Agregar título y subtítulo
+  tab_header(
+    title = "Resumen de Diamantes por Calidad de Corte",
+    subtitle = "Análisis del dataset diamonds"
+  ) %>%
+  # Formatear columnas numéricas
+  fmt_number(
+    columns = c(precio_promedio, quilates_promedio),
+    decimals = 2
+  ) %>%
+  fmt_number(
+    columns = c(cantidad, precio_max),
+    decimals = 0
+  ) %>%
+  # Agregar símbolo de dólar a precios
+  fmt_currency(
+    columns = c(precio_promedio, precio_max),
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  # Renombrar columnas
+  cols_label(
+    cut = "Corte",
+    cantidad = "Cantidad",
+    precio_promedio = "Precio Promedio",
+    quilates_promedio = "Quilates Promedio",
+    precio_max = "Precio Máximo"
+  )
+
+tabla_resumen
+```
+
+## 3. TABLA CON COLORES Y ESTILOS
+
+Se puede dar estilos a las diferentes partes de la tabla. Se agrupa los datos por color y claridad y luego se calculan resúmenes con summarise, ordenados por el precio promedio de mayor a menor. Además se pintanlas celdas de precio con un gradiente de colores dependiente del valor. 
+
+```{r}
+tabla_avanzada <- diamonds %>%
+  group_by(color, clarity) %>%
+  summarise(
+    n = n(),
+    precio_medio = mean(price)
+  ) %>%
+  arrange(desc(precio_medio)) %>%
+  head(15) %>%
+  gt() %>%
+  tab_header(
+    title = "Top 15: Combinaciones Color-Claridad",
+    subtitle = "Ordenadas por precio medio"
+  ) %>%
+  # Formatear precio
+  fmt_currency(
+    columns = precio_medio,
+    currency = "USD"
+  ) %>%
+  # Colorear celdas según valor
+  data_color(
+    columns = precio_medio,
+    palette = "viridis"
+  ) %>%
+  # Renombrar columnas
+  cols_label(
+    color = "Color",
+    clarity = "Claridad",
+    n = "Cantidad",
+    precio_medio = "Precio Medio"
+  ) %>%
+  # Alinear columnas
+  cols_align(
+    align = "center",
+    columns = c(n, precio_medio)
+  )
+
+tabla_avanzada
+```
+
+## 4. TABLA CON NOTAS AL PIE Y FUENTE
+
+```{r}
+tabla_completa <- diamonds %>%
+  filter(carat >= 2) %>%
+  group_by(cut) %>%
+  summarise(
+    cantidad = n(),
+    precio_min = min(price),
+    precio_max = max(price),
+    precio_promedio = mean(price)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Diamantes Grandes (≥2 quilates)",
+    subtitle = "Análisis de precios por calidad de corte"
+  ) %>%
+  fmt_currency(
+    columns = c(precio_min, precio_max, precio_promedio),
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  cols_label(
+    cut = "Corte",
+    cantidad = "N°",
+    precio_min = "Precio Mínimo",
+    precio_max = "Precio Máximo",
+    precio_promedio = "Precio Promedio"
+  ) %>%
+  # Agregar nota al pie
+  tab_footnote(
+    footnote = "Solo diamantes de 2 quilates o más",
+    locations = cells_column_labels(columns = cantidad)
+  ) %>%
+  # Agregar fuente
+  tab_source_note(
+    source_note = "Fuente: Dataset diamonds de ggplot2"
+  ) %>%
+  # Resaltar la fila con mayor precio promedio
+  tab_style(
+    style = cell_fill(color = "lightblue"),
+    locations = cells_body(
+      columns = everything(),
+      rows = precio_promedio == max(precio_promedio)
+    )
+  )
+
+tabla_completa
+```
+
+# Row groups (agrupación de filas)
+
+- Usa gt(groupname_col = "nombre_columna")
+- La columna que especifiques se convierte en etiquetas de grupo
+- Perfecto para categorizar datos jerárquicamente
+- Puedes estilizar los grupos con cells_row_groups()
+
+## 1. ROW GROUPS (AGRUPAR FILAS)
+
+Agrupar filas permite organizar datos en secciones con etiquetas
+
+```{r}
+tabla_row_groups <- diamonds %>%
+  group_by(cut, color) %>%
+  summarise(
+    cantidad = n(),
+    precio_promedio = mean(price),
+    quilates_promedio = mean(carat)
+  ) %>%
+  ungroup() %>%
+  arrange(cut, desc(precio_promedio)) %>%
+  # Seleccionar algunos ejemplos para claridad
+  group_by(cut) %>%
+  slice_head(n = 3) %>%
+  ungroup() %>%
+  # CLAVE: usar groupname_col para agrupar filas
+  gt(groupname_col = "cut") %>%
+  tab_header(
+    title = "Diamantes por Corte y Color",
+    subtitle = "Top 3 colores por precio en cada categoría de corte"
+  ) %>%
+  fmt_currency(
+    columns = precio_promedio,
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  fmt_number(
+    columns = quilates_promedio,
+    decimals = 2
+  ) %>%
+  cols_label(
+    color = "Color",
+    cantidad = "Cantidad",
+    precio_promedio = "Precio Promedio",
+    quilates_promedio = "Quilates Promedio"
+  ) %>%
+  # Estilizar los encabezados de grupo
+  tab_style(
+    style = cell_fill(color = "#E8F4F8"),
+    locations = cells_row_groups()
+  ) %>%
+  tab_options(
+    row_group.font.weight = "bold"
+  )
+
+tabla_row_groups
+```
+
+# Spanners (encabezados que agrupan columnas)
+
+- Usa tab_spanner(label = "Título", columns = c(col1, col2, ...))
+- Crea encabezados superiores que agrupan columnas relacionadas
+- Ideal para organizar métricas relacionadas (precio, dimensiones, etc.)
+- Puedes estilizarlos con cells_column_spanners()
+
+## 2. SPANNERS (ENCABEZADOS QUE AGRUPAN COLUMNAS)
+
+Los spanners crean encabezados superiores que agrupan varias columnas
+
+```{r}
+tabla_spanners <- diamonds %>%
+  group_by(cut) %>%
+  summarise(
+    cantidad = n(),
+    # Métricas de precio
+    precio_min = min(price),
+    precio_medio = mean(price),
+    precio_max = max(price),
+    # Métricas de quilates
+    quilates_min = min(carat),
+    quilates_medio = mean(carat),
+    quilates_max = max(carat)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Análisis Completo de Diamantes por Corte",
+    subtitle = "Métricas de precio y quilates"
+  ) %>%
+  # CLAVE: Crear spanners con tab_spanner()
+  tab_spanner(
+    label = "Estadísticas de Precio (USD)",
+    columns = c(precio_min, precio_medio, precio_max)
+  ) %>%
+  tab_spanner(
+    label = "Estadísticas de Quilates",
+    columns = c(quilates_min, quilates_medio, quilates_max)
+  ) %>%
+  # Formatear columnas
+  fmt_currency(
+    columns = c(precio_min, precio_medio, precio_max),
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  fmt_number(
+    columns = c(quilates_min, quilates_medio, quilates_max),
+    decimals = 2
+  ) %>%
+  # Renombrar columnas
+  cols_label(
+    cut = "Corte",
+    cantidad = "N°",
+    precio_min = "Mínimo",
+    precio_medio = "Promedio",
+    precio_max = "Máximo",
+    quilates_min = "Mínimo",
+    quilates_medio = "Promedio",
+    quilates_max = "Máximo"
+  ) %>%
+  # Colorear spanners diferentes
+  tab_style(
+    style = cell_fill(color = "#E8F4F8"),
+    locations = cells_column_spanners(spanners = "Estadísticas de Precio (USD)")
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#FFF4E8"),
+    locations = cells_column_spanners(spanners = "Estadísticas de Quilates")
+  )
+
+tabla_spanners
+```
+
+## 3. COMBINANDO AMBOS: ROW GROUPS + SPANNERS
+
+- El ejemplo muestra cómo combinar ambos para crear tablas súper organizadas:
+  - Verticalmente: grupos de filas (rangos de precio)
+  - Horizontalmente: spanners (tipos de métricas)
+
+El poder real viene al combinar ambas técnicas
+
+```{r}
+tabla_combinada <- diamonds %>%
+  # Crear categorías de precio
+  mutate(
+    rango_precio = case_when(
+      price < 1000 ~ "Económico",
+      price < 5000 ~ "Medio",
+      TRUE ~ "Premium"
+    )
+  ) %>%
+  group_by(rango_precio, cut) %>%
+  summarise(
+    cantidad = n(),
+    # Métricas de precio
+    precio_promedio = mean(price),
+    precio_sd = sd(price),
+    # Métricas físicas
+    quilates_promedio = mean(carat),
+    profundidad_promedio = mean(depth),
+    tabla_promedio = mean(table)
+  ) %>%
+  ungroup() %>%
+  # Ordenar para que tenga sentido visual
+  arrange(
+    factor(rango_precio, levels = c("Económico", "Medio", "Premium")),
+    cut
+  ) %>%
+  # Crear tabla con row groups
+  gt(groupname_col = "rango_precio") %>%
+  tab_header(
+    title = "Análisis Multidimensional de Diamantes",
+    subtitle = "Agrupado por rango de precio y tipo de corte"
+  ) %>%
+  # Crear spanners para organizar columnas
+  tab_spanner(
+    label = "Métricas de Precio",
+    columns = c(precio_promedio, precio_sd)
+  ) %>%
+  tab_spanner(
+    label = "Características Físicas",
+    columns = c(quilates_promedio, profundidad_promedio, tabla_promedio)
+  ) %>%
+  # Formatear valores
+  fmt_currency(
+    columns = c(precio_promedio, precio_sd),
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  fmt_number(
+    columns = c(quilates_promedio, profundidad_promedio, tabla_promedio),
+    decimals = 2
+  ) %>%
+  # Etiquetas claras
+  cols_label(
+    cut = "Corte",
+    cantidad = "N°",
+    precio_promedio = "Promedio",
+    precio_sd = "Desv. Est.",
+    quilates_promedio = "Quilates",
+    profundidad_promedio = "Profundidad %",
+    tabla_promedio = "Tabla %"
+  ) %>%
+  # Estilos
+  tab_style(
+    style = list(
+      cell_fill(color = "#E8F4F8"),
+      cell_text(weight = "bold")
+    ),
+    locations = cells_row_groups()
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#F0F0F0"),
+    locations = cells_column_spanners()
+  ) %>%
+  # Colorear celdas según cantidad
+  data_color(
+    columns = cantidad,
+    palette = "Blues"
+  ) %>%
+  # Nota al pie
+  tab_source_note(
+    source_note = "Fuente: Dataset diamonds de ggplot2. 
+    Rangos: Económico (<$1000), Medio ($1000-$5000), Premium (>$5000)"
+  )
+
+tabla_combinada
+
+```
+
+## 4. SPANNERS ANIDADOS (AVANZADO)
+
+Puedes crear spanners dentro de otros spanners
+
+```{r}
+tabla_anidada <- diamonds %>%
+  group_by(cut) %>%
+  summarise(
+    n = n(),
+    # Precio
+    precio_q25 = quantile(price, 0.25),
+    precio_mediana = median(price),
+    precio_q75 = quantile(price, 0.75),
+    # Quilates
+    quilates_q25 = quantile(carat, 0.25),
+    quilates_mediana = median(carat),
+    quilates_q75 = quantile(carat, 0.75)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Distribución de Diamantes por Cuartiles"
+  ) %>%
+  # Spanner principal
+  tab_spanner(
+    label = "PRECIO (USD)",
+    columns = c(precio_q25, precio_mediana, precio_q75)
+  ) %>%
+  tab_spanner(
+    label = "QUILATES",
+    columns = c(quilates_q25, quilates_mediana, quilates_q75)
+  ) %>%
+  # Formatear
+  fmt_currency(
+    columns = starts_with("precio"),
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  fmt_number(
+    columns = starts_with("quilates"),
+    decimals = 2
+  ) %>%
+  cols_label(
+    cut = "Corte",
+    n = "N°",
+    precio_q25 = "Q1 (25%)",
+    precio_mediana = "Mediana",
+    precio_q75 = "Q3 (75%)",
+    quilates_q25 = "Q1 (25%)",
+    quilates_mediana = "Mediana",
+    quilates_q75 = "Q3 (75%)"
+  )
+
+tabla_anidada
+```
+
+# Summary rows (subtotales y totales generales)
+
+## 1. SUMMARY ROWS BÁSICAS
+
+Agregar filas de resumen al final de la tabla
+
+```{r}
+tabla_summary_basica <- diamonds %>%
+  group_by(cut) %>%
+  summarise(
+    cantidad = n(),
+    precio_promedio = mean(price),
+    quilates_promedio = mean(carat)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Diamantes por Tipo de Corte",
+    subtitle = "Con totales al final"
+  ) %>%
+  fmt_number(
+    columns = c(precio_promedio, quilates_promedio),
+    decimals = 2
+  ) %>%
+  # CLAVE: grand_summary_rows() agrega filas de resumen al final
+  grand_summary_rows(
+    columns = c(cantidad, precio_promedio, quilates_promedio),
+    fns = list(
+      "Total" = ~sum(., na.rm = TRUE),
+      "Promedio" = ~mean(., na.rm = TRUE)
+    )
+  ) %>%
+  cols_label(
+    cut = "Corte",
+    cantidad = "Cantidad",
+    precio_promedio = "Precio Promedio",
+    quilates_promedio = "Quilates Promedio"
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#E8F4F8"),
+    locations = cells_grand_summary()
+  )
+
+tabla_summary_basica
+```
+
+## 2. SUMMARY ROWS CON GRUPOS
+
+Cuando tienes row groups, puedes agregar resúmenes por grupo
+
+```{r}
+tabla_summary_grupos <- diamonds %>%
+  mutate(
+    categoria = case_when(
+      price < 1000 ~ "Económico",
+      price < 5000 ~ "Medio",
+      TRUE ~ "Premium"
+    )
+  ) %>%
+  group_by(categoria, cut) %>%
+  summarise(
+    cantidad = n(),
+    precio_promedio = mean(price),
+    precio_max = max(price),
+    .groups = 'drop'
+  ) %>%
+  arrange(
+    factor(categoria, levels = c("Económico", "Medio", "Premium")),
+    cut
+  ) %>%
+  group_by(categoria) %>%
+  gt(groupname_col = "categoria") %>%
+  tab_header(
+    title = "Diamantes por Categoría y Corte",
+    subtitle = "Con subtotales por categoría"
+  ) %>%
+  fmt_currency(
+    columns = c(precio_promedio, precio_max),
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  # summary_rows: resumen por cada grupo
+  summary_rows(
+    groups = TRUE,
+    columns = c(cantidad, precio_promedio, precio_max),
+    fns = list(
+      Subtotal = ~sum(., na.rm = TRUE)
+    )
+  ) %>%
+  # grand_summary_rows: resumen general al final
+  grand_summary_rows(
+    columns = c(cantidad, precio_promedio, precio_max),
+    fns = list(
+      "TOTAL GENERAL" = ~sum(., na.rm = TRUE)
+    )
+  ) %>%
+  cols_label(
+    cut = "Corte",
+    cantidad = "Cantidad",
+    precio_promedio = "Precio Promedio",
+    precio_max = "Precio Máximo"
+  )
+
+tabla_summary_grupos
+```
+
+## 3. MÚLTIPLES FUNCIONES DE RESUMEN
+
+Puedes agregar varias filas de resumen con diferentes estadísticas
+
+```{r}
+tabla_summary_multiple <- diamonds %>%
+  group_by(color) %>%
+  summarise(
+    n = n(),
+    precio_promedio = mean(price),
+    precio_mediana = median(price),
+    quilates_promedio = mean(carat)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Análisis de Diamantes por Color",
+    subtitle = "Múltiples estadísticas de resumen"
+  ) %>%
+  fmt_currency(
+    columns = c(precio_promedio, precio_mediana),
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  fmt_number(
+    columns = c(n, quilates_promedio),
+    decimals = 2
+  ) %>%
+  # Agregar múltiples filas de resumen (usar grand_summary_rows sin grupos)
+  grand_summary_rows(
+    columns = c(n, precio_promedio, precio_mediana, quilates_promedio),
+    fns = list(
+      "Suma" = ~sum(., na.rm = TRUE),
+      "Promedio" = ~mean(., na.rm = TRUE),
+      "Mínimo" = ~min(., na.rm = TRUE),
+      "Máximo" = ~max(., na.rm = TRUE)
+    )
+  ) %>%
+  cols_label(
+    color = "Color",
+    n = "Cantidad",
+    precio_promedio = "Precio Promedio",
+    precio_mediana = "Precio Mediana",
+    quilates_promedio = "Quilates Promedio"
+  ) %>%
+  tab_options(
+    summary_row.background.color = "#FFF4E8",
+    summary_row.text_transform = "italic"
+  )
+
+tabla_summary_multiple
+```
+
+4\. SUMMARY ROWS PERSONALIZADAS POR COLUMNA
+
+Puedes aplicar diferentes funciones a diferentes columnas
+
+```{r}
+tabla_summary_personalizada <- diamonds %>%
+  group_by(cut) %>%
+  summarise(
+    cantidad = n(),
+    precio_min = min(price),
+    precio_promedio = mean(price),
+    precio_max = max(price),
+    quilates_promedio = mean(carat)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Estadísticas de Diamantes por Corte",
+    subtitle = "Resúmenes personalizados por columna"
+  ) %>%
+  fmt_currency(
+    columns = c(precio_min, precio_promedio, precio_max),
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  fmt_number(
+    columns = c(cantidad, quilates_promedio),
+    decimals = 2
+  ) %>%
+  # Resumen para cantidad: suma total
+  grand_summary_rows(
+    columns = cantidad,
+    fns = list("Total de diamantes" = ~sum(.))
+  ) %>%
+  # Resumen para precios: promedio general
+  grand_summary_rows(
+    columns = c(precio_min, precio_promedio, precio_max),
+    fns = list("Promedio general" = ~mean(.))
+  ) %>%
+  # Resumen para quilates: promedio ponderado
+  grand_summary_rows(
+    columns = quilates_promedio,
+    fns = list("Media global" = ~mean(.))
+  ) %>%
+  cols_label(
+    cut = "Corte",
+    cantidad = "Cantidad",
+    precio_min = "Precio Mínimo",
+    precio_promedio = "Precio Promedio",
+    precio_max = "Precio Máximo",
+    quilates_promedio = "Quilates Promedio"
+  ) %>%
+  tab_options(
+    summary_row.background.color = "#E8F8E8"
+  )
+
+tabla_summary_personalizada
+```
+
+## 5. COMBINACIÓN AVANZADA: GRUPOS + SPANNERS + SUMMARY
+
+- Puedes crear spanners anidados (spanners dentro de spanners)
+- Los row groups se ordenan según el orden de tus datos
+- cells_column_spanners(spanners = "nombre") permite estilizar spanners específicos
+- Siempre formatear las columnas (fmt_*) antes de crear las summary rows para evitar conflictos.
+
+El ejemplo más completo: combinando todo
+
+```{r}
+tabla_completa_avanzada <- diamonds %>%
+  mutate(
+    rango_quilates = case_when(
+      carat < 1 ~ "Pequeño (<1ct)",
+      carat < 2 ~ "Mediano (1-2ct)",
+      TRUE ~ "Grande (>2ct)"
+    )
+  ) %>%
+  group_by(rango_quilates, cut) %>%
+  summarise(
+    cantidad = n(),
+    # Métricas de precio
+    precio_min = min(price),
+    precio_promedio = mean(price),
+    precio_max = max(price),
+    # Métricas de calidad
+    profundidad_promedio = mean(depth),
+    tabla_promedio = mean(table),
+    .groups = 'drop'
+  ) %>%
+  arrange(
+    factor(rango_quilates, levels = c("Pequeño (<1ct)", "Mediano (1-2ct)", "Grande (>2ct)")),
+    cut
+  ) %>%
+  group_by(rango_quilates) %>%
+  gt(groupname_col = "rango_quilates") %>%
+  tab_header(
+    title = "Análisis Completo: Precio y Calidad por Tamaño",
+    subtitle = "Con subtotales por grupo y totales generales"
+  ) %>%
+  # Spanners para organizar columnas
+  tab_spanner(
+    label = "Estadísticas de Precio (USD)",
+    columns = c(precio_min, precio_promedio, precio_max)
+  ) %>%
+  tab_spanner(
+    label = "Métricas de Calidad",
+    columns = c(profundidad_promedio, tabla_promedio)
+  ) %>%
+  # Formatear datos principales
+  fmt_currency(
+    columns = c(precio_min, precio_promedio, precio_max),
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  fmt_number(
+    columns = c(profundidad_promedio, tabla_promedio),
+    decimals = 1
+  ) %>%
+  # Subtotales por grupo - cantidad
+  summary_rows(
+    groups = TRUE,
+    columns = cantidad,
+    fns = list("Subtotal" = ~sum(.))
+  ) %>%
+  # Subtotales por grupo - precios (promedio)
+  summary_rows(
+    groups = TRUE,
+    columns = c(precio_min, precio_promedio, precio_max),
+    fns = list("Promedio" = ~mean(.))
+  ) %>%
+  # Total general - cantidad
+  grand_summary_rows(
+    columns = cantidad,
+    fns = list("TOTAL GENERAL" = ~sum(.))
+  ) %>%
+  # Total general - precios (promedio)
+  grand_summary_rows(
+    columns = c(precio_min, precio_promedio, precio_max),
+    fns = list("PROMEDIO GENERAL" = ~mean(.))
+  ) %>%
+  # Etiquetas
+  cols_label(
+    cut = "Corte",
+    cantidad = "N°",
+    precio_min = "Mínimo",
+    precio_promedio = "Promedio",
+    precio_max = "Máximo",
+    profundidad_promedio = "Profundidad %",
+    tabla_promedio = "Tabla %"
+  ) %>%
+  # Estilos con tab_options
+  tab_options(
+    row_group.background.color = "#E8F4F8",
+    summary_row.background.color = "#FFF9E8",
+    grand_summary_row.background.color = "#FFE8E8"
+  ) %>%
+  tab_source_note(
+    source_note = "Fuente: Dataset diamonds de ggplot2"
+  )
+
+tabla_completa_avanzada
+```
+
+# Stub groups (agrupación con nombres de fila)
+
+## 1. STUB GROUPS - CONCEPTO BÁSICO
+
+El "stub" es la primera columna que actúa como identificador de fila. Los stub groups permiten agrupar filas usando esta columna especial
+
+```{r}
+tabla_stub_basica <- diamonds %>%
+  group_by(cut, color) %>%
+  summarise(
+    cantidad = n(),
+    precio_promedio = mean(price),
+    .groups = 'drop'
+  ) %>%
+  arrange(cut, color) %>%
+  slice_head(n = 15) %>%
+  gt(rowname_col = "color", groupname_col = "cut") %>%
+  tab_header(
+    title = "Tabla con Stub Groups",
+    subtitle = "La columna 'color' se convierte en stub (nombres de fila)"
+  ) %>%
+  fmt_currency(
+    columns = precio_promedio,
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  cols_label(
+    cantidad = "Cantidad",
+    precio_promedio = "Precio Promedio"
+  ) %>%
+  tab_stubhead(
+    label = "Color del Diamante"
+  )
+
+tabla_stub_basica
+```
+
+## 2. STUB GROUPS CON RESÚMENES
+
+Combinar stub groups con summary rows
+
+```{r}
+tabla_stub_summary <- diamonds %>%
+  group_by(cut, clarity) %>%
+  summarise(
+    n = n(),
+    precio_medio = mean(price),
+    quilates_medio = mean(carat),
+    .groups = 'drop'
+  ) %>%
+  arrange(cut, desc(precio_medio)) %>%
+  group_by(cut) %>%
+  slice_head(n = 4) %>%
+  ungroup() %>%
+  group_by(cut) %>%
+  gt(rowname_col = "clarity", groupname_col = "cut") %>%
+  tab_header(
+    title = "Top 4 Claridades por Corte",
+    subtitle = "Con subtotales por grupo"
+  ) %>%
+  fmt_currency(
+    columns = precio_medio,
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  fmt_number(
+    columns = quilates_medio,
+    decimals = 2
+  ) %>%
+  summary_rows(
+    groups = TRUE,
+    columns = c(n, precio_medio),
+    fns = list(
+      "Subtotal" = ~sum(., na.rm = TRUE)
+    )
+  ) %>%
+  cols_label(
+    n = "Cantidad",
+    precio_medio = "Precio Medio",
+    quilates_medio = "Quilates Medio"
+  ) %>%
+  tab_stubhead(
+    label = "Claridad"
+  ) %>%
+  tab_options(
+    row_group.background.color = "#E8F4F8",
+    summary_row.background.color = "#FFF4E8"
+  )
+
+tabla_stub_summary
+```
+
+# Imágenes y visualizaciones (emojis, barras de progreso, HTML)
+
+## 3. AGREGAR IMÁGENES - TEXT_TRANSFORM
+
+Puedes agregar imágenes usando text_transform con HTML. Primero creamos datos con URLs de imágenes (ejemplo con íconos)
+
+```{r}
+tabla_con_imagenes <- diamonds %>%
+  group_by(cut) %>%
+  summarise(
+    cantidad = n(),
+    precio_promedio = mean(price),
+    quilates_promedio = mean(carat)
+  ) %>%
+  mutate(
+    # Agregar una columna para el ícono (usando emojis como ejemplo simple)
+    calidad_visual = case_when(
+      cut == "Ideal" ~ "⭐⭐⭐⭐⭐",
+      cut == "Premium" ~ "⭐⭐⭐⭐",
+      cut == "Very Good" ~ "⭐⭐⭐",
+      cut == "Good" ~ "⭐⭐",
+      TRUE ~ "⭐"
+    )
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Diamantes con Indicadores Visuales",
+    subtitle = "Usando símbolos para representar calidad"
+  ) %>%
+  fmt_currency(
+    columns = precio_promedio,
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  fmt_number(
+    columns = quilates_promedio,
+    decimals = 2
+  ) %>%
+  cols_label(
+    cut = "Corte",
+    calidad_visual = "Calidad",
+    cantidad = "Cantidad",
+    precio_promedio = "Precio Promedio",
+    quilates_promedio = "Quilates Promedio"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = calidad_visual
+  )
+
+tabla_con_imagenes
+```
+
+## 4. IMÁGENES CON TEXT_TRANSFORM
+
+Usar text_transform para insertar HTML personalizado con imágenes
+
+```{r}
+tabla_imagenes_avanzada <- diamonds %>%
+  group_by(color) %>%
+  summarise(
+    n = n(),
+    precio_promedio = mean(price)
+  ) %>%
+  arrange(desc(precio_promedio)) %>%
+  head(5) %>%
+  mutate(
+    # Agregar barra visual basada en el precio
+    precio_rel = precio_promedio / max(precio_promedio)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = "Top 5 Colores por Precio",
+    subtitle = "Con barras de progreso visuales"
+  ) %>%
+  # Transformar la columna para agregar barras HTML
+  text_transform(
+    locations = cells_body(columns = precio_rel),
+    fn = function(x) {
+      pct <- as.numeric(x) * 100
+      glue::glue(
+        "<div style='background: linear-gradient(90deg, #4CAF50 {pct}%, #f0f0f0 {pct}%); 
+        width: 100%; height: 20px; border-radius: 4px;'></div>"
+      )
+    }
+  ) %>%
+  fmt_currency(
+    columns = precio_promedio,
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  cols_label(
+    color = "Color",
+    n = "Cantidad",
+    precio_promedio = "Precio Promedio",
+    precio_rel = "Nivel de Precio"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = precio_rel
+  )
+
+tabla_imagenes_avanzada
+
+```
+
+## 5. COMBINACIÓN: STUB GROUPS + IMÁGENES + SPANNERS
+
+El ejemplo más completo
+
+```{r}
+tabla_completa_final <- diamonds %>%
+  group_by(cut, color) %>%
+  summarise(
+    cantidad = n(),
+    precio_min = min(price),
+    precio_promedio = mean(price),
+    precio_max = max(price),
+    quilates_promedio = mean(carat),
+    .groups = 'drop'
+  ) %>%
+  arrange(cut, desc(precio_promedio)) %>%
+  group_by(cut) %>%
+  slice_head(n = 3) %>%
+  ungroup() %>%
+  mutate(
+    # Indicador visual de tamaño
+    tamaño = case_when(
+      quilates_promedio >= 1 ~ "🔷 Grande",
+      quilates_promedio >= 0.7 ~ "🔹 Mediano",
+      TRUE ~ "▫️ Pequeño"
+    ),
+    # Calcular precio relativo para barras
+    precio_rel = precio_promedio / max(precio_promedio)
+  ) %>%
+  group_by(cut) %>%
+  gt(rowname_col = "color", groupname_col = "cut") %>%
+  tab_header(
+    title = "Análisis Visual Completo de Diamantes",
+    subtitle = "Top 3 colores por corte con indicadores visuales"
+  ) %>%
+  # Spanners
+  tab_spanner(
+    label = "Rango de Precios (USD)",
+    columns = c(precio_min, precio_promedio, precio_max)
+  ) %>%
+  tab_spanner(
+    label = "Características",
+    columns = c(cantidad, quilates_promedio, tamaño)
+  ) %>%
+  # Formateo
+  fmt_currency(
+    columns = c(precio_min, precio_promedio, precio_max),
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  fmt_number(
+    columns = quilates_promedio,
+    decimals = 2
+  ) %>%
+  # Agregar barras de progreso
+  text_transform(
+    locations = cells_body(columns = precio_rel),
+    fn = function(x) {
+      pct <- as.numeric(x) * 100
+      color_bar <- ifelse(pct > 80, "#4CAF50", 
+                          ifelse(pct > 50, "#FFC107", "#FF9800"))
+      sprintf(
+        "<div style='background: linear-gradient(90deg, %s %.1f%%, #f0f0f0 %.1f%%); width: 100%%; height: 18px; border-radius: 3px;'></div>",
+        color_bar, pct, pct
+      )
+    }
+  ) %>%
+  # Etiquetas
+  cols_label(
+    cantidad = "N°",
+    precio_min = "Mínimo",
+    precio_promedio = "Promedio",
+    precio_max = "Máximo",
+    quilates_promedio = "Quilates",
+    tamaño = "Tamaño",
+    precio_rel = "Nivel"
+  ) %>%
+  tab_stubhead(
+    label = "Color"
+  ) %>%
+  # Subtotales
+  summary_rows(
+    groups = TRUE,
+    columns = cantidad,
+    fns = list("Total" = ~sum(.))
+  ) %>%
+  # Estilos
+  tab_options(
+    row_group.background.color = "#E8F4F8",
+    summary_row.background.color = "#FFF9E8",
+    stub.background.color = "#F5F5F5"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(tamaño, precio_rel)
+  ) %>%
+  tab_source_note(
+    source_note = "Fuente: Dataset diamonds de ggplot2"
+  )
+
+tabla_completa_final
+```
+
+## NOTA SOBRE IMÁGENES EXTERNAS 
+
+Si quieres usar imágenes desde URLs, puedes hacerlo así:
+
+```{r}
+# text_transform(
+#   locations = cells_body(columns = imagen_col), 
+#   fn = function(x) { 
+#     glue::glue("<img src='{x}' style='height:30px;'>") 
+#     } 
+#   )
+```
+
+Donde 'imagen_col' contiene las URLs de las imágenes
+
+# Tablas sobre objetos especiales 
+
+```{r}
+# Instalación de paquetes necesarios
+# install.packages("gt")
+# install.packages("broom")
+# install.packages("gtsummary")
+# install.packages("dplyr")
+
+library(gt)
+library(broom)      # Para convertir modelos en tibbles
+library(gtsummary)  # Para tablas automáticas de modelos
+library(dplyr)
+
+# Cargar el dataset diamonds
+data(diamonds, package = "ggplot2")
+```
+
+## 1. COMPARAR MODELOS LINEALES CON BROOM + GT
+
+- broom::tidy(): Extrae coeficientes, p-valores, estadísticos
+- broom::glance(): Extrae R², AIC, BIC, etc.
+- broom::augment(): Agrega predicciones y residuos
+- Luego usas gt() para personalizar totalmente
+
+Ventajas: Máxima flexibilidad y control sobre el formato
+
+broom::tidy() convierte modelos en data frames limpios
+
+```{r}
+# Crear varios modelos
+modelo1 <- lm(price ~ carat, data = diamonds)
+modelo2 <- lm(price ~ carat + cut, data = diamonds)
+modelo3 <- lm(price ~ carat + cut + color, data = diamonds)
+
+# Extraer coeficientes y combinarlos
+tabla_coeficientes <- bind_rows(
+  tidy(modelo1) %>% mutate(modelo = "Modelo 1: carat"),
+  tidy(modelo2) %>% mutate(modelo = "Modelo 2: + cut"),
+  tidy(modelo3) %>% mutate(modelo = "Modelo 3: + color")
+) %>%
+  select(modelo, term, estimate, std.error, statistic, p.value) %>%
+  gt(groupname_col = "modelo") %>%
+  tab_header(
+    title = "Comparación de Modelos Lineales",
+    subtitle = "Predicción del precio de diamantes"
+  ) %>%
+  fmt_number(
+    columns = c(estimate, std.error, statistic),
+    decimals = 3
+  ) %>%
+  fmt_scientific(
+    columns = p.value,
+    decimals = 2
+  ) %>%
+  cols_label(
+    term = "Variable",
+    estimate = "Estimación",
+    std.error = "Error Std",
+    statistic = "t-valor",
+    p.value = "p-valor"
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#FFF4E8"),
+    locations = cells_body(
+      columns = p.value,
+      rows = p.value < 0.05
+    )
+  ) %>%
+  tab_options(
+    row_group.background.color = "#E8F4F8"
+  )
+
+tabla_coeficientes
+```
+
+## 2. MÉTRICAS DE AJUSTE DE MODELOS
+
+Usar broom::glance() para comparar métricas de bondad de ajuste
+
+```{r}
+tabla_metricas <- bind_rows(
+  glance(modelo1) %>% mutate(modelo = "Modelo 1"),
+  glance(modelo2) %>% mutate(modelo = "Modelo 2"),
+  glance(modelo3) %>% mutate(modelo = "Modelo 3")
+) %>%
+  select(modelo, r.squared, adj.r.squared, AIC, BIC, deviance, df.residual) %>%
+  gt() %>%
+  tab_header(
+    title = "Métricas de Bondad de Ajuste",
+    subtitle = "Comparación entre modelos"
+  ) %>%
+  fmt_number(
+    columns = c(r.squared, adj.r.squared),
+    decimals = 4
+  ) %>%
+  fmt_number(
+    columns = c(AIC, BIC, deviance),
+    decimals = 1
+  ) %>%
+  cols_label(
+    modelo = "Modelo",
+    r.squared = "R²",
+    adj.r.squared = "R² Ajustado",
+    AIC = "AIC",
+    BIC = "BIC",
+    deviance = "Deviance",
+    df.residual = "GL Residuales"
+  ) %>%
+  # Resaltar el mejor modelo (menor AIC)
+  tab_style(
+    style = cell_fill(color = "#C8E6C9"),
+    locations = cells_body(
+      columns = everything(),
+      rows = AIC == min(AIC)
+    )
+  )
+
+tabla_metricas
+```
+
+## 3. TABLA COMBINADA: COEFICIENTES + MÉTRICAS
+
+Crear una vista más completa
+
+```{r}
+crear_resumen_modelo <- function(modelo, nombre) {
+  coefs <- tidy(modelo) %>%
+    filter(term != "(Intercept)") %>%
+    summarise(
+      n_vars = n(),
+      vars_sig = sum(p.value < 0.05)
+    )
+  
+  metricas <- glance(modelo)
+  
+  tibble(
+    modelo = nombre,
+    variables = coefs$n_vars,
+    significativas = coefs$vars_sig,
+    r_cuadrado = metricas$r.squared,
+    r_cuadrado_aj = metricas$adj.r.squared,
+    AIC = metricas$AIC,
+    BIC = metricas$BIC
+  )
+}
+
+tabla_resumen_modelos <- bind_rows(
+  crear_resumen_modelo(modelo1, "Modelo 1: carat"),
+  crear_resumen_modelo(modelo2, "Modelo 2: + cut"),
+  crear_resumen_modelo(modelo3, "Modelo 3: + color")
+) %>%
+  gt() %>%
+  tab_header(
+    title = "Resumen Comparativo de Modelos",
+    subtitle = "Variables, significancia y métricas de ajuste"
+  ) %>%
+  tab_spanner(
+    label = "Variables",
+    columns = c(variables, significativas)
+  ) %>%
+  tab_spanner(
+    label = "Bondad de Ajuste",
+    columns = c(r_cuadrado, r_cuadrado_aj)
+  ) %>%
+  tab_spanner(
+    label = "Criterios de Información",
+    columns = c(AIC, BIC)
+  ) %>%
+  fmt_number(
+    columns = c(r_cuadrado, r_cuadrado_aj),
+    decimals = 4
+  ) %>%
+  fmt_number(
+    columns = c(AIC, BIC),
+    decimals = 1
+  ) %>%
+  cols_label(
+    modelo = "Modelo",
+    variables = "Total",
+    significativas = "Sig. (p<0.05)",
+    r_cuadrado = "R²",
+    r_cuadrado_aj = "R² Ajustado"
+  ) %>%
+  data_color(
+    columns = r_cuadrado_aj,
+    palette = "Greens"
+  )
+
+tabla_resumen_modelos
+```
+
+## 4. COMPARAR PRUEBAS DE HIPÓTESIS
+
+Ejemplo con diferentes pruebas t
+
+```{r}
+# Crear grupos para comparar
+grupo_ideal <- diamonds %>% filter(cut == "Ideal") %>% pull(price)
+grupo_premium <- diamonds %>% filter(cut == "Premium") %>% pull(price)
+grupo_good <- diamonds %>% filter(cut == "Good") %>% pull(price)
+
+# Realizar pruebas t
+test1 <- t.test(grupo_ideal, grupo_premium)
+test2 <- t.test(grupo_ideal, grupo_good)
+test3 <- t.test(grupo_premium, grupo_good)
+
+# Convertir a tabla
+tabla_tests <- tibble(
+  comparacion = c(
+    "Ideal vs Premium",
+    "Ideal vs Good",
+    "Premium vs Good"
+  ),
+  media_grupo1 = c(
+    mean(grupo_ideal),
+    mean(grupo_ideal),
+    mean(grupo_premium)
+  ),
+  media_grupo2 = c(
+    mean(grupo_premium),
+    mean(grupo_good),
+    mean(grupo_good)
+  ),
+  diferencia = media_grupo1 - media_grupo2,
+  t_estadistico = c(test1$statistic, test2$statistic, test3$statistic),
+  gl = c(test1$parameter, test2$parameter, test3$parameter),
+  p_valor = c(test1$p.value, test2$p.value, test3$p.value),
+  significativo = ifelse(p_valor < 0.05, "✓ Sí", "✗ No")
+) %>%
+  gt() %>%
+  tab_header(
+    title = "Comparación de Precios entre Cortes",
+    subtitle = "Pruebas t de dos muestras"
+  ) %>%
+  tab_spanner(
+    label = "Medias",
+    columns = c(media_grupo1, media_grupo2, diferencia)
+  ) %>%
+  tab_spanner(
+    label = "Estadísticos de Prueba",
+    columns = c(t_estadistico, gl, p_valor)
+  ) %>%
+  fmt_currency(
+    columns = c(media_grupo1, media_grupo2, diferencia),
+    currency = "USD",
+    decimals = 0
+  ) %>%
+  fmt_number(
+    columns = c(t_estadistico, gl),
+    decimals = 2
+  ) %>%
+  fmt_scientific(
+    columns = p_valor,
+    decimals = 3
+  ) %>%
+  cols_label(
+    comparacion = "Comparación",
+    media_grupo1 = "Grupo 1",
+    media_grupo2 = "Grupo 2",
+    diferencia = "Diferencia",
+    t_estadistico = "t",
+    gl = "GL",
+    p_valor = "p-valor",
+    significativo = "Significativo"
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#C8E6C9"),
+    locations = cells_body(
+      rows = p_valor < 0.05
+    )
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = significativo
+  )
+
+tabla_tests
+```
+
+## 5. USANDO GTSUMMARY (AUTOMÁTICO)
+
+Es más rápido y simple, pero con menos alternativas de configuración.
+
+- tbl_regression(): Tabla de regresión automática
+- tbl_merge(): Combina múltiples modelos
+- add_glance_table(): Agrega métricas de ajuste
+- Ventajas: Rápido, formato estándar académico, menos código
+
+gtsummary automatiza la creación de tablas de modelos
+
+```{r}
+library(gtsummary)
+```
+
+```{r}
+# Tabla automática de regresión
+tabla_gtsummary <- tbl_regression(
+  modelo3,
+  label = list(
+    carat ~ "Quilates",
+    cut ~ "Corte",
+    color ~ "Color"
+  )
+) %>%
+  add_glance_table(
+    include = c(r.squared, adj.r.squared, AIC, BIC)
+  ) %>%
+  modify_header(label = "**Variable**") %>%
+# modify_caption("**Tabla de Regresión Lineal - Modelo 3**") %>% # Por alguna razón esta tabla conel título modificado no se guarda en el html
+  as_gt() %>%
+  tab_options(
+    table.font.size = px(12)
+  )
+
+tabla_gtsummary
+
+```
+
+## 6. COMPARAR MÚLTIPLES MODELOS CON GTSUMMARY
+
+```{r}
+tabla_comparacion_gtsummary <- tbl_merge(
+  tbls = list(
+    tbl_regression(modelo1, label = list(carat ~ "Quilates")),
+    tbl_regression(modelo2, label = list(carat ~ "Quilates", cut ~ "Corte")),
+    tbl_regression(modelo3, label = list(carat ~ "Quilates", cut ~ "Corte", color ~ "Color"))
+  ),
+  tab_spanner = c("**Modelo 1**", "**Modelo 2**", "**Modelo 3**")
+) %>%
+  as_gt() %>%
+  tab_header(
+    title = "Comparación de Modelos de Regresión",
+    subtitle = "Predicción del precio de diamantes"
+  )
+
+tabla_comparacion_gtsummary
+```
+
+## NOTAS IMPORTANTES
+
+### PAQUETE BROOM:
+
+-   tidy(): Extrae coeficientes, p-valores, etc.
+-   glance(): Extrae métricas de ajuste (R², AIC, BIC)
+-   augment(): Agrega predicciones y residuos
+
+### PAQUETE GTSUMMARY:
+
+-   tbl_regression(): Tabla automática de regresión
+-   tbl_merge(): Combina múltiples tablas
+-   add_glance_table(): Agrega métricas de ajuste
+-   Funciona con: lm, glm, anova, coxph, survival, modelos mixtos y muchos más
+
+### VENTAJAS:
+
+-   broom + gt: Máximo control y personalización
+-   gtsummary: Rápido y automático, ideal para reportes
+

@@ -217,7 +217,7 @@ paste("year(hoy):", year(hoy)) # año
 | 2d          | Matrix      | Data frame / tibble |
 | nd          | Array       |                     |
 
-## s[1,2]Vectores
+## Vectores
 
 Los vectores son conjuntos ordenados de objetos de la misma clase (o type). Se instancian con c(). Pueden contener cualquier tipo de objetos mientras sean del mismo tipo y los fuerza al mismo tipo por defecto. Las operaciones básicas funcionan elemento a elemento.
 
@@ -554,10 +554,6 @@ if (length(largosOrd) %% 2 == 0) {
 ## Escribir nuevas funciones
 
 Para un ejemplo lo hacemos implementando el método anterior, el cálculo de la mediana.
-
-```{r}
-source("funciones/calcularMediana.R")
-```
 
 ```{r}
 calcularMediana <- function(data) {

@@ -1,0 +1,212 @@
+---
+title: "03 - Formateo de tablas"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+Dar formato a las tablas de datos es una parte central del análisis de datos. No se trata sólo de una cuestión estética, tiene que ver con entender el fenómeno en estudio. Para ello R cuenta con muchos paquetes que permiten explorar los datos crudos. Aquí vamos a explorar algunos de ellos.
+
+Lo primero que debemos entender es que los sistemas más versátiles son aquellos que permiten más configuración y por lo tanto son más complejos de entender y usar. Los sistemas simples son simples porque automatizan muchas cosas sin darnos mucha posibilidad de configuraciones avanzadas y por lo tanto son menos versátiles. Sin embargo generalmente el inicio de la exploración requiere poca configuración, es a medida que conocemos mejor nuestros datos que necesitamos elaborar tablas más complejas. De modo que los sistemas más simples se usan en los primero momentos de nuestra exploración porque nos permiten sambullirnos rápitamente en lo que nos interesa. Luego surgen las preguntas más complejas y entonces necesitamos más versatilidad en la configuración de las tablas. Finalmente es muy frecuente que necesitemos comunicar nuestros hallazgos y para eso necesitámos mucha versatilidad y las cuestiones estéticas del diseño de tablas pasan a ser relevantes.
+
+Vamos a empezar entonces con los sistemas más simples y luego iremos hacia los más complejos.
+
+# DT
+
+```{r}
+library(DT)
+```
+
+Sólo dándole un dataset o un tibble como parámetro ya hace algo interesante. Es una tabla que nos permite ordenar por cada columna y filtrar.
+
+```{r}
+datatable(iris)
+```
+
+```{r}
+# Esto crea un dataframe con datos aleatorios. Cada columna lo hace con una distribución diferente. rpios(100, 1e4) indica 100 números al azar con una distribución de Poison con lambda igual a 10000. La columna E son las fechas consecutivas desde hoy hasta dentro de 100 días.
+df1 <- data.frame(
+  A = rpois(100, 1e4),
+  B = runif(100),
+  C = rpois(100, 1e3),
+  D = rnorm(100),
+  E = Sys.Date() + 1:100
+)
+```
+
+En ese dataframe puede formatearse cada columna.
+
+```{r}
+datatable(df1, filter = 'top') %>%
+  formatCurrency(c('A', 'C'), '$') %>% # agrega la moneda al valor
+  formatPercentage('B', 2) %>% # convierte el valor en porcentaje
+  formatRound('D', 3) %>% # Redondea el valor a 3 decimales
+  formatDate('E', 'toDateString') # convierte un texto en una fecha
+```
+
+Con un poco más de trabajo podemos hacer formatos condicionales.
+
+```{r}
+datatable(iris) %>% 
+  formatStyle('Sepal.Length', fontWeight = styleInterval(5, c('normal', 'bold'))) %>%
+  formatStyle(
+    'Sepal.Width',
+    color = styleInterval(c(3.4, 3.8), c('white', 'blue', 'red')),
+    backgroundColor = styleInterval(3.4, c('gray', 'yellow'))
+  ) %>%
+  formatStyle(
+    'Petal.Length',
+    background = styleColorBar(iris$Petal.Length, 'steelblue'),
+    backgroundSize = '100% 90%',
+    backgroundRepeat = 'no-repeat',
+    backgroundPosition = 'center'
+  ) %>%
+  formatStyle(
+    'Species',
+    transform = 'rotateX(45deg) rotateY(20deg) rotateZ(30deg)',
+    backgroundColor = styleEqual(
+      unique(iris$Species), c('lightblue', 'lightgreen', 'lightpink')
+    )
+  )
+```
+
+
+# Reactable
+
+<https://glin.github.io/reactable/articles/examples.html>
+
+
+```{r}
+library(reactable)
+library(MASS)
+```
+
+```{r}
+reactable(Cars93, filterable = TRUE, searchable = TRUE, minRows = 10)
+```
+
+```{r}
+reactable(Cars93, filterable = TRUE, searchable = TRUE, minRows = 10, groupBy = "Manufacturer")
+
+```
+
+```{r}
+reactable(
+  Cars93[, c("Type", "Price", "MPG.city", "DriveTrain", "Man.trans.avail")],
+  groupBy = "Type",
+  columns = list(
+    Price = colDef(aggregate = "max"),
+    MPG.city = colDef(aggregate = "mean", format = colFormat(digits = 1)),
+    DriveTrain = colDef(aggregate = "unique"),
+    Man.trans.avail = colDef(aggregate = "frequency")
+  )
+)
+```
+
+
+```{r}
+library(tidyverse)
+library(sparkline)
+
+data <- chickwts %>%
+  group_by(feed) %>%
+  summarise(weight = list(weight)) %>%
+  mutate(boxplot = NA, sparkline = NA)
+
+reactable(data, columns = list(
+  weight = colDef(cell = function(values) {
+    sparkline(values, type = "bar", chartRangeMin = 0, chartRangeMax = max(chickwts$weight))
+  }),
+  boxplot = colDef(cell = function(value, index) {
+    sparkline(data$weight[[index]], type = "box")
+  }),
+  sparkline = colDef(cell = function(value, index) {
+    sparkline(data$weight[[index]])
+  })
+))
+```
+
+ ## Con Shiny
+ 
+```{r}
+library(shiny)
+library(reactable)
+
+ui <- fluidPage(
+  titlePanel("reactable example"),
+  reactableOutput("table")
+)
+
+server <- function(input, output, session) {
+  output$table <- renderReactable({
+    reactable(iris)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+# kable y kableExtra
+
+
+```{r}
+library(knitr)
+library(kableExtra)
+
+kable(iris, format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE) %>%
+  row_spec(0, background = "#666", color = "white") # encabezado
+
+```
+
+
+# gt. Grammar of Tables
+
+```{r}
+library(gt)
+```
+
+```{r}
+iris %>% gt()  %>% tab_header(title = md("Iris sp"),
+             subtitle = "Tamaños florales para 3 especies" ) %>% 
+  tab_style(
+    style = list(cell_fill(color = "Orange")),
+    locations = cells_body(columns = Sepal.Length, rows = 1)
+  ) %>% 
+  tab_style(
+    style = list(cell_text(color = "Orange")),
+    locations = cells_body(columns = Petal.Width, rows =c(1,3))
+  ) %>% 
+  tab_style(
+    style = cell_text(color = "red", weight = "bold"),
+    locations = cells_body(
+      columns = c(Sepal.Width),
+      rows = Sepal.Width < 3.5
+    )
+  ) %>% 
+  tab_style(
+    style = cell_text(color = "blue", weight = "bold"),
+    locations = cells_body(
+      columns = c(Petal.Length),
+      rows = Petal.Length >= 2
+    )
+  )
+```
+
+# Huxtable y Flextable
+
+```{r}
+library(huxtable)
+data(diamonds, package = "ggplot2")
+
+lm1 <- lm(log(price) ~ carat, diamonds)
+lm2 <- lm(log(price) ~ depth, diamonds)
+lm3 <- lm(log(price) ~ carat + depth, diamonds)
+
+huxreg(lm1, lm2, lm3)
+
+huxreg(lm1, lm2, lm3, statistics = c("N" = "nobs", "R2" = "r.squared"))
+```
+
+

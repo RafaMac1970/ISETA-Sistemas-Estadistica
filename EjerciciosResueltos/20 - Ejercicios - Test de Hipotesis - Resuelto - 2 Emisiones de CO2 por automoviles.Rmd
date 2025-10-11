@@ -65,7 +65,7 @@ e.  Concluir y explicar la conclusión en términos del fenómeno de interés.
 
 ```{r}
 if (valor_p1 < alfa1) {
-  cat("se rechaza la hipótesis nula y concluyo que los vehículos emiten menos de 2.5 g/km de CO2.\n")
+  cat("Se rechaza la hipótesis nula y concluyo que los vehículos emiten menos de 2.5 g/km de CO2.\n")
 } else {
   cat("No rechaz la hipótesis nula. No hay evidencia suficiente para concluir que los vehículos emiten menos de 2.5 g/km de CO2.\n")
 }

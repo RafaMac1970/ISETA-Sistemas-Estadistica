@@ -9,15 +9,17 @@ library(patchwork)
 
 ui <- fluidPage(
   titlePanel("Cálculo de Potencia y Beta con Distribuciones T no Central"),
+  
   sidebarLayout(
     sidebarPanel(
-      sliderInput("mu", "Media de la población (mu):", min = 0, max = 20, value = 7),
+      sliderInput("mu", "Media de la población (mu):", min = 0, max = 20, value = 10),
       sliderInput("sigma", "Desviación estándar de la población (sigma):", min = 1, max = 10, value = 4),
-      sliderInput("media", "Media muestral:", min = 0, max = 20, value = 10),
+      sliderInput("media", "Media muestral:", min = 0, max = 20, value = 7),
       sliderInput("s", "Desviación estándar muestral (s):", min = 1, max = 10, value = 4),
       sliderInput("n", "Tamaño de la muestra (n):", min = 5, max = 100, value = 25),
       sliderInput("alfa", "Nivel de significación (alfa):", min = 0.001, max = 0.1, value = 0.01, step = 0.001)
     ),
+    
     mainPanel(
       plotOutput("distPlot", height = "700px")
     )
@@ -32,79 +34,115 @@ server <- function(input, output) {
     s <- input$s
     n <- input$n
     alfa <- input$alfa
+    
     df <- n - 1
-
-    # --- Parámetro de no centralidad (estadísticamente correcto: usa sigma) ---
-    ncp <- sqrt(n) * (media - mu) / sigma
-
-    # valor crítico (cola izquierda)
+    
+    # --- Parámetros base ---
+    # Parámetro de no centralidad basado en la muestra
+    ncp_muestra <- (media - mu) / (s / sqrt(n))
+    
+    # Valor crítico en escala t
     tcrit <- qt(alfa, df = df)
-    beta <- 1 - pt(tcrit, df = df, ncp = ncp)
-
-    # --- GRID en t ---
-    t_vals <- seq(-8, 8, length.out = 2000)
-    y_H0_t <- dt(t_vals, df = df)                # t central (H0)
-    y_H1_t <- dt(t_vals, df = df, ncp = ncp)     # t no central (H1)
-
-    datos_t <- data.frame(t = t_vals, H0 = y_H0_t, H1 = y_H1_t)
-
-    # --- Gráfico 1: escala t (con áreas correctamente sombreadas) ---
-    g1 <- ggplot(datos_t, aes(x = t)) +
-      geom_line(aes(y = H0), color = "blue", size = 1) +
-      geom_line(aes(y = H1), color = "red", linetype = "dotdash", size = 1) +
-      # área tipo I: bajo H0, t <= tcrit
-      geom_ribbon(data = subset(datos_t, t <= tcrit), aes(ymin = 0, ymax = H0),
-                  fill = "blue", alpha = 0.3) +
-      # área tipo II: bajo H1, t > tcrit
-      geom_ribbon(data = subset(datos_t, t > tcrit), aes(ymin = 0, ymax = H1),
-                  fill = "red", alpha = 0.3) +
+    
+    # Beta y potencia
+    beta <- 1 - pt(tcrit, df = df, ncp = ncp_muestra)
+    
+    # Rango en escala t
+    rango <- seq(-10, 10, length.out = 500)
+    
+    # --- Datos para el gráfico 1 (escala t) ---
+    # Para la distribución poblacional, convertimos a escala t usando sigma
+    t_vals_pob <- rango * (s / sigma)
+    
+    datos <- data.frame(
+      x = rango,
+      # Distribución bajo H0 (escalada según la relación s/sigma)
+      poblacion = dt(t_vals_pob, df = df) * (s / sigma),
+      # Distribución bajo H1 (no central, usando s muestral)
+      muestra = dt(rango, df = df, ncp = ncp_muestra)
+    )
+    
+    # --- Gráfico 1: escala t ---
+    # Función para la distribución poblacional escalada
+    dt_pob_scaled <- function(x) {
+      dt(x * (s / sigma), df = df) * (s / sigma)
+    }
+    
+    g1 <- ggplot(datos, aes(x)) +
+      # Curvas
+      geom_line(aes(y = poblacion), color = "blue", size = 1) +
+      geom_line(aes(y = muestra), color = "red", linetype = "dotdash", size = 1) +
+      # Áreas de error tipo I (azul) y tipo II (roja)
+      geom_area(stat = "function", fun = dt_pob_scaled,
+                fill = "blue", alpha = 0.3,
+                xlim = c(-10, tcrit)) +
+      geom_area(stat = "function", fun = dt,
+                args = list(df = df, ncp = ncp_muestra),
+                fill = "red", alpha = 0.3,
+                xlim = c(tcrit, 10)) +
+      # Línea crítica
       geom_vline(xintercept = tcrit, linetype = "dashed") +
-      annotate("text", x = tcrit, y = max(y_H0_t, y_H1_t) * 0.9,
-               label = paste0("t\u03B1 = ", round(tcrit, 3)), angle = 90, vjust = -0.5) +
-      annotate("text", x = -6, y = max(y_H0_t, y_H1_t) * 0.7,
-               label = paste("Potencia =", round(1 - beta, 3))) +
-      annotate("text", x = -6, y = max(y_H0_t, y_H1_t) * 0.62,
-               label = paste("\u03B2 =", round(beta, 3))) +
-      labs(title = "Distribuciones en escala t",
-           x = "Estadístico t", y = "Densidad") +
+      # Anotaciones
+      annotate("text", x = tcrit, y = 0.02, label = paste("tα =", round(tcrit, 2)), angle = 90, vjust = -0.5) +
+      annotate("text", x = -6, y = 0.05, label = paste("Potencia =", round(1 - beta, 3))) +
+      annotate("text", x = -6, y = 0.04, label = paste("β =", round(beta, 3))) +
+      ggtitle("Distribuciones T: Poblacional (azul) vs. Muestral (roja)") +
+      ylab("Densidad") + xlab("Estadístico t") +
       theme_minimal()
-
-    # --- Transformar a escala X (no estandarizada) ---
-    # Aquí uso sigma como factor de escala (distribución de la media poblacional)
-    scale_pop <- sigma / sqrt(n)   # escala para Xbar bajo H0/H1 (si interpretamos sigma como verdadero)
-    x_vals <- mu + t_vals * scale_pop   # transformar t -> X
-
-    # Aplicar cambio de variable: f_X(x) = f_T(t) * (1/scale)
-    fX_H0 <- y_H0_t / scale_pop
-    fX_H1 <- y_H1_t / scale_pop
-
-    datos_x <- data.frame(x = x_vals, H0 = fX_H0, H1 = fX_H1)
-
-    # punto crítico en escala X (coherente con la transformación)
-    xcrit <- mu + tcrit * scale_pop
-
-    # --- Gráfico 2: escala X (áreas consistentes con escala no estandarizada) ---
+    
+    # --- Gráfico 2: escala real (X̄) ---
+    # Transformación de t → X̄ 
+    # Ambas distribuciones se centran en mu (H0)
+    x_vals <- mu + rango * (sigma / sqrt(n))
+    xcrit <- mu + tcrit * (sigma / sqrt(n))
+    
+    # Factores de escala para jacobiano
+    factor_escala_h0 <- sqrt(n) / sigma
+    factor_escala_h1 <- sqrt(n) / s
+    
+    # Funciones de densidad en escala X̄
+    dens_h0 <- function(x) {
+      t_val <- (x - mu) / (sigma / sqrt(n))
+      dt(t_val, df = df) * factor_escala_h0
+    }
+    
+    dens_h1 <- function(x) {
+      t_val <- (x - mu) / (s / sqrt(n))
+      dt(t_val, df = df, ncp = ncp_muestra) * factor_escala_h1
+    }
+    
+    # Rango de X̄ para el gráfico
+    x_min <- min(x_vals)
+    x_max <- max(x_vals)
+    x_seq <- seq(x_min, x_max, length.out = 500)
+    
+    datos_x <- data.frame(
+      x = x_seq,
+      poblacion = sapply(x_seq, dens_h0),
+      muestra = sapply(x_seq, dens_h1)
+    )
+    
     g2 <- ggplot(datos_x, aes(x = x)) +
-      geom_line(aes(y = H0), color = "blue", size = 1) +
-      geom_line(aes(y = H1), color = "red", linetype = "dotdash", size = 1) +
-      # área tipo I (X <= xcrit) bajo H0
-      geom_ribbon(data = subset(datos_x, x <= xcrit), aes(ymin = 0, ymax = H0),
-                  fill = "blue", alpha = 0.3) +
-      # área tipo II (X > xcrit) bajo H1
-      geom_ribbon(data = subset(datos_x, x > xcrit), aes(ymin = 0, ymax = H1),
-                  fill = "red", alpha = 0.3) +
+      geom_line(aes(y = poblacion), color = "blue", size = 1) +
+      geom_line(aes(y = muestra), color = "red", linetype = "dotdash", size = 1) +
+      # Área tipo I (bajo H0)
+      geom_area(stat = "function", fun = dens_h0,
+                fill = "blue", alpha = 0.3,
+                xlim = c(x_min, xcrit)) +
+      # Área tipo II (bajo H1)
+      geom_area(stat = "function", fun = dens_h1,
+                fill = "red", alpha = 0.3,
+                xlim = c(xcrit, x_max)) +
       geom_vline(xintercept = xcrit, linetype = "dashed") +
-      annotate("text", x = xcrit, y = max(fX_H0, fX_H1) * 0.9,
-               label = paste0("\u03BC\u2091 = ", round(xcrit, 3)), angle = 90, vjust = -0.5) +
-      labs(title = "Misma comparación en la escala de la media muestral (\u0305X)",
-           x = expression(bar(X)), y = "Densidad") +
+      ggtitle("Distribuciones en escala de la variable real (X̄)") +
+      ylab("Densidad") + xlab("Valor de la media muestral X̄") +
       theme_minimal()
-
-    # --- Combinar verticalmente ---
+    
+    # --- Combinar ambos ---
     g1 / g2
   })
 }
 
 shinyApp(ui = ui, server = server)
-
 ```
+

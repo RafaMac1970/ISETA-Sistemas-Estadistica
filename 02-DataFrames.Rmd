@@ -193,7 +193,7 @@ world_bank_pop %>%
 
 ```
 
-El inconveniente de usar pipes es que si quiero trabajar sobre los datos del gráfico anterior debo repetir el proceso. Siempre una alternativa es darle persistencia al proceso anterior antes de hacer el gráfico, de esa manCHEera se lo puede volver a usar.
+El inconveniente de usar pipes es que si quiero trabajar sobre los datos del gráfico anterior debo repetir el proceso. Siempre una alternativa es darle persistencia al proceso anterior antes de hacer el gráfico, de esa manera se lo puede volver a usar.
 
 ```{r}
 wbpTidy <- world_bank_pop %>% 
@@ -281,7 +281,7 @@ unTibble2
 
 ```{r}
 matriz2 <- matrix(1:16, ncol = 4)
-unTibble3 <- data.frame(matriz2)
+unTibble3 <- tibble(data.frame(matriz2))
 unTibble3
 ```
 
@@ -307,11 +307,9 @@ repeat {
   for (fila in 1:7) {
   unTibble5[fila,columna] <- sample(1:20, 1)
     }
-  
   if (columna >= 5) {
     break
   }
-  
   columna <- columna + 1
 }
 
@@ -380,10 +378,10 @@ Hay una diferencia importante con un dataframe respecto del acceso a informació
 | datos[,2]            |      un vector      |      un tibble      |
 | datos[2,]            |    un data frame    |      un tibble      |
 | datos[2,2]           | un dato (contenido) |      un tibble      |
-| datos\$nombreColumna |      un vector      |      un vector      |
+| datos$nombreColumna  |      un vector      |      un vector      |
 | datos[[2,2]]         | un dato (contenido) | un dato (contenido) |
 
-Si queremos acceder al contenido debemos hacerlo con \$ o con [[]]
+Si queremos acceder al contenido debemos hacerlo con $ o con [[]]
 
 ```{r}
 unDataFrame1[,2]
