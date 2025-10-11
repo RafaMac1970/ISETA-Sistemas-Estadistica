@@ -1,0 +1,102 @@
+---
+title: "03 - Built-in datasets"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Built in databases
+
+R cuenta con una larga serie de conjuntos de datos (datasets) que se usan en diferentes contextos y paquetes para ejemplificar el funcionamineto. Lo bueno de estos datasets es que son datos reales y que han sido analizados por muchísima gente. Adedmás algunos de ellos son muy conocidos. Vamos a explorar algunos y cómo conocerlos así los tenemos disponibles para todo el curso.
+
+```{r}
+library(help = "datasets")
+data(package = .packages(all.available = TRUE))
+```
+
+Aquí les nombro algunos datasets interesantes (los nombres son "case sensitives"): - iris - diamonds - mtcar - airquality - mpg - co2 (no es lo mismo que CO2 !! ) - who - world_bank_pop - gapminder - gapminder_unfiltered - ToothGrowth
+
+## iris
+
+Con el comando help() pueden obtener información descriptiva acerca de dada dataset. Además suele haber vínculos a información más ámplia como los trabajos originales en los que se usaron.
+
+```{r}
+help(iris)
+```
+
+```{r}
+iris
+```
+
+```{r fig.height=10, fig.width=12, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(GGally)
+ggpairs(iris, aes(color = Species, alpha = 0.5))
+```
+
+Iris setosa <https://search.brave.com/images?q=irissetosa&source=web&img=104>
+
+Iris versicolor <https://www.jardin2m.com/Content/Images/Vegetaux/29IRVERS.jpg>
+
+Iris virginica <https://imgs.search.brave.com/RL8PDV1Fb6X3z_brQvsexvB4IUzLJBnrZeAWq0K_b48/rs:fit:540:720:1/g:ce/aHR0cDovL3d3dy5t/aW5uZXNvdGF3aWxk/Zmxvd2Vycy5pbmZv/L3VkYXRhL3I5bmRw/MjNxL3BkL2lyaXMt/dmlyZ2luaWNhLTgu/anBn>
+
+```{r}
+hist(iris$Sepal.Length)
+```
+
+## Gapminder
+
+<https://www.gapminder.org/>
+
+```{r}
+library(gapminder)
+help(gapminder)
+```
+
+```{r}
+gapminder_unfiltered %>% 
+  str()
+```
+
+```{r}
+gapminder_unfiltered %>% 
+  show()
+```
+
+```{r}
+vector_paises <- c("Argentina", "Peru", "Bolivia")
+gapminder_unfiltered %>% 
+  filter(country  %in%  vector_paises) %>% 
+  select(country, year, lifeExp, gdpPercap)
+```
+
+```{r}
+library(ggplot2)
+gapminder_unfiltered %>% 
+  filter(year >= 1990) %>% 
+  ggplot(aes(x = gdpPercap, y = lifeExp, color = continent)) +
+  geom_point() + 
+  facet_wrap(~ continent)
+```
+
+```{r}
+paises <- c("Peru", "Bolivia", "Argentina")
+
+gapminder_unfiltered %>% 
+  filter(country %in% paises) %>% 
+  ggplot() +
+    aes(x = year, y = gdpPercap, color = country) +
+    geom_line() +
+    ylim(0,13000)
+```
+
+## ToothGrowth
+
+```{r}
+help(ToothGrowth)
+ToothGrowth
+```
+
+```{r}
+ggpairs(ToothGrowth, aes(color = factor(dose), alpha = 0.5))
+```
