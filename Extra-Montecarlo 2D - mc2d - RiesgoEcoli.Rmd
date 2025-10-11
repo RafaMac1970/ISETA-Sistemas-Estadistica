@@ -1,0 +1,246 @@
+---
+title: "Simulaciones Montecarlo (mc2D)"
+output: html_notebook
+---
+
+Tomado de la ayuda de mc2d. Leer el .pdf
+
+
+```{r}
+help(mc2d)
+```
+
+```{r}
+library(mc2d)
+library(fitdistrplus)
+# set.seed(666)
+# options("width"=90,"digits"=3)
+```
+
+# Simulaciones Montecarlo
+
+Son simulaciones donde al menos en una variable de la simulación hay azar. Esto implica que la simulación debe controlar dos cosas: la lógica de interación de las variables (modelo) y cómo es la distribución aleatoria (funciones de aleatorización con distribución controlada).
+
+De acuerdo con las recomendaciones internacionales, una Evaluación Cuantitativa de Riesgos (QRA, por sus siglas en inglés) debe reflejar la variabilidad en el riesgo y tener en cuenta la incertidumbre asociada con la estimación del riesgo. La variabilidad representa, por ejemplo, la heterogeneidad temporal, geográfica y/o individual del riesgo para una población dada. La incertidumbre se entiende como derivada de una falta de conocimiento perfecto sobre la estructura del modelo QRA y los parámetros asociados.
+
+En la comunidad de riesgos de ingeniería, estos conceptos se denominan incertidumbre aleatoria para la variabilidad y incertidumbre epistémica para la incertidumbre. La distribución empírica del riesgo dentro de la población puede obtenerse a partir de la combinación matemática de distribuciones que reflejen la variabilidad de los parámetros en la población.
+
+En una simulación de Monte Carlo bidimensional (o de segundo orden) se superpone la incertidumbre en las estimaciones de riesgo derivada a la incertidumbre de los parámetros. En una simulación de Monte Carlo bidimensional la variabilidad y la incertidumbre se muestrean por separado en la simulación.
+
+Se puede describir de la siguiente manera:
+
+1.    Los parámetros del modelo deben dividirse en cuatro categorías: los parámetros fijos (0), los parámetros cuyas distribuciones reflejan solo variabilidad (V), en adelante denominados parámetros variables, los parámetros cuyas distribuciones reflejan solo incertidumbre (U), denotados como parámetros inciertos, y los parámetros cuyas distribuciones reflejan tanto incertidumbre como variabilidad(VU), denotados como parámetros variables e inciertos. Para esta última categoría, se debe especificar una estructura jerárquica, utilizando hiperparámetros: si un parámetro es tanto incierto como variable, uno debería poder especificar una distribución empírica o paramétrica que represente la variabilidad. Esta distribución es condicional a otros parámetros a los que se asocia la incertidumbre.
+
+2.    Se muestrean aleatoriamente un conjunto de parámetros inciertos de acuerdo a sus respectivas distribuciones;
+
+3.    El modelo se evalúa utilizando una simulación de Monte Carlo clásica (unidimensional) de tamaño Nv, tratando los parámetros inciertos como fijos. Esta QRA tiene en cuenta la variabilidad en todos los parámetros variables y conduce a una función de densidad empírica que refleja la variabilidad de la exposición/riesgo en la población, condicional a los parámetros inciertos. Se evalúan y almacenan diversas estadísticas (por ejemplo, la media, la desviación estándar, percentiles) de la función de densidad empírica resultante;
+
+4.    Los pasos 2) y 3) se realizan un gran número (Nu) de veces, lo que lleva a Nu conjuntos de estadísticas. Los parámetros inciertos se generan con respecto a sus distribuciones inciertas;
+
+5.    Como salida, se utiliza el percentil 50 (mediana) de cada estadística como una estimación puntual de esta estadística; los percentiles 2.5 y 97.5 de cada estadística se utilizan para establecer un intervalo de confianza del 95% (CI95) de esta estadística. La mediana de los valores estimados de Nu para cada uno de los percentiles estimados nos permite mostrar una distribución acumulativa de variabilidad a través de un gráfico. Esta curva está rodeada por los percentiles 2.5 y 97.5 obtenidos a partir de las estimaciones de Nu de cada uno de los percentiles.
+
+
+Más formalmente, la simulación de Monte Carlo bidimensional es una herramienta propuesta para estimar la incertidumbre de las distribuciones de probabilidad de variables aleatorias de interés (y luego algunas de sus características, como la media o algunos percentiles).
+
+Este paquete usa las funciones mcstoc() y mcdata() para generar "nodos" que son las variables aleatorias. Y al final la función mc() crea objetos Montecarlo asociando los "nodos" anteriores (que son sus parámetros).
+
+-   ndvar() determina el número de iteraciones por defecto para las funciones de variabilidad
+-   ndunc() determina el número de iteraciones por defecto para las funciones de incertidumbre
+
+## Un modelo básico
+
+Evaluación Cuantitativa de Riesgos: Infección por Escherichia coli vinculada al consumo de carne vacuna picada congelada en niños menores de 3 años.
+
+Advertencia: los datos son ficticios y el modelo está simplificado en exceso para ilustrar mejor el uso del paquete: los resultados no deben y no pueden interpretarse.
+
+El modelo se construye asumiendo que:
+
+-   En un lote dado de carne picada, las E. coli están distribuidas aleatoriamente con una concentración media de 10 bacterias (ufc) por gramo de producto.
+-   No ocurre crecimiento bacteriano durante el almacenamiento, ya que el producto se mantiene congelado hasta que se cocina, justo antes del consumo.
+-   El 2.7% de los consumidores cocinan su carne poco hecha, el 37.3% mediana y el 60.0% bien hecha.
+-   La inactivación bacteriana "i" está asociada con estas prácticas de cocción:
+    -   No hay inactivación para la cocción poco hecha.
+    -   1/5 de las bacterias sobrevivientes para una cocción mediana.
+    -   1/50 de las bacterias sobrevivientes para una cocción bien hecha.
+-   La variabilidad en los tamaños de porción de carne "s" para niños menores de 3 años se puede describir con una distribución gamma con parámetros: shape = 3.93, rate = 0.0806.
+-   La relación dosis-respuesta, que describe la probabilidad de enfermedad, P, según la dosis, es un modelo de una vez. Se asume que la probabilidad de enfermedad por vez, "r", es constante con r = 0.001.
+
+La pregunta es: ¿Cuál es el riesgo de enfermedad en la población que consumió el lote contaminado?
+
+Esta distribución se estimará utilizando simulaciones de Monte Carlo realizadas con R a través del paquete mc2d. Primero, el modelo se desarrollará en un marco unidimensional. Luego, para incluir algunas incertidumbres en el modelo, se derivará en un marco bidimensional.
+
+## Escherichia Coli 1
+
+### (1D). Simulación Monte-Carlo unidimensional 
+
+```{r}
+ndvar(1001)
+conc <- 10
+cook <- mcstoc(rempiricalD, values = c(1,1/5,1/50), prob = c(0.027,0.373,0.600))
+serving <- mcstoc(rgamma, shape = 3.93, rate = 0.0806)
+expo <- conc * cook * serving
+dose <- mcstoc(rpois, lambda = expo)
+r <- 0.001
+risk <- 1-(1-r)^dose
+EC1 <- mc(cook, serving, expo, dose, risk)
+print(EC1)
+summary(EC1)
+```
+
+nsv = número de simulaciones de la dimensión de la variabilidad
+
+nsu = número de simulaciones de la dimensión de la incertidumbre
+
+nva = número de variaciones en la salida
+
+## Escherichia Coli 2
+
+### (2D). Simulación Monte-Carlo bidimensional
+
+Ahora asumamos que:
+
+-   La concentración media de bacterias en el lote no se conoce con certeza, sino que fue solo una estimación puntual. Los microbiólogos piensan que la incertidumbre alrededor de esta estimación se puede representar mediante una distribución normal con parámetros mu = 10 y sigma = 2.
+
+-   Estudios epidemiológicos sugieren que el parámetro "r" también es incierto. La incertidumbre alrededor del valor medio de 0.001 se puede representar con una distribución uniforme entre 0.0005 y 0.0015.
+
+```{r}
+ndunc(101)
+conc <- mcstoc(rnorm,type="U",mean=10,sd=2)
+cook <- mcstoc(rempiricalD, type="V",values=c(1,1/5,1/50), prob=c(0.027,0.373,0.600))
+serving <- mcstoc(rgamma,type="V",shape=3.93,rate=0.0806)
+expo <- conc * cook * serving
+dose <- mcstoc(rpois,type="VU",lambda=expo)
+r <- mcstoc(runif,type="U",min=0.0005,max=0.0015)
+risk <- 1-(1-r)^dose
+EC2 <- mc(conc,cook,serving,expo,dose,r,risk)
+print(EC2,digits=2)
+summary(EC2)
+```
+
+## Escherichia Coli 2. Variaciones
+
+### Combinación de Distribuciones.
+
+Se puede construir una distribución con otras dos.
+
+```{r}
+conc1 <- mcstoc(rnorm, type = "U", mean = 10, sd = 2)
+conc2 <- mcstoc(runif, type = "U", min = 8, max = 12)
+whichdist <- c(0.75, 0.25)
+concbis <- mcprobtree(whichdist, list("0" = conc1, "1" = conc2), type = "U")
+```
+
+
+### Especificar correlación entre nodos.
+
+Suelen existir variables correlacionadas, en esos casos podemos generar números al azar que estén correlacionados.
+
+```{r}
+cornode(cook,serving,target=0.5,result=TRUE) 
+```
+
+### Objeto Monte Carlo
+
+La función mc() crea un objeto Monte Carlo con los nodos antes creados.
+
+```{r}
+EC2 <- mc(conc,cook,serving,expo,dose,r,risk)
+print(EC2)
+summary(EC2)
+```
+
+## Escherichia Coli 3.
+
+### Creando un Modelo Monte Carlo
+
+Esto permite usarlo luego cambiando algunos parámetros.
+
+```{r}
+modelEC3 <- mcmodel({
+  conc <- mcstoc(rnorm,type="U",mean=10,sd=2)
+  cook <- mcstoc(rempiricalD, type="V",values=c(1,1/5,1/50),
+    prob=c(0.027,0.373,0.600))
+  serving <- mcstoc(rgamma,type="V",shape=3.93,rate=0.0806)
+  r <- mcstoc(runif,type="U",min=0.0005,max=0.0015)
+  expo <- conc * cook * serving
+  dose <- mcstoc(rpois,type="VU",lambda=expo)
+  risk <- 1-(1-r)^dose
+  mc(conc,cook,serving,expo,dose,r,risk)
+})
+modelEC3
+```
+
+## Escherichia Coli 3 y 4
+
+### Usando el Modelo
+
+```{r}
+EC3 <- evalmcmod(modelEC3,nsv=100,nsu=10,seed=666)
+EC4 <- evalmcmod(modelEC3,nsv=100,nsu=1000,seed=666)
+```
+
+## Volvemos a Escherichia Coli 2
+
+### Función summary()
+
+```{r}
+tmp <- summary(EC2,probs=c(0.995,0.999),digits=12)
+tmp$risk
+```
+
+## Escherichia Coli 2. Graficando
+
+### Histogramas para todos
+
+```{r}
+hist(EC2)
+```
+
+### Plot
+
+La función plot() provee un gráfico de distribución acumulada de la estimación de los cuantiles.
+
+```{r}
+plot(EC2)
+```
+
+### Ídem pero en ggplot2
+
+```{r}
+ggplotmc(EC2)
+```
+
+### Correlación de la variabilidad
+
+Correlación entre cada variable (V, de variabilidad) de entrada con la de salida (risk)
+
+```{r}
+torEC2 <- tornado(EC2)
+torEC2
+plot(torEC2)
+```
+
+### Correlación de la incertidumbre
+
+Correlación entre cada variable (U, de incertidumbre) de entrada con la de salida (risk)
+
+```{r}
+tornadounc(EC2, output="risk", quant=.99)
+```
+
+### Razones (Ratios)
+
+Relaciones de varibilidad e incertidumbre.
+
+-   A: mediana para la incertidumbre de la variabilidad
+-   B: mediana para la incertidumbre del percentil 97.5 de la variabilidad
+-   C: percentil 97.5 de incertidumbre para la mediana de la variabilidad
+-   D: percentil 97.5 de incertidumbre para el percentil 97.5 de la variabilidad
+-   Razón de Variabilidad (B / A)
+-   Razón de Incertidumbre (C / A)
+-   Razón del Total de Incertidumbre (D / A)
+
+```{r}
+mcratio(risk)
+```
+
