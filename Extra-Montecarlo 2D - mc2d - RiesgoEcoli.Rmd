@@ -3,7 +3,7 @@ title: "Simulaciones Montecarlo (mc2D)"
 output: html_notebook
 ---
 
-Tomado de la ayuda de mc2d. Leer el .pdf
+Tomado de la ayuda de mc2d. Leer el .pdf 
 
 
 ```{r}

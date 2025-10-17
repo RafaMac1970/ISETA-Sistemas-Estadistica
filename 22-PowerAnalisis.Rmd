@@ -76,6 +76,8 @@ ggplot(data.frame(x = rango), aes(x = rango)) +
   ylab("Densidad") + ggtitle("Distribuciones T de Student y T No Central") + xlab("estadístico t")
 ```
 
+## Comparemos muchos casos sistemáticamente
+
 ### Primero armamos el Data Frame con las potencias calculadas
 
 ```{r echo=TRUE}
@@ -201,7 +203,7 @@ legend("topright", title="Power", as.character(p),
 
 # Ejemplo de relación entre sd y n
 
-Esto muestra cómo varía el sd a medida que agrego individuos a una muestra
+Esto muestra cómo varía el sd a medida que agrego individuos a una muestra con una simulación montecarlo.
 
 ```{r echo=TRUE}
 popu <- rnorm(50000, mean = 10, sd = 1)

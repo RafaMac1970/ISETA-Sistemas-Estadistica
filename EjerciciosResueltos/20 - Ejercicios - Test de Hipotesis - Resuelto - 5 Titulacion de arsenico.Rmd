@@ -37,7 +37,7 @@ SE <- s / sqrt(n)
 t_stat <- (xbar - mu0) / SE
 df <- n - 1
 
-# Valor crítico para un alpha de 5% (0.05)
+# Valor crítico para un alpha de 5% (0.05) a dos colas.
 t_crit <- qt(0.975, df)
 
 # Resultados
@@ -76,6 +76,8 @@ c.  Identificar la población de referencia y las variables aleatorias en este e
 > La población de referencia es la solución elaborada. Hay dos variables aleatorias involucradas: 1. La concentración de la solución de referencia tiene variaciones cada vez que se prepara. 2. Cada titulación realizada. 
 
 > La limitación más importante es que el método supone que una muestra preparada en el laboratorio es equivalente a una muestra de agua tomada del ambiente. En la naturaleza el arsénico puede tener interacciones con otras substancias disueltas (que estan ausentes en la solución preparada en el laboratorio - agua destilada + arsénico).
+
+> El rango del método sirve para valores cercanos a 0.05mg/l
 
 d.  Construir e interpretar un intervalo de confianza 0.95 para la esperanza de las titulaciones.
 
