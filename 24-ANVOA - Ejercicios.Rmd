@@ -1,0 +1,68 @@
+---
+title: "24 - ANOVA - Ejercicios"
+output: html_notebook
+---
+
+```{r}
+library(ggplot2)
+# library()
+```
+
+
+# ANOVA
+
+## 1. Ejercicio: Rotura de lana
+
+Se utilizarán los datos del built-in dataset warpbreaks.
+
+Se realizó un experimento para evaluar el efecto de dos factores sobre la cantidad de rupturas en un tejido: el tipo de lana (wool) y la tensión aplicada (tension). Los datos están en el dataset warpbreaks.
+
+-   Use la ayuda para comprender mejor los datos.
+-   Grafique los datos.
+-   Verifique los supuestos.
+-   Plantee las hipótesis nula y alternativa para cada factor y la interacción.
+-   Realice un ANOVA de dos factores con interacción para analizar el número de rupturas (breaks).
+-   ¿Qué factor tiene mayor efecto sobre las rupturas? ¿Existe interacción significativa entre ambos factores?
+-   En caso de encontrar significancia, realice un análisis post-hoc adecuado y grafique los resultados.
+
+## 2. Ejercicio: Absorción de CO2
+
+Un estudio botánico analizó la absorción de CO2 por plantas de dos tipos (Type) bajo dos tratamientos (Treatment). 
+Los datos están en el dataset CO2
+
+-   Use la ayuda para comprender mejor los datos.
+-   Grafique los datos.
+-   Verifique los supuestos.
+-   Formule las hipótesis nulas y alternativas para ambos factores y la interacción.
+-   Realice un ANOVA de dos factores con interacción entre Type y Treatment para explicar la absorción de CO2 (uptake).
+-   ¿Existe una interacción significativa entre el tipo de planta y el tratamiento aplicado?
+-   Interpreta los resultados y discute cómo se relacionan los efectos principales con la interacción.
+
+## 3. Ejercicio: Efectividad de insecticidas
+
+Se probaron seis tipos de insecticidas (spray) para evaluar su efectividad en la eliminación de insectos. 
+Los datos están en el dataset InsectSprays
+
+-   Use la ayuda para comprender mejor los datos.
+-   Grafique los datos.
+-   Verifique los supuestos.
+-   Plantee las hipótesis nula y alternativa para este ANOVA.
+-   Realice un ANOVA de un factor para evaluar el efecto del tipo de spray sobre el conteo de insectos (count).
+-   En caso de encontrar diferencias significativas, realiza un test de Tukey para identificar qué tipos de sprays difieren significativamente entre sí.
+-   Grafica los resultados del análisis post-hoc.
+
+## 4. Ejercicio: Dieta sobre crecimiento de pollos
+
+> Aclaración, este ejercicio tiene una característica que requiere de un análisis algo diferente, ya que a cada pollo se le midió el peso varias veces a lo largo del tiempo. Sin embargo realizaremos aquí un ANOVA común, luego les mostraré la alternativa.
+
+Una investigación desea evaluar si existe una interacción significativa entre el tipo de dieta y el tiempo de medición sobre el peso de los pollos. 
+Los datos están en el dataset ChickWeight
+
+-   Use la ayuda para comprender mejor los datos.
+-   Grafique los datos.
+-   Verifique los supuestos.
+-   Plantee las hipótesis nula y alternativa para ambos factores y su interacción.
+-   Realice un ANOVA de dos factores con interacción (Diet y Time) para explicar el peso (weight).
+-   Interprete los resultados del análisis. 
+-   Si existen diferencias significativas, realiza un análisis post-hoc para determinar qué combinaciones de niveles presentan diferencias.
+

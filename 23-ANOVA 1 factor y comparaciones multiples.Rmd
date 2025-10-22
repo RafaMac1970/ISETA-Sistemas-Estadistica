@@ -1,0 +1,221 @@
+---
+title: "23 - ANOVA 1 factor y comparaciones múltiples"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+Una descripción completa que puede encontrar on line.
+
+-   Joaquín Amat Rodrigo (2016). ANOVA análisis de varianza para comparar múltiples medias.
+<https://cienciadedatos.net/documentos/19_anova>
+
+```{r}
+library(tidyverse)
+```
+
+# ANOVA para un factor
+
+Para realizar un ANOVA usamos la función aov(), que tiene como primer parámetro el modelo lineal que deseamos evaluar. 
+
+El modelo lineal genérico es:
+
+$$
+Y_{ij} = \mu + \alpha_i + \epsilon_{ij}
+$$
+
+Donde:
+
+-   Y es la variable respuesta.
+-   𝝁 es la media de todos los datos juntos, o la media del grupo de referencia (lo segundo es lo que hace R).
+-   𝜶 es el efecto de grupo (del iésimo grupo). En un ANOVA el grupo es una variable categórica, no aleatoria.
+-   𝟄 es el residual del individuo jésimo perteneciente al iésimo grupo. 
+Se asume que los residuales tienen distribución normal con media 0 y varianza sigma cuadrado:
+
+$$
+\epsilon_{ij} \sim N(0, \sigma^2)
+$$
+
+
+
+La hipótesis a probar en un ANOVA de un factor es la siguiente:
+
+
+$$
+H_0: \alpha_1 = \alpha_2 = \dots = \alpha_k = 0 \\
+H_1: \text{Al menos uno de los } \alpha_i \neq 0
+$$
+
+Para realizar el análisis de varianza, se dividen las sumas de cuadrados en dos componentes:
+
+$$
+SC_{Total} = SC_{Entre} + SC_{Dentro}
+$$
+
+SC_{Total}: Suma de cuadrados total, que mide la variabilidad total de los datos.
+SC_{Entre}: Suma de cuadrados entre grupos, que mide la variabilidad explicada por las diferencias entre los grupos.
+SC_{Dentro}: Suma de cuadrados dentro de los grupos, que mide la variabilidad dentro de los grupos.
+
+
+El estadístico F se calcula como:
+
+$$
+F = \frac{\frac{SC_{Entre}}{gl_{Entre}}}{\frac{SC_{Dentro}}{gl_{Dentro}}}
+$$
+
+Donde:
+
+gl_{Entre} = k - 1 es el grado de libertad entre los grupos (k es la cantidad de grupos).
+gl_{Dentro} = N - k es el grado de libertad dentro de los grupos (N es el tamaño de todas las muestra juntas).
+
+# Un Ejemplo
+
+Usaremos los datos de iris. Primero probamos con ancho de sépalos, y luego puede hacerlo con largo de pétalos para ver las diferencias.
+
+## Explorar el dataset
+
+```{r}
+summary(iris)
+```
+
+```{r}
+library(gt)
+gt(iris)
+```
+
+## Graficar
+
+```{r}
+ggplot(iris, aes(x = Species, y = Sepal.Width)) +
+  geom_boxplot() +
+  geom_jitter() +
+  ylim(c(0, 4.5))
+```
+
+```{r}
+# ggplot(iris, aes(x = Species, y = Petal.Length)) +
+#   geom_boxplot() +
+#   geom_jitter() +
+#   ylim(c(0, 7))
+```
+
+## Hacer el ANOVA
+
+### Con aov()
+
+```{r}
+anovaModel <- aov(Sepal.Width ~ Species, data = iris)
+summary(anovaModel)
+```
+
+
+```{r}
+anovaModel$coefficients
+```
+
+```{r}
+# anovaModel <- aov(Petal.Length ~ Species, data = iris)
+# summary(anovaModel)
+```
+
+```{r}
+# anovaModel$coefficients
+```
+
+### Con lm()
+
+También puede realizarse con la función lm(), que se refiere a modelos lineales (Linear Model). Aquí se puede ver en la última línea que el estadístico de prueba, los grados de libertad y el p-value coinciden con el resultado de aov(), ya que están calculados para el modelo completo. Además se puede ver que los coeficientes son los mismos. 
+
+El R² es el coeficiente de correlación (no el de Pearson, porque la variable explicatoria es categórica). lm() es más correcto usarlo para regresión lineal, es decir cuando la variable explicatoria es numérica (el tema se abordará más adelante).
+
+```{r}
+lmModel <- lm(Sepal.Width ~ Species, data = iris)
+# lmModel <- lm(Petal.Length ~ Species, data = iris)
+summary(lmModel)
+```
+
+## Verificación de supuestos
+
+Siempre que se hace un análisis es necesario verificar que se cumpla con los supuestos sobre los cuales se desarrrolló el método. Por esa razón veremos seguidamente cómo verificar los supuestos de ANOVA.
+
+El siguiente vínculo aborda este tema más extensamente.
+
+Mark Greenwood (2022). "ANOVA model diagnostics including QQ-plots"
+<https://stats.libretexts.org/Bookshelves/Advanced_Statistics/Intermediate_Statistics_with_R_(Greenwood)/03%3A_One-Way_ANOVA/3.04%3A_ANOVA_model_diagnostics_including_QQ-plots>
+
+### Normalidad
+
+El análisis supone que los residuales tienen distribución Normal, por lo tanto realizamos un test T para una H0 que dice que la distribución de los residuales no difiere de la distribución Normal. Si el p-value es inferior a 0.05, la diferncia entre las distribuciones es diferente de cero, lo que significa que llos residuales no tienen distribución Normal, y en ese caso no puedo aceptar los resultados del ANOVA.
+
+```{r}
+shapiro.test(residuals(anovaModel))
+```
+
+### Homogeneidad de varianzas
+
+El análisis supone que los residuales dentro de cada grupo tienen la misma varianza, por lo tanto realizamos un test T para una H0 que dice que todos los grupos tienen la misma varianza. Si el p-value es inferior a 0.05, hay al menos un grupo cuya varianza difiere del resto y en ese caso no puedo aceptar los resultados del ANOVA.
+
+Existen muchos test posibles, todos son similares.  bartlett.test(), fligner.test(), var.test(), leveneTest()
+
+```{r}
+bartlett.test(Sepal.Width ~ Species, data = iris)
+# bartlett.test(Petal.Length ~ Species, data = iris)
+```
+
+### Supuestos Gráficamente
+
+```{r fig.height=6, fig.width=6}
+par(mfrow = c(2,2))
+plot(anovaModel, pch = 16)
+
+```
+
+```{r}
+boxplot(anovaModel$residuals ~ iris$Species)
+```
+
+
+## Comparaciones múltiples
+
+El siguiente vínculo aborda este tema más extensamente.
+
+Joaquín Amat Rodrigo (2016). "Comparaciones múltiples: corrección de p-value y FDR".
+<https://rpubs.com/Joaquin_AR/236898>
+
+
+Las funciones LSD.test() y pairwise.t.test() puede usar los siguientes métodos: "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none" (T de Student)
+
+### Intervalos LSD de Fisher (Least Significance Difference)
+
+```{r}
+library(agricolae)
+lsdTest <- LSD.test(anovaModel, "Species", p.adj="none", alpha = 0.01, group=FALSE)
+lsdTest
+```
+
+### Ajuste de Bonferroni
+
+```{r}
+pairwise.t.test(iris$Sepal.Width, iris$Species, p.adjust.method = "bonferroni")
+# pairwise.t.test(iris$Petal.Length, iris$Species, p.adjust.method = "bonferroni")
+```
+
+### Ajuste de Holm-Bonferroni
+
+```{r}
+pairwise.t.test(iris$Sepal.Width, iris$Species, p.adjust.method = "holm")
+# pairwise.t.test(iris$Petal.Length, iris$Species, p.adjust.method = "holm")
+```
+
+### Tukey-Kramer (HSD). Honest Significant Difference. También conocido como corrección de Dunnet.
+
+```{r}
+tukeyTest <- TukeyHSD(anovaModel)
+tukeyTest
+```
+
+```{r}
+plot(tukeyTest)
+```
+
+

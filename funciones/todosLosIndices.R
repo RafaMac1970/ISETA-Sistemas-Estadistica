@@ -3,7 +3,7 @@ library(moments)
 source("funciones/quantiles.R")
 source("funciones/ic95.R")
 source("funciones/cv.R")
-# El argumento debe ser un tibble agrupado de acuerdo a la agregación que se desee
+# El argumento debe ser un tibble agrupado de acuerdo a la agregación que se desee y la variable debe ser "valor"
 todosLosIndices <- function(unTibbleAgrupado){
    reframe(unTibbleAgrupado, n = n(), 
                              min = min(valor), 
@@ -20,7 +20,7 @@ todosLosIndices <- function(unTibbleAgrupado){
                              EE = std.error(valor), 
                              asimetria = skewness(valor), 
                              curtosis = kurtosis(valor), 
-                             "IC95-" = ic95(valor)[1], 
-                             "IC95+" = ic95(valor)[2])
+                             IC95Down = ic95(valor)[1], 
+                             IC95Up = ic95(valor)[2])
   
 }
