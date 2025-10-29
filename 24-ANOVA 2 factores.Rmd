@@ -82,7 +82,7 @@ ToothGrowth %>%
   ggplot() + 
     aes(x = len) +
     geom_histogram() +
-    facet_wrap(vars(dose, supp), ncol = 2)
+    facet_wrap(vars(supp, dose), ncol = 3)
 ```
 
 ##### Calculamos los índices

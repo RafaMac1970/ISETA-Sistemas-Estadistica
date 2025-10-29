@@ -62,6 +62,8 @@ Arriba se muestra el procedimiento, además armé una función que hace lo mismo
 
 ## Matriz gráfica de correlación
 
+Esto se muestra para verificar la capacidad del método, pero no es una práctica recomendable hacerlo con tanta cantidad de variables y datos. De todos modos puede verse la enorme utilidad que podría tener esto en la exploración de algunos casos. Muy rápidamente se puede contar con un panorama general muy detallado.
+
 ```{r fig.height=15, fig.width=15, message=FALSE, warning=FALSE}
 library(GGally)
 
@@ -190,7 +192,7 @@ En este caso la moda no tiene sentido, por eso la excluyo de las estadísticas.
  source("funciones/todosLosIndices.R")
 
  # Primero armar el tibble agrupado de acuerdo a la agregación que se desee
- unTibbleAgrupado <- irisTidy %>% group_by(Species,Variable)
+ unTibbleAgrupado <- irisTidy %>% group_by(Species, Variable)
 
  # Luego puede invocar la función
  todosLosIndices(unTibbleAgrupado)
@@ -222,8 +224,8 @@ ggMarginal(p, type="boxplot")
 
 
 ```{r}
-gr1 <- ggplot(iris, aes(x=Petal.Length, fill = Species, alpha = 0.4)) +
-  geom_histogram() +
+gr1 <- ggplot(iris, aes(x = Petal.Length, fill = Species)) +
+  geom_histogram(alpha = 0.4) +
   geom_boxplot(aes(x =  Petal.Length, y = 30), width = 5)
 gr1
 ```
