@@ -1,0 +1,279 @@
+---
+title: "25 - Regresión Lineal Simple y múltiple"
+output: html_notebook
+---
+
+Aquí les dejo una referencia muy completa y clara sorbe este tema.
+
+Joaquín Amat Rodrigo (2016). "Correlación lineal y Regresión lineal simple"
+<https://cienciadedatos.net/documentos/24_correlacion_y_regresion_lineal>
+
+La primera parte es correlación (como ya se vió en 21 - Covarianza y Correlación.Rmd), acceda directamente a Regresión simple con este vínculo.
+<https://cienciadedatos.net/documentos/24_correlacion_y_regresion_lineal#Regresi%C3%B3n_lineal_simple>
+
+
+# Regresión simple.
+
+La regresión simple tiene una sola variable contínua explicatoria, pero puede tener más factores categóricos (ver más adelante).
+
+$$
+Y_{i} = \beta_0 + (\beta_1 *x_i)  + \epsilon_{i}
+$$
+Donde:
+
+-   Y es la variable dependiente (respuesta).
+-   𝜷0 es la ordenada al origen de la recta.
+-   𝜷1 es la pendiente de la recta.
+-   xi es la variable independiente del iésimo individuo.
+-   𝟄i es el residual del individuo iésimo respecto del valor predicho por el modelo. 
+Se asume que los residuales tienen distribución normal con media 0 y varianza sigma cuadrado:
+
+$$
+\epsilon_{ij} \sim N(0, \sigma^2)
+$$
+```{r}
+library(tidyverse)
+library(ggpmisc)
+```
+
+## Regresión simple. Ejemplo con mtcars
+
+```{r}
+mtcars
+help(mtcars)
+```
+
+```{r}
+regSimple <- lm(mpg ~ hp, data = mtcars)
+summary(regSimple)
+```
+
+```{r}
+# library(ggpmisc)
+ggplot(mtcars, aes(x = hp, y = mpg)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, color = "firebrick") +
+  stat_poly_eq(use_label(c("eq", "adj.R2", "R2", "R2.CI", "P", "n")))
+```
+
+### Parámetros
+
+#### Pendiente
+
+La pendiente (aquí el efecto hp del modelo) es la razon entre la covarianza entre la variable independiente y la variable dependiente
+
+```{r}
+pendiente <- cov(mtcars$mpg, mtcars$hp) / var(mtcars$hp)
+pendiente
+```
+
+#### Ordenada al Orígen (Intercept)
+
+La ordenada al orígen se despeja usando las medias de las dos variables y la pendiente calculada.
+
+```{r}
+oo <- mean(mtcars$mpg) - (pendiente * mean(mtcars$hp))
+oo
+```
+
+
+#### Coeficientede determinación (R²)
+
+$$
+SCY =  SCM + SCD
+$$
+SCY: es la Sumatoria de Cuadrados total
+SCM: es la Sumatoria de Cuadrados del modelo
+SCD: es la Sumatoria de Cuadrados de los residuales
+
+$$
+R^2 =  \frac {SCM} {SCY} 
+$$
+
+
+```{r}
+scy <- sum((mtcars$mpg - mean(mtcars$mpg))^2)
+scm <- sum((regSimple$fitted.values - mean(mtcars$mpg))^2)
+scd <- sum((regSimple$residuals)^2)
+
+scy
+scm + scd
+scm
+scd
+
+r2 <- scm / scy
+r2
+```
+
+
+## Regresión simple con un factor
+
+### Filtrando por una categoría
+
+Se puede filtrar los datos por una categoría y realizar una regresión simple como la anterior sobre los datos de esa categoría. Este procedimiento puede repetirse para cada una de las categoría de interés y obtener varias regresiones simples separadas.
+
+```{r}
+filtrado <- mtcars %>% filter(vs == 1)
+```
+
+```{r}
+regSimple2 <- lm(mpg ~ hp, data = filtrado)
+summary(regSimple2)
+```
+
+```{r}
+# library(ggpmisc)
+ggplot(filtrado, aes(x = hp, y = mpg, fill = factor(vs))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, color = "firebrick") +
+  stat_poly_eq(use_label(c("eq", "R2"))) 
+```
+
+## Regresión múltiple
+
+El método anterior sirve, pero podemos extraer más información y realizar el análisis anterior para todas las categorías en un solo paso. Lo que hacemos es agregar un efecto de grupo (categórico) para cada nivel de un factor de interés. Esto hace varias regresiones juntas (una para cada nivel del factor de clasificación) y además puede probar las hipótesis similares a un ANOVA.
+
+El modelo sería el siguiente:
+
+$$
+Y_{ijk} = \beta_0 + \beta_1 X_i + \beta_j X_j + \beta_{1j} X_i X_j+ \epsilon_{ijk}
+$$
+
+```{r}
+regConFactor <- lm(mpg ~ hp * factor(vs), data = mtcars)
+summary(regConFactor)
+```
+
+```{r}
+# library(ggpmisc)
+ggplot(mtcars, aes(x = hp, y = mpg, fill = factor(vs))) +
+  geom_point(aes(fill = factor(vs))) +
+  geom_smooth(method = "lm", se = TRUE, color = "firebrick") +
+  stat_poly_eq(use_label(c("eq", "R2"))) 
+```
+
+### Probando con otro factor diferente
+
+```{r}
+regConFactor2 <- lm(mpg ~ hp * factor(cyl), data = mtcars)
+summary(regConFactor2)
+```
+
+
+```{r}
+# library(ggpmisc)
+ggplot(mtcars, aes(x = hp, y = mpg, fill = factor(cyl))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, color = "firebrick") +
+  stat_poly_eq(use_label(c("eq", "R2"))) 
+```
+
+### Probando con dos factores
+
+```{r}
+regConFactor2 <- lm(mpg ~ hp * factor(vs) * factor(cyl), data = mtcars)
+summary(regConFactor2)
+```
+
+> Se puede ver que los p-values son demasiado altos, eso es porque en cada grupo hay pocos vehículos (n demasiado bajo).
+
+
+```{r}
+ggplot(mtcars, aes(x = hp, y = mpg)) +
+  geom_point(aes(color = factor(cyl)), size = 2) +
+  geom_smooth(method = "lm", se = TRUE, color = "firebrick") +
+  facet_grid(factor(vs) ~ factor(cyl), 
+             labeller = labeller(vs = c("0" = "V-shaped", "1" = "Straight"),
+                                cyl = c("4" = "4 cyl", "6" = "6 cyl", "8" = "8 cyl"))) +
+  labs(title = "MPG vs HP: Interacción triple",
+       color = "Cilindros") +
+  theme_bw()
+```
+
+```{r}
+library(ggpmisc)
+
+ggplot(mtcars, aes(x = hp, y = mpg, color = factor(cyl))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) +
+  stat_poly_eq(use_label(c("eq", "R2")), size = 3) +
+  facet_wrap(~factor(vs), labeller = labeller(vs = c("0" = "V-shaped", "1" = "Straight"))) +
+  labs(color = "Cilindros") +
+  theme_bw()
+
+```
+
+### CO2
+
+```{r}
+help(CO2)
+```
+
+
+```{r}
+model <- lm(uptake ~ conc * Type * Treatment, data = CO2)
+summary(model)
+```
+
+
+```{r}
+library(ggplot2)
+library(ggpmisc)
+
+# Gráfico
+ggplot(CO2, aes(x = conc, y = uptake, color = Treatment)) +
+  geom_point(size = 2, alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  stat_poly_eq(use_label(c("eq", "R2")), size = 3) +
+  facet_wrap(~Type, labeller = labeller(Type = c("Quebec" = "Quebec", 
+                                                   "Mississippi" = "Mississippi"))) +
+  labs(title = "Absorción de CO2 según concentración, tipo y tratamiento",
+       x = "Concentración de CO2 (mL/L)",
+       y = "Absorción de CO2 (µmol/m²/s)",
+       color = "Tratamiento") +
+  theme_bw()
+```
+
+### Con Cars93
+
+```{r}
+library(MASS)
+help(Cars93)
+```
+
+```{r}
+model <- lm(Price ~ Horsepower * Type * Origin, data = Cars93)
+summary(model)
+```
+
+```{r}
+library(ggplot2)
+library(ggpmisc)
+
+model <- lm(Price ~ Horsepower * Type * Origin, data = Cars93)
+summary(model)
+
+# Gráfico con facetas por Type y color por Origin
+ggplot(Cars93, aes(x = Horsepower, y = Price, color = Origin)) +
+  geom_point(size = 2, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE) +
+  stat_poly_eq(use_label(c("eq", "R2")), size = 3) +
+  facet_wrap(~Type) +
+  labs(title = "Precio vs Caballos de fuerza por Tipo y Origen",
+       x = "Caballos de fuerza (HP)",
+       y = "Precio (miles de USD)",
+       color = "Origen") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 0))
+```
+
+## Regresión múltiple, con más de una variable dependiente. Esto es medio tramposo...
+
+Aquí se muestra a modo de ejemplo solamente el caso más simple de este tipo de análisis. En realidad estamos haciendo una regresión como antes con una variable respuesta que en este caso es la multiplicación de otras dos. A la izquierda del ~ se puede poner la fórmula que se nos dé la gana, lo que hace el método es usar el resultado de esa fórmula como si fuera una sola variable.
+
+Existen métodos más interesantes y complejos donde se pueden evaluar las asociaciones entre muchas variables dependientes y muchas independientes. Pero eso escapa los alcances de este curso.
+
+```{r}
+regMultiple <- glm(mpg * wt ~ hp * factor(cyl), data = mtcars)
+summary(regMultiple)
+```

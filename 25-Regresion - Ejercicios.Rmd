@@ -1,0 +1,51 @@
+---
+title: "25 - Regresión - Ejercicios"
+output: html_notebook
+---
+
+# Regresión
+
+En todos los casos grafique los datos para visualizarlos de la mejor manera que se le ocurra.
+
+## 1. Regresión múltiple con mtcars
+
+Objetivo: Determinar los factores que afectan el consumo de combustible de los automóviles.
+
+Utiliza el dataset mtcars. La variable respuesta será mpg (millas por galón). Usa los siguientes predictores:
+-     wt (peso del auto)
+-     hp (caballos de fuerza)
+-     cyl (número de cilindros)
+-     gear (número de marchas)
+-   Evalúa los supuestos del modelo:
+-   Analiza los residuos para verificar homocedasticidad y normalidad.
+-   Interpreta los coeficientes estimados. ¿Qué variables tienen un impacto significativo en el consumo?
+
+## 2. Ejercicio: Predicción de precios con diamonds
+
+Objetivo: Predecir el precio de los diamantes en función de sus características.
+
+Trabaja con el dataset diamonds del paquete ggplot2. 
+-   ¿Cuál será la variable respuesta para cumplir con el objetivo?
+-   Elija los predictores adecuados.
+-   Evalúa la bondad de ajuste mediante el R² ajustado.
+-   Compara dos modelos: uno con todos los predictores y otro más simple (elimina una o más variables).
+
+## 3. Ejercicio: Regresión múltiple con interacciones usando iris
+
+Objetivo: Estimar la longitud del pétalo en función de otras características y explorar interacciones.
+
+-   Utiliza el dataset iris. Elije una variable respuesta a explicar con las otras.
+-   ¿Cuáles son los posibles predictores?
+-   Introduce términos de interacción entre Species y las otras variables para evaluar si las relaciones difieren según la especie.
+-   Verifica si los coeficientes de las interacciones son significativos.
+
+
+## 4. Modelado de datos ecológicos con airquality
+
+Objetivo: Evaluar cómo diferentes factores ambientales afectan los niveles de ozono.
+
+-   ¿Cuál será la variable respuesta para cumplir con el objetivo?
+-   ¿Cuáles son los posibles predictores?
+-   Verifica si hay datos faltantes y decide cómo tratarlos (e.g., eliminación de casos o imputación).
+-   Ajusta un modelo de regresión y analiza qué factores afectan significativamente la concentración de ozono.
+-   Interpreta los resultados y sugiere acciones que podrían ayudar a reducir los niveles de ozono.
