@@ -1,0 +1,45 @@
+---
+title: "27 - TP Final - Integración"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Estudiante: SuNombre
+
+Guarde el archivo con el siguiente formato (27-TPFinal-Integracion-SuNombreApellido.Rmd). Si hace referencia a archivos externos ubíquelos en la misma carpeta que el Notebook y envíelos juntos.
+
+## Experimentos
+
+Realice uno o más experimentos (manipulativos y / o mensurativos) orientados a entender algo más acerca de un asunto de su elección.
+
+-   Enuncie la pregunta, objetivo, e hipótesis que se propone probar.
+-   Describa el / los experimento/s y las variables medidas. 
+-   Describa cómo midió todo lo que midió.
+-   Describa cómo eligió lo que decidió medir.
+-   Cree un tibble con la información recopilada.
+
+## Requerimientos de análisis
+
+Es necesario que realice al menos una prueba de hipótesis, un ANOVA de dos factores y una Regresión, de modo que necesita al menos dos variables cuantitativas y al menos dos variables cualitativas (factores).
+
+Realice un análisis descriptivo de sus datos calculando las medidas de tendencia central y dispersión que crea convenientes. Elabore los gráficos necesarios para comprender sus datos y el problema a analizar.
+
+Utilice los métodos estudiados en este curso para analizar los resultados de sus experiemntos e interprételos estadísticamente y en relación al problema en estudio.
+
+Si consigue datos que le resulten interesantes y de los cuales conozca la procedencia y modo de obtención puede usarlos.
+
+## Cuestiones que todo análisis correcto debe considerar:
+
+-   Identificar la poblacion, la muestra, la unidad muestral y las variables aleatorias consideradas.
+-   Formular hipótesis estadísticas apropiadas para tomar la decisión en cuestión.
+-   Enunciar el significado de cada hipótesis en términos del fenómeno de interés.
+-   Seleccionar un nivel de significación apropiado. ¿Qué implica el valor elegido?
+-   Verificar los supuestos de todos los análisis que realice.
+-   Calcular el valor-p. ¿Qué probabilidad representa?
+-   Construir intervalos de confianza para sus estimaciones. Interpretarlos.
+-   Concluir y explicar la conclusión en términos del fenómeno de interés.
+-   ċQué supuestos adicionales (no estadísticos) condicionan la validez de las inferencias realizadas?
+-   ¿A qué población se extiende la inferencia realizada?
+-   Al menos una conclusión final.
+
