@@ -1,0 +1,104 @@
+---
+title: "Cregimiento Logístico Iterativo - Shiny"
+---
+
+```{r}
+library(shiny)
+
+# Función de crecimiento logístico iterativa con población discreta
+logistic_growth_iterative <- function(n0, K, rm, generations) {
+  n <- numeric(generations + 1)
+  n[1] <- n0  # Condición inicial
+  for (t in 2:(generations + 1)) {
+    n[t] <- n[t - 1] + rm * n[t - 1] * (1 - n[t - 1] / K)
+    n[t] <- round(n[t])  # Redondear a valores enteros
+  }
+  return(n)
+}
+
+# Tasa de crecimiento logístico r(n) = rm * (1 - n/K)
+growth_rate <- function(n, K, rm) {
+  r <- rm * (1 - n / K)
+  return(r)
+}
+
+# UI de la app
+ui <- fluidPage(
+  titlePanel("Modelo de crecimiento logístico iterativo de dos poblaciones"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      h3("Población 1"),
+      sliderInput("n0_1", "Tamaño inicial (n0)", min = 1, max = 100, value = 10),
+      sliderInput("K_1", "Capacidad de carga (K)", min = 50, max = 500, value = 300),
+      sliderInput("rm_1", "Tasa de crecimiento máximo (rm)", min = 0.1, max = 4, value = 0.5, step = 0.1),
+      
+      h3("Población 2"),
+      sliderInput("n0_2", "Tamaño inicial (n0)", min = 1, max = 100, value = 10),
+      sliderInput("K_2", "Capacidad de carga (K)", min = 50, max = 500, value = 300),
+      sliderInput("rm_2", "Tasa de crecimiento máximo (rm)", min = 0.1, max = 4, value = 0.5, step = 0.1),
+      
+      sliderInput("generations", "Generaciones", min = 1, max = 100, value = 50)
+    ),
+    
+    mainPanel(
+      plotOutput("populationPlot"),
+      plotOutput("growthRatePlot"),
+      
+      h3("Teoría del modelo logístico iterativo"),
+      
+      withMathJax(
+        helpText("La ecuación iterativa del modelo de crecimiento logístico está dada por:"),
+        helpText("$$n_{t} = n_{t-1} + r_m \\cdot n_{t-1} \\cdot \\left(1 - \\frac{n_{t-1}}{K}\\right)$$"),
+        helpText("Donde:"),
+        helpText("$$n_t$$ es el tamaño de la población en la generación $$t$$,"),
+        helpText("$$r_m$$ es la tasa máxima de crecimiento poblacional,"),
+        helpText("$$K$$ es la capacidad de carga, o el tamaño máximo que puede alcanzar la población."),
+        helpText("$$n_0$$ es el tamaño poblacional inicial."),
+        helpText("En este modelo discreto iterativo, calculamos el tamaño poblacional $$n_t$$ en función de $$n_{t-1}$$ en cada paso.")
+      )
+    )
+  )
+)
+
+# Servidor de la app
+server <- function(input, output) {
+  
+  output$populationPlot <- renderPlot({
+    generations <- input$generations
+    
+    # Población 1
+    n1 <- logistic_growth_iterative(input$n0_1, input$K_1, input$rm_1, generations)
+    # Población 2
+    n2 <- logistic_growth_iterative(input$n0_2, input$K_2, input$rm_2, generations)
+    
+    # Gráfico de tamaño poblacional en función de las generaciones
+    plot(0:generations, n1, type = "l", col = "blue", ylim = c(0, max(input$K_1, input$K_2)),
+         ylab = "Tamaño poblacional (n)", xlab = "Generaciones", lwd = 2)
+    lines(0:generations, n2, col = "red", lwd = 2)
+    legend("bottomright", legend = c("Población 1", "Población 2"), col = c("blue", "red"), lwd = 2)
+  })
+  
+  output$growthRatePlot <- renderPlot({
+    generations <- input$generations
+    
+    # Población 1
+    n1 <- logistic_growth_iterative(input$n0_1, input$K_1, input$rm_1, generations)
+    r1 <- growth_rate(n1, input$K_1, input$rm_1)
+    
+    # Población 2
+    n2 <- logistic_growth_iterative(input$n0_2, input$K_2, input$rm_2, generations)
+    r2 <- growth_rate(n2, input$K_2, input$rm_2)
+    
+    # Gráfico de tasa de crecimiento en función del tamaño poblacional
+    plot(n1, r1, type = "l", col = "blue", ylim = c(0, max(input$rm_1, input$rm_2)),
+         ylab = "Tasa de crecimiento (r)", xlab = "Tamaño poblacional (n)", lwd = 2)
+    lines(n2, r2, col = "red", lwd = 2)
+    legend("topright", legend = c("Población 1", "Población 2"), col = c("blue", "red"), lwd = 2)
+  })
+}
+
+# Ejecutar la app
+shinyApp(ui = ui, server = server)
+```
+

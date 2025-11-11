@@ -1,0 +1,106 @@
+---
+title: "Cregimiento Logístico - Shiny"
+---
+
+```{r}
+library(shiny)
+
+# Función de crecimiento logístico con población discreta
+logistic_growth_discrete <- function(n0, K, rm, generations) {
+  t <- seq(0, generations, by = 1)
+  n <- K / (1 + ((K - n0) / n0) * exp(-rm * t))
+  n <- round(n)  # Redondeamos el tamaño poblacional a números enteros
+  return(n)
+}
+
+# Tasa de crecimiento logístico r(n) = rm * (1 - n/K)
+growth_rate <- function(n, K, rm) {
+  r <- rm * (1 - n / K)
+  return(r)
+}
+
+# UI de la app
+ui <- fluidPage(
+  titlePanel("Modelo de crecimiento logístico discreto de dos poblaciones"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      h3("Población 1"),
+      sliderInput("n0_1", "Tamaño inicial (n0)", min = 1, max = 100, value = 10),
+      sliderInput("K_1", "Capacidad de carga (K)", min = 50, max = 1000, value = 500),
+      sliderInput("rm_1", "Tasa de crecimiento máximo (rm)", min = 0.1, max = 2, value = 0.5, step = 0.1),
+      
+      h3("Población 2"),
+      sliderInput("n0_2", "Tamaño inicial (n0)", min = 1, max = 100, value = 10),
+      sliderInput("K_2", "Capacidad de carga (K)", min = 50, max = 1000, value = 500),
+      sliderInput("rm_2", "Tasa de crecimiento máximo (rm)", min = 0.1, max = 2, value = 0.5, step = 0.1),
+      
+      sliderInput("generations", "Generaciones", min = 1, max = 100, value = 50)
+    ),
+    
+    mainPanel(
+      plotOutput("populationPlot"),
+      plotOutput("growthRatePlot"),
+      
+      h3("Teoría del modelo logístico discreto"),
+      
+      withMathJax(
+        helpText("La ecuación diferencial del modelo de crecimiento logístico está dada por:"),
+        helpText("$$\\frac{dn}{dt} = r_m \\cdot n \\cdot \\left(1 - \\frac{n}{K}\\right)$$"),
+        helpText("Donde:"),
+        helpText("$$n(t)$$ es el tamaño de la población en el tiempo $$t$$,"),
+        helpText("$$r_m$$ es la tasa máxima de crecimiento poblacional,"),
+        helpText("$$K$$ es la capacidad de carga, o el tamaño máximo que puede alcanzar la población."),
+        helpText("$$n_0$$ es el tamaño poblacional inicial."),
+        helpText("La solución de esta ecuación es la función logística:"),
+        helpText("$$n(t) = \\frac{K}{1 + \\left(\\frac{K - n_0}{n_0}\\right) e^{-r_m t}}$$"),
+        helpText("Además, la tasa de crecimiento poblacional en función del tamaño $$n$$ está dada por:"),
+        helpText("$$r(n) = r_m \\cdot \\left(1 - \\frac{n}{K}\\right)$$"),
+        helpText("En este modelo discreto, el tamaño poblacional se redondea a la cantidad entera más cercana.")
+      )
+    )
+  )
+)
+
+# Servidor de la app
+server <- function(input, output) {
+  
+  output$populationPlot <- renderPlot({
+    generations <- input$generations
+    
+    # Población 1
+    n1 <- logistic_growth_discrete(input$n0_1, input$K_1, input$rm_1, generations)
+    # Población 2
+    n2 <- logistic_growth_discrete(input$n0_2, input$K_2, input$rm_2, generations)
+    
+    # Gráfico de tamaño poblacional en función de las generaciones
+    plot(0:generations, n1, type = "l", col = "blue", ylim = c(0, max(input$K_1, input$K_2)),
+         ylab = "Tamaño poblacional (n)", xlab = "Generaciones", lwd = 2)
+    lines(0:generations, n2, col = "red", lwd = 2)
+    legend("bottomright", legend = c("Población 1", "Población 2"), col = c("blue", "red"), lwd = 2)
+  })
+  
+  output$growthRatePlot <- renderPlot({
+    generations <- input$generations
+    
+    # Población 1
+    n1 <- logistic_growth_discrete(input$n0_1, input$K_1, input$rm_1, generations)
+    r1 <- growth_rate(n1, input$K_1, input$rm_1)
+    
+    # Población 2
+    n2 <- logistic_growth_discrete(input$n0_2, input$K_2, input$rm_2, generations)
+    r2 <- growth_rate(n2, input$K_2, input$rm_2)
+    
+    # Gráfico de tasa de crecimiento en función del tamaño poblacional
+    plot(n1, r1, type = "l", col = "blue", ylim = c(0, max(input$rm_1, input$rm_2)),
+         ylab = "Tasa de crecimiento (r)", xlab = "Tamaño poblacional (n)", lwd = 2)
+    lines(n2, r2, col = "red", lwd = 2)
+    legend("topright", legend = c("Población 1", "Población 2"), col = c("blue", "red"), lwd = 2)
+  })
+}
+
+# Ejecutar la app
+shinyApp(ui = ui, server = server)
+
+```
+
