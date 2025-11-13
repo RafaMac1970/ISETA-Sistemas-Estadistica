@@ -1,0 +1,61 @@
+---
+title: "Objetos - Cuadrática"
+output: html_notebook
+---
+
+Este Notebook busca ilustrar el uso de objetos en R. Aunque el sistema se basa en objetos (es decir que lo que generalmente usamos tiene esta estructura de fondo) suele usarse el paradigma funcional, y en este curso hemos usado casi siempre funciones. Sin embargo el usao de objetos es muy recomendado cuando queremos desarrollar métodos escalables y que usaremos repetidamente.
+
+# Cuatratica
+
+## Objetos
+
+En este caso la programación de las clases está hecha en un archivo externo, aquí lo importamos.
+
+```{r}
+source("objetos/Cuadratica.R")
+```
+
+El uso es siempre el siguiente, se crea un objeto poniéndole un nombre (en este caso "ecuacion"), luego al objeto creado le preguntamos cosas con objeto$pregunta(). A la pregunta se le llama método. La clase se define con nombre en mayúscula (aquí "Cuadrática"). Los métodos se programan en la definición de la Clase (aquí está todo en el archivo "objetos/Cuadratica.R").
+
+```{r}
+# Crear una instancia
+ecuacion <- Cuadratica$new(a = -1, b = 2, c = 3)
+# ecuacion <- Cuadratica$new(a = 1, b = -3, c = 5)
+
+# Imprimir la ecuación
+ecuacion$imprimir()
+
+# Calcular el discriminante
+ecuacion$discriminante()  
+
+# Calcular las raíces con Baskara
+ecuacion$raices()
+
+# Ordenada al orígen. Calcula el valor de la función para x=0
+ecuacion$f(0)
+
+# Calcular el vértice (es un punto (x, y))
+ecuacion$vertice()
+
+# Dibuja la función y agrega la información
+ecuacion$dibujar(-5:5)
+```
+
+## Funciones
+
+```{r}
+a <- -1
+b <- -5
+c <- 6
+```
+
+
+```{r}
+source("funciones/baskara.R")
+baskara(a, b, c)
+```
+
+```{r}
+source("funciones/discriminante.R")
+discriminante(a, b, c)
+```
