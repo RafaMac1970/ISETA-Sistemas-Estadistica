@@ -50,7 +50,7 @@ Aprende con Alf (Actualización permanente). Manual de Estadística. <https://ap
 
 Kelmansky, Diana M. (2009). Estadística para todos. Estrategias de pensamiento y herramientas para la solución de problemas. Ministerio de Educación, Buenos Aires, Argentina. 272 pgs. (Está en la biblioteca del ISETA y on line) <http://www.bnm.me.gov.ar/giga1/documentos/EL001858.pdf>
 
-Levin, Richard, David Rubin (2004). Estadística para administración y economía. (7ma ed.) Pearson Educación de México. México, 952pgs. <https://www.academia.edu/9701898/Estad%C3%ADstica_para_Administraci%C3%B3n_y_Econom%C3%ADa_7ma_Edici%C3%B3n_Richard_I_Levin_and_David_S_Rubin>
+Levin, Richard, David Rubin (2004). Estadística para administración y economía. (7ma ed.) Pearson Educación de México. México, 952pgs. <https://drive.google.com/file/d/0BzXIxkCfil5UeHVSaHFqRE9LMDg/view?resourcekey=0-IxTANUpi9YzcuJ18AqWzEA>
 
 Juan Bosco Mendoza Vega (Actualización permanente). R para principiantes. (on line) <https://bookdown.org/jboscomendoza/r-principiantes4>
 

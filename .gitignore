@@ -2,9 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
-/estudiantes
-/objetos
 /EjerciciosResueltos
+/estudiantes
+/Santi
+
 *.Rproj
 *.html
 borrador-*.*
