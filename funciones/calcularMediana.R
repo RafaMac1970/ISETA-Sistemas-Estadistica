@@ -1,8 +1,8 @@
-calcularMediana <- function(aVector) {
-  dataOrdenado <- sort(aVector)
-  if (length(dataOrdenado) %% 2 == 0) {
-    (largosOrd[length(dataOrdenado) / 2] + dataOrdenado[(length(dataOrdenado) / 2) + 1]) / 2
+calcularMediana <- function(unVector) {
+  vectorOrdenado <- sort(unVector)
+  if (length(vectorOrdenado) %% 2 == 0) {
+    (vectorOrdenado[length(vectorOrdenado) / 2] + vectorOrdenado[(length(vectorOrdenado) / 2) + 1]) / 2
   } else {
-    dataOrdenado[(length(dataOrdenado) / 2) + 1]
+    vectorOrdenado[(length(vectorOrdenado) / 2) + 1]
   }
 }

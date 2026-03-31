@@ -48,8 +48,8 @@ Seguidamente haremos una brevísima síntesis de las herramientas básicas para 
 | Potencia        | \^ ó \*\* |
 | Raíz            | \^(1/)    |
 | Raíz cuadrada   | sqrt()    |
-
-Asignación \<- ó -\> ó = (no recomendado =)
+| Asignación      | \<- ó -\> ó =|
+ No se recomienda usar =
 
 ## Operadores lógicos
 
@@ -128,10 +128,19 @@ class(a)
 a <- 1
 a
 class(a) # "numeric"
+typeof(a) # "double"
+
+a <- as.integer(a)
+a
+class(a) # "integer"
+typeof(a) # "integer"
 
 b <- 3.2
 b
 class(b) # "numeric"
+typeof(b) # "double"
+
+
 
 c <- 1/7
 c
@@ -176,13 +185,21 @@ d
 b > c # TRUE
 class(b > c) # "logical"
 
-b > c
+b < c
 b > c & a < d 
 b > c | a < d 
 ! b > c | a < d
 ```
 
 ## Date and Time.
+
+Trataremos siempre trabajar con el paquete lubridate que es el estándar más moderno y más utilizado actualmente. En la ayuda podrán ver las funciones de este paquete.
+
+```{r}
+library("lubridate")
+help(lubridate)
+```
+
 
 ```{r}
 instante <- now()
@@ -209,6 +226,15 @@ paste("week(hoy):", week(hoy)) # semana del año
 paste("year(hoy):", year(hoy)) # año
 ```
 
+Un ejemplo pavo de uso:
+
+Calcula el tiempo que pasó entre dos fechas.
+
+```{r}
+days(today() - dmy("23-08-70"))
+```
+
+
 # Estructuras de datos
 
 | Dimensiones | Homogeneous | Heterogeneous       |
@@ -219,7 +245,7 @@ paste("year(hoy):", year(hoy)) # año
 
 ## Vectores
 
-Los vectores son conjuntos ordenados de objetos de la misma clase (o type). Se instancian con c(). Pueden contener cualquier tipo de objetos mientras sean del mismo tipo y los fuerza al mismo tipo por defecto. Las operaciones básicas funcionan elemento a elemento.
+Los vectores son conjuntos ordenados de objetos de la misma clase (o type, se averigua con typeof()). Se instancian con c(). Pueden contener cualquier tipo de objetos mientras sean de la misma clase y los fuerza a la misma clase por defecto. Las operaciones básicas funcionan elemento a elemento.
 
 ```{r}
 x <- c(1, 7, 3)
@@ -239,6 +265,8 @@ x %/% y # 0 1 0
 x ** y  # 1 2401  243 
 x ^ y   # 1 2401  243
 
+z <- c(1, 2.5, 3/7)
+z
 z <- c(1, 2.5, 3/7, "f")
 z
 ```
@@ -247,13 +275,15 @@ z
 
 ```{r}
 # Generan un vector con los elementos de la secuencia
-vec1 <- c(1:10) # Desde : hasta
+vec1 <- c(1:10) # Desde : hasta También se puede 1:10 , pero no se recomienda.
 vec2 <- seq(15,50,3) # Desde, hasta, cada
 vec1
 vec2
 ```
 
-### Acceder a los elementos de un vector
+### Acceder a los elementos de un vector 
+
+> Importante: en R los índices comienzan en 1, eso es diferente a python que comienzan en 0
 
 ```{r}
 # Vector
@@ -288,22 +318,27 @@ matr2 <- rbind(x,y)
 matr2
 ```
 
+### Suma de matrices elemento a elemento
+
 ```{r}
-# Suma de matrices elemento a elemento
 paste("s + t Es la suma término a término, ambas matrices deben tener las mismas dimensiones")
 writeLines("\n")
 s + t
 ```
 
+### Multiplicación de matrices elemento a elemento (el operador es *).
+
 ```{r}
-# Multiplicación de matrices elemento a elemento
 paste("s * t Es el producto término a término, ambas matrices deben tener las mismas dimensiones")
 writeLines("\n")
 s * t
 ```
 
+### Multiplicaciones algebraicas de matrices (el operador es %*%).
+
+Tenga en cuenta que se necesitan las dimensiones correctas para la multiplicación de matrices. El número de filas de la primera debe ser igual al número de columnas de la segunda.
+
 ```{r}
-# Tenga en cuenta que se necesitan las dimensiones correctas para la multiplicación de matrices
 w <- matrix(12:17, nrow = 2, ncol = 3)
 writeLines("\n")
 paste("w")
@@ -318,45 +353,47 @@ writeLines("\n")
 paste("w %*% z Es el producto matricial, ej del primer valor 8*1 + 10*2 + 12*3 = 64")
 writeLines("\n")
 w %*% z
+```
 
-# Producto exterior
-#writeLines("\n")
-#paste("w %o% z")
-#w %o% z # (Salida omitida)
+### Producto Kronecker (el operador es %x%).
 
-# Producto Kronecker
+Este producto hace todas las multiplicaciones posibles de los elementos de la primera matriz con los de la segunda. En este caso cada matriz tiene 6 elementos, por eso el producto tiene 6 * 6 = 36 elementos.
+
+```{r}
 writeLines("\n")
 paste("w %x% z Producto Kronecker")
 writeLines("\n")
 w %x% z
 ```
 
+
 ### Acceder a sus elementos
 
 ```{r}
-# Matriz
+s
+t
 
 # Un elemento de celda, contando los elementos desde el inicio
 s[1] # 1
-t[3] # 10
+t[3] # 3
 
 # Un elemento de celda, con referencia de fila y columna. Coordenadas. [fila,columna]
 s[1,2] # 3
-t[2,3] # 13
+t[2,3] # 6
 
 
 # Una fila
 s[1,] # 1 3 5
-t[2,] # 9 11 13
+t[2,] # 2 4 6
 
 # Una columna
 s[,1] # 1 2
-t[,3] # 12 13
+t[,3] # 5 6
 ```
 
 ## Array.
 
-En este caso lo veremos en 3D, pero puede usarse en cualquier dimensión
+En este caso lo veremos en 3D, pero puede usarse en cualquier dimensión.
 
 ```{r}
 # Crear vectores, pueden tener diferente longitud. También se puede hacer desde un solo vector.
@@ -377,16 +414,16 @@ typeof(unArray3D)
 ```{r}
 unArray3D[3,1,2]
 
-writeLines("")
+writeLines("\n")
 unArray3D[,,1]
 
-writeLines("")
+writeLines("\n")
 unArray3D[,2,]
 ```
 
 ## Estructuras de datos heterogéneos
 
-## Listas
+## Listas. Heterogéneas de 1D.
 
 Pueden almacenar cualquier objeto.
 
@@ -398,39 +435,46 @@ class(h)
 
 ```{r}
 t <- s
-
 s
 t
+writeLines("\n")
+s[2,2] <- 15
+s
+t
+writeLines("\n")
 h
 ```
 
-En una lista los objetos pueden nombrarse
+En una lista los objetos pueden nombrarse. Esto se parece a los diccionarios de python
 
 ```{r}
 unaLista <- list(nombre = "Rafael", apellido = "Mac Donough", fechaDeNacimiento = ymd("1970-08-23"), dni = 21486775, esHombre = TRUE)
 unaLista$fechaDeNacimiento
+writeLines("")
 unaLista[2]
 ```
 
-### Acceder a sus elementos
+### Acceder a sus elementos. 
+
+Observar que hay dos pares de [[ ]]
 
 ```{r}
-# Observar que hay dos pares de [[ ]]
-
 h[[3]]
 h[[6]]
 h[[7]]
 h[[8]]
 ```
 
-## Data Frames
+## Data Frames. Heterogéneos de 2D
 
-Puede tener diferentes tipos de datos en diferentes columnas (variables), pero dentro de la columna los tipos de datos deben ser homogéneos.
+Aviso: en el curso usaremos una estructura similar llamada tibble (del paquete tidyverse). Aquí se explican los dataframes porque son la estructura por defecto de R, en la próxima clase se abordarán los tibbles más exensamente.
+
+> Atención!: Puede tener diferentes tipos de datos en diferentes columnas (variables), pero dentro de la columna los tipos de datos deben ser homogéneos.
 
 ```{r}
 unDataFrame1 <- data.frame(
   "entero" = 1:4, 
-  "factor" = as.factor(c("a", "b", "c", "d")), 
+  "factor" = factor(c("a", "b", "c", "d")), 
   "numero" = c(1.2, 3.4, 4.5, 5.6),
   "cadena" = c("en", "fe", "go", "hu")
 )
@@ -441,21 +485,24 @@ unDataFrame1
 ### Acceder a sus elementos
 
 ```{r}
-unDataFrame1[[1]]
-unDataFrame1$factor
-unDataFrame1[[4,3]]
-unDataFrame1[[3]][4]
-unDataFrame1[[1]][2]
-unDataFrame1$cadena[3]
+unDataFrame1[[1]] # Toda la columna 1
+writeLines("")
+unDataFrame1$factor # Toda la columna factor
+writeLines("")
+unDataFrame1[[4,3]] # fila, columna
+writeLines("")
+unDataFrame1[[3]][4] # Toda la columna 3 y luego dentro de ella extraigo el elemento 4
+writeLines("")
+unDataFrame1[[1]][2] # Toda la columna 1 y luego dentro de ella extraigo el elemento 2
+writeLines("")
+unDataFrame1$cadena[3]  # Toda la columna cadena y luego dentro de ella extraigo el elemento 3
 ```
 
 # Funciones
 
 ## Funciones básicas
 
-Trabajemos con los datos vuestros, las medidas de las hojas.
-
-Largo, ancho, cantidad de folíolos, largo del pecíolo (distancia.)
+Largo (mm), ancho (mm), cantidad de folíolos (cantidad), largo del pecíolo (mm).
 
 ```{r}
 largos <- c(288,358,343,365,379,395,381)
@@ -482,27 +529,28 @@ min(largos)
 ### ¿Cómo funcionan las funciones anteriores?
 
 ```{r}
+# Itera sobre los elemntos de un vector directamente
 suma <- 0 
 for (i in largos) {
   suma <- suma + i
 }
 suma
-
+# Itera los índices de un vector y accede a los elementos a través del índice. En R todo está optimizzadopara trabajar como en el ejemplo anterior, directamente sobre los objetos del vector, lista, matriz, array, etc.
 suma2 <- 0 
 for (i in 1:length(largos)) {
   suma2 <- suma2 + largos[i]
 }
 suma2
-
+# length , largo del vector (cantidad de elementos que lo componen)
 n <- 0 
 for (i in largos) {
   n <- n + 1
 }
 n
-
+# media o promedio de todos los valores del vector
 media <- suma / n
 media
-
+# valor máximo del vector
 maxi <- largos[1] 
 for (i in largos) {
   if (maxi < i) {
@@ -510,7 +558,7 @@ for (i in largos) {
   }
 }
 maxi
-
+# valor mínimo del vector
 mini <- largos[1]
 for (i in largos) {
   if (mini > i){
@@ -520,7 +568,7 @@ for (i in largos) {
 mini
 ```
 
-### Cómo se ordena?
+### ¿Cómo se ordena?
 
 ```{r}
 # La función sort ordena los elementos de un vector
@@ -556,13 +604,13 @@ if (length(largosOrd) %% 2 == 0) {
 Para un ejemplo lo hacemos implementando el método anterior, el cálculo de la mediana.
 
 ```{r}
-calcularMediana <- function(data) {
-  dataOrdenado <- sort(data)
-  if (length(dataOrdenado) %% 2 == 0) {
-    (largosOrd[length(dataOrdenado) / 2] + dataOrdenado[(length(dataOrdenado) / 2) + 1]) / 2
-    } else {
-      dataOrdenado[(length(dataOrdenado) / 2) + 1]
-      }
+calcularMediana <- function(unVector) {
+  vectorOrdenado <- sort(unVector)
+  if (length(vectorOrdenado) %% 2 == 0) {
+    (vectorOrdenado[length(vectorOrdenado) / 2] + vectorOrdenado[(length(vectorOrdenado) / 2) + 1]) / 2
+  } else {
+    vectorOrdenado[(length(vectorOrdenado) / 2) + 1]
+  }
 }
 ```
 
@@ -623,6 +671,8 @@ Esto tiene muchas ventajas:
 
 Mostremos un ejemplo:
 
+Primero sin pipes:
+
 ```{r}
 unVector <- 5:10
 unVector
@@ -656,32 +706,38 @@ boxplot(dfHojas, ylim=c(0,400), ylab = "Largo (cm)", xlab= "variable")
 #boxplot(largos, ylim=c(0,460), ylab = "Largo (cm)", xlab= "muestra")
 ```
 
-```{r}
-library(ggpubr)
-p1 <- ggplot(dfHojas, aes(x = "", y = largos)) + 
-  geom_boxplot() +
-  stat_boxplot(geom = "errorbar",
-               width = 0.25) +
-  geom_jitter(width = 0.1) +
-  ylim(0,NA)
-p2 <- ggplot(dfHojas, aes(x = "", y = anchos)) + 
-  geom_boxplot() +
-  stat_boxplot(geom = "errorbar",
-               width = 0.25) +
-  geom_jitter(width = 0.1) +
-  ylim(0,NA)
-p3 <- ggplot(dfHojas, aes(x = "", y = foliolos)) + 
-  geom_boxplot() +
-  stat_boxplot(geom = "errorbar",
-               width = 0.25) +
-  geom_jitter(width = 0.1) +
-  ylim(0,NA)
-p4 <- ggplot(dfHojas, aes(x = "", y = peciolos)) + 
-  geom_boxplot() +
-  stat_boxplot(geom = "errorbar",
-               width = 0.25) +
-  geom_jitter(width = 0.1) +
-  ylim(0,NA)
+## Con ggplot2
 
-ggarrange(p1, p2, p3, p4, nrow=1)
+### Primero preparamos los datos
+
+```{r}
+variables <- variable.names(dfHojas)[1:4]
+tibbleHojas <- dfHojas %>% pivot_longer(variables, names_to = "Variable", values_to = "Valor")
+tibbleHojas
 ```
+
+### Luego graficamos
+
+```{r}
+grafico <- ggplot(tibbleHojas) +
+  aes(x= Variable, y = Valor) +
+  geom_boxplot() +
+  stat_boxplot(geom = "errorbar",
+               width = 0.25)
+grafico
+```
+
+### Una mejor alternativa, mire los ejes y.
+
+```{r}
+tibbleHojas <- tibbleHojas %>% group_by(tibbleHojas$Variable)
+grafico <- ggplot(tibbleHojas) +
+  aes(x= Variable, y = Valor) +
+  geom_boxplot() +
+  stat_boxplot(geom = "errorbar",
+               width = 0.25) +
+  ylim(0,NA) +
+  facet_wrap(vars(Variable), nrow = 1, scales = "free")
+grafico
+```
+

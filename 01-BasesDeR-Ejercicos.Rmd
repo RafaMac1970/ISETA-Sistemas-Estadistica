@@ -5,13 +5,15 @@ output:
     toc: true
 ---
 
-# Estudiante: SuNombre 
+# Estudiante: SuNombre
 
 Para realizar estos ejercicios use como referencia el documento "01-BasesDeR.Rmd".
 
 Resuelva estos ejercicios en este documento insertando los chuncks necesarios (cntrl + alt + i), luego de cada consigna. Agregue al nombre del archivo el suyo al final (01-Ejercicios-BasesDeR-SuNombreApellido.Rmd), y me lo envía por email.
 
 Cargue las librerías necesaria cuando las necesite, no lo haga al inicio de la actividad. Esto no es el modo habitual de trabajo, pero se pretende aquí que usted descubra cuándo necesita las librerías extra.
+
+> AVISO !!: Si realiza estos ejercicios con IA's lo más probable es que no aprenda lo básico de R. En próximas clases les mostraré cómo usar IA's para resolver problemas con R, pero primero hay que aprender la sintáxis y lógica de trabajo de R, y no existen atajos para ello, hay que pensar y transpirar... :o). Resolver todos estos ejercicios me llevó algo más de una hora y media, es esperable que usted requiera varias horas y consultas conmigo y sus compañeros.
 
 # Tipos de datos (Numeric, character, logical, y varios tipos para fechas y tiempos)
 
@@ -81,7 +83,7 @@ Para las matrices del ejemplo anterior:
 
 ## Array.
 
--   Imagine una inflación mensual del 7% y construya un array con la información del ejercicio anterior agregándole toda esa misma información pero en el mes siguiente.
+-   Imagine una inflación mensual del 7% y construya 2 arrays (uno con la recaudación y otro con las ganacias) con la información del ejercicio anterior agregándole la información del mes siguiente.
 
 ### Acceder a sus elementos
 

@@ -58,13 +58,13 @@ Introducción a estadística con R. (on line) <https://bookdown.org/matiasandina
 
 ## Nivel Medio
 
-Vargas, Liseth Estefanía y Eloína Mesa Fuquen (2021). Introducción al análisis de datos con RStudio. Cenipalma, Colombia. (.pdf on line) <https://repositorio.fedepalma.org/bitstream/handle/123456789/141281/Manual%20REstudio%20IMw.pdf?sequence=6&isAllowed=y>
+Vargas, Liseth Estefanía y Eloína Mesa Fuquen (2021). Introducción al análisis de datos con RStudio. Cenipalma, Colombia. (.pdf on line) <https://repositorio.fedepalma.org/bitstream/handle/123456789/141281/Manual%20REstudio.pdf?sequence=15&isAllowed=y>
 
 Daniel Paredes Inilupu (2020). Data Science con R. Análisis de Datos y algoritmos de predicción con R. (on line) <https://bookdown.org/dparedesi/data-science-con-r/>
 
 ## Nivel Avanzado
 
-Excelente libro completo y con explicaciones rigurosas, sintéticas y muy bien ejemplificadas. (No está el línea ni en la biblioteca de ISETA). - Batista William (2020). Introducción a la inferencia estadística aplicada. 2da Ed. Editorial Facultad de Agronomía. 272 pgs. <https://www.agro.uba.ar/catalog/introducci-n-la-inferencia-estad-stica-aplicada-3ra-edici-n>
+Excelente libro completo y con explicaciones rigurosas, sintéticas y muy bien ejemplificadas. (No está el línea ni en la biblioteca de ISETA). - Batista William (2020). Introducción a la inferencia estadística aplicada. 2da Ed. Editorial Facultad de Agronomía. 272 pgs. <https://efa.agro.uba.ar/producto/introduccion-a-la-inferencia-estadistica-aplicada-3ra-edicion/>
 
 Este es un recurso excelente y muy completo, pero más avanzado, recomiendo empezar por los anteriores, o iniciar con este pero con calma. - Hernández, Freddy y Olga Usuga (2023). Manual de R. (on line) <https://fhernanb.github.io/Manual-de-R>
 
