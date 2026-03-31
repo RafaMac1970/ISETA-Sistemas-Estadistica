@@ -5,7 +5,7 @@ output: html_notebook
 
 # Antes de empezar.
 
-La demanda de profesionales capacitados en ciencia de datos está creciendo rápidamente. Aquí se introduce a la adqusición de habilidades que pueden ayudar a enfrentar desafíos de análisis de datos del mundo real. Estas incluyen programación, manipulación y visualización de datos en R, organización de archivos, control de versiones con Git y GitHub, y preparación de documentos reproducibles con Quarto y knitr. Cada parte tiene varios capítulos diseñados para ser presentados como una clase e incluye ejercicios para cada capítulo en documentos aparte.
+La demanda de profesionales capacitados en ciencia de datos está creciendo rápidamente. Aquí se introduce a la adqusición de habilidades que pueden ayudar a enfrentar desafíos de análisis de datos del mundo real. Estas incluyen programación, manipulación y visualización de datos en R, organización de archivos, control de versiones con Git y GitHub, y preparación de documentos reproducibles knitr. Cada parte tiene varios capítulos diseñados para ser presentados como una clase e incluye ejercicios para cada capítulo en documentos aparte.
 
 El lenguaje R <http://r-project.org> es poderosísimo, con una comunidad de usuarios que lo desarrollan permanentemente muy madura y extensa. El entorno de trabajo original de R es extremadamente básico y existen muchos entornos que lo mejoran. Nosotros usaremos RStudio <https://posit.co/downloads>.
 
@@ -63,7 +63,7 @@ print("Hola, estamos jugando con cuentas. El logatitmo de base 3 de la raíz cua
 log(sqrt(1/pi), base = 3)
 ```
 
-Para insertar un nuevo chunk puede hacerlo desde el menú "Code / Insert Chunk", con el botón verde a la derecha de este panel (que tiene un símbolo + y una C), despliega un mení y elige R, o con las teclas rápidas Alt+Ctrl+I.
+Para insertar un nuevo chunk puede hacerlo desde el menú "Code / Insert Chunk", con el botón verde a la derecha de este panel (que tiene un símbolo + y una C), despliega un menú y elige R, o con las teclas rápidas Alt+Ctrl+I.
 
 Pruebelo aquí.
 

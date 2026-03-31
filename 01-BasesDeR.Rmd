@@ -140,8 +140,6 @@ b
 class(b) # "numeric"
 typeof(b) # "double"
 
-
-
 c <- 1/7
 c
 class(c) # "numeric"
