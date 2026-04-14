@@ -1,10 +1,7 @@
 ---
 title: "02 - Data Frames"
-output:
-  html_document:
-    toc: true
-    df_print: paged
-  html_notebook:
+output: 
+  html_notebook: 
     toc: true
 ---
 
@@ -29,19 +26,19 @@ Los tipos de datos los clasificamos de acuerdo a las condiciones que le imponen 
 |               |              |                                              |                                   |
 |               |              | Test de CoVid                                | Positivo, Negativo                |
 +---------------+--------------+----------------------------------------------+-----------------------------------+
-|               | Ordinales    | Desarrollo de un lepidóptero.\               | Huevo, larva, pupa, mariposa      |
+|               | Ordinales    | Desarrollo de un lepidóptero.                | Huevo, larva, pupa, mariposa      |
 |               |              |                                              |                                   |
 |               |              | Año de estudio.                              | 1°, 2°, 3°, 4°, 5°, 6°            |
 |               |              |                                              |                                   |
-|               |              | Estado Civil.\                               | Soltero, casado, separado         |
+|               |              | Estado Civil.                                | Soltero, casado, separado         |
 |               |              |                                              |                                   |
 |               |              | Mes del año.                                 | Enero, Febrero, ...               |
 +---------------+--------------+----------------------------------------------+-----------------------------------+
-| Cuantitativos | Discretos    | Puntaje en el chinchón.\                     | Número entero (incluso negativos) |
+| Cuantitativos | Discretos    | Puntaje en el chinchón.                      | Número entero (incluso negativos) |
 |               |              |                                              |                                   |
-|               |              | Cantidad de hojas de una planta.             | Número natural\                   |
+|               |              | Cantidad de hojas de una planta.             | Número natural                    |
 |               |              |                                              |                                   |
-|               |              | Nota en el final de una materia.             | 1 al 10\                          |
+|               |              | Nota en el final de una materia.             | 1 al 10                           |
 |               |              |                                              |                                   |
 |               |              | Cantidad de personas en la cola de un banco. | Número natural                    |
 +---------------+--------------+----------------------------------------------+-----------------------------------+
@@ -57,7 +54,7 @@ Los tipos de datos los clasificamos de acuerdo a las condiciones que le imponen 
 |               |              |                                              |                                   |
 |               | Geográficos  | Asociados a una posición                     |                                   |
 |               |              |                                              |                                   |
-|               | Repetidos\   | Asociados a una unidad muestral              |                                   |
+|               | Repetidos    | Asociados a una unidad muestral              |                                   |
 |               |              |                                              |                                   |
 |               | Genéticos    | Secuencias de ADN                            |                                   |
 |               |              |                                              |                                   |
