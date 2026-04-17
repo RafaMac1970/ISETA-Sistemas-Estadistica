@@ -3,11 +3,11 @@
 .RData
 .Ruserdata
 /Ocultos
-/EjerciciosResueltos
 /estudiantes
 /Santi
 
 *.Rproj
+*.RData
 *.html
 borrador-*.*
 
