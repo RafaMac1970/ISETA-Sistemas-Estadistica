@@ -524,7 +524,7 @@ library(tidyquant)
 dataBolsa  <- tq_get("GLOB", get = "stock.prices")
 dataBolsa 
 
-desde <- date("2025-01-01")
+desde <- date("2026-01-01")
 hasta <- today()
 dataBolsaPeriodo <- dataBolsa %>% subset(date >= desde & date <= hasta)
 dataBolsaPeriodo
@@ -532,7 +532,9 @@ dataBolsaPeriodo
 
 
 ```{r}
-graficoVelas <- dataBolsaPeriodo %>% as.data.frame() %>% select(2:8) %>%
+graficoVelas <- dataBolsaPeriodo %>% 
+  as.data.frame() %>% 
+  select(2:8) %>%
   candleChart()
 # candleChart(theme='white',up.col='blue',dn.col='red')
 ```

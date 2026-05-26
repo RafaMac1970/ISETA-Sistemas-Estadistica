@@ -37,7 +37,7 @@ pop1 <- runif(nPop, min = 0, max = 100)
 ```
 
 ```{r}
-pop1
+# pop1
 ```
 
 ```{r}
@@ -76,9 +76,8 @@ muestras <- tibble(muestras)
 
 # Calculamos la media a cada fila. rowwise hace que el summarise se calcule por fila, y el bind_cols impide que perdamos las columnas.
 muestras <-  muestras %>% bind_cols(
-    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(where(is.numeric))))
   )
-muestras
 ```
 
 #### Creamos un gráfico por tratamiento.
@@ -112,9 +111,8 @@ for (i in c(1:40)) {
 muestras <- tibble(muestras)
 
 muestras <-  muestras %>% bind_cols(
-    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(where(is.numeric))))
   )
-muestras
 ```
 
 ```{r}
@@ -144,10 +142,10 @@ for (i in c(1:40)) {
 muestras <- tibble(muestras)
 
 muestras <-  muestras %>% bind_cols(
-    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(where(is.numeric))))
   )
-muestras
 ```
+
 ```{r}
 gr3 <- ggplot(muestras, aes(x = media)) + 
   stat_function(fun = dnorm, n = 101, args = list(mean = mean(muestras$media), sd = sd(muestras$media))) +
@@ -175,10 +173,10 @@ for (i in c(1:40)) {
 muestras <- tibble(muestras)
 
 muestras <-  muestras %>% bind_cols(
-    muestras %>% rowwise() %>% summarise(media = mean(c_across(is.numeric)))
+    muestras %>% rowwise() %>% summarise(media = mean(c_across(where(is.numeric))))
   )
-muestras
 ```
+
 ```{r}
 gr4 <- ggplot(muestras, aes(x = media)) + 
   stat_function(fun = dnorm, n = 101, args = list(mean = mean(muestras$media), sd = sd(muestras$media))) +

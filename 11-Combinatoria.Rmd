@@ -13,11 +13,11 @@ Para abordar el problema de la "probabilidad", que está en los fundamentos más
 
 Hay dos videos explicando este tema de manera concisa y completa. Las explicaciones son muy claras y rigurosas, recomiendo enfáticamente que lo miren con detenimiento. Fueron realizados por el profesor Unamuno, que enseña matemáticas en el CBC de la UBA para las carreras de ingeniería. Además hay otros videos con ejercicios resueltos que todos son excelentes.
 
--   Conceptos Básicos de Combinatoria <https://www.youtube.com/watch?v=-HFv7RYOoIU&list=PL43954F1FE4A51311&index=3>
+-   Conceptos Básicos de Combinatoria (unamunoenlinea) <https://www.youtube.com/watch?v=-HFv7RYOoIU&list=PL43954F1FE4A51311&index=3>
 
--   Los Naturales y el Factorial <https://www.youtube.com/watch?v=VJHE7vwsxrg&list=PL2fBB5seGsOWKATwyDy76rGyBGmdN5p5m>
+-   Los Naturales y el Factorial (unamunoenlinea) <https://www.youtube.com/watch?v=VJHE7vwsxrg&list=PL2fBB5seGsOWKATwyDy76rGyBGmdN5p5m>
 
--   Combinatoria Variaciones Permutaciones Combinaciones con y sin repeticion <https://www.youtube.com/watch?v=rAH7RWU4JyM&list=PL2fBB5seGsOUIH732oKHMmqjpMmLeImNY>
+-   Combinatoria Variaciones Permutaciones Combinaciones con y sin repeticion (unamunoenlinea) <https://www.youtube.com/watch?v=rAH7RWU4JyM&list=PL2fBB5seGsOUIH732oKHMmqjpMmLeImNY>
 
 ### Libro
 
