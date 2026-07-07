@@ -27,10 +27,10 @@ Vamos a construir una población de referencia. Para comenzar gueneramos número
 
 ```{r}
 nPop <- 50000
-pop1 <- runif(nPop, min = 0, max = 100)
+# pop1 <- runif(nPop, min = 0, max = 100)
 # pop1 <- rnorm(nPop, mean = 50, sd = 25)
 # pop1 <- rbinom(nPop, 99, 0.25)
-# pop1 <- rpois(nPop, lambda = 3)
+pop1 <- rpois(nPop, lambda = 3)
 # pop1 <- rt(nPop, 50, 50)
  # pop1 <- rchisq(nPop, 3, ncp = 0.5)
 # pop1 <- rgamma(nPop, shape = 2, scale = 5) # Asimétrica

@@ -7,10 +7,10 @@ output: html_notebook
 
 Este gráfico lo mostramos por razones históricas, dado que Florence Nightingale fue la primera persona que utilizó los gráficos estadísticos para persuadir a las autoridades de que cambiasen sus estrategias, hasta entonces sólo se utilizaban para presentar información, sin intención de provocar un cambio en la acción.
 
-Para conocer esta historia léala aquí: https://microbioblog.es/el-diagrama-de-la-rosa-de-florence
+Para conocer esta historia léala aquí: <https://microbioblog.es/el-diagrama-de-la-rosa-de-florence>
 
 Si quere saber algo más acerca de Florence Nightingale puede visitar wikipedia, es un muy buen artículo.
-https://es.wikipedia.org/wiki/Florence_Nightingale
+<https://es.wikipedia.org/wiki/Florence_Nightingale>
 
 El ejemplo está copiado de la ayuda que viene en el paquete "HistData" para la función Nightingale. Puede verse ejecutando el siguiente código.
 

@@ -88,9 +88,7 @@ ggplot(df, aes(x = x, y = y, fill = factor(ifelse(x == valor, "Valor", "Resto"))
   scale_fill_manual(name = "", values = c("grey50", "red")) + theme_bw()
 ```
 
-2. Obtener la probabilidad de que al menos 15 pacientes sean fumadores. Aquí se pide calcular P[X ≥
-15] = P[X > 14], que sería equivalente a P[X ≥ 15] = 1 − P[X < 15] = 1 − P[X ≤ 14]. Se procede a
-calcular las dos posibilidades con las opciones habilitadas en R.
+2. Obtener la probabilidad de que al menos 15 pacientes sean fumadores. Aquí se pide calcular P[X ≥ 15] = P[X > 14], que sería equivalente a P[X ≥ 15] = 1 − P[X < 15] = 1 − P[X ≤ 14]. Se procede a calcular las dos posibilidades con las opciones habilitadas en R.
 
 ```{r}
 valor = 14

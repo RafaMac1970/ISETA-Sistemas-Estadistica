@@ -1,0 +1,553 @@
+---
+title: "17 - Tablas de contingencia"
+output: 
+  html_notebook: 
+    toc: true
+---
+
+# Variables cualitativas
+
+## Un ejemplo
+
+Se incluyen en el estudio 143 pacientes de quienes se registra si son o no fumadores y si han tenido o no un ACV. La tabla sintetiza la información. La intensión es conocer la asociación entre estas dos variables.
+
+| ACV | No Fuma |   Fuma  |
+|-----|---------|---------|
+| No  | 90      | 40      |
+| Si  | 6       | 7       |
+
+```{r}
+library(vcd)
+library(epitools)
+
+# Creamos una matriz
+tablaACV <- matrix(c(90, 40, 6, 7), nrow = 2, byrow = TRUE)
+rownames(tablaACV) <- c("ACV No", "ACV Si")
+colnames(tablaACV) <- c("Fuma No", " Fuma Si")
+
+# La convertimos en una tabla
+tablaACV <- as.table(tablaACV)
+print(tablaACV)
+```
+
+```{r}
+mosaic(tablaACV)
+```
+
+```{r}
+barplot(tablaACV, beside = TRUE)
+```
+
+### Frecuencias y Frecuencias Relativas
+
+La función prop.table() nos permite calcular frecuencias sobre una tabla de contingencia creada con table() o as.table()
+
+```{r}
+paste("Proporciones por fila (ACV), suman 1 en cada fila")
+prop.table(tablaACV, margin = 1)
+
+paste("Proporciones por columna (Fumar), suman 1 en cada columna")
+prop.table(tablaACV, margin = 2)
+
+paste("Proporciones globales, suman 1 en toda la tabla")
+prop.table(tablaACV)
+```
+
+## Valor esperado
+
+El primer análisis que realizamos es tratar de conocer qué valores esperamos en la tabla si no hubiera asociación entre las variables. Para eso usamos las frecuencias de fumadores y no fumadores y la de ACV o No ACV. Si nuestros datos difieren de lo esperado significa que algo está alterando las probabilidadades y podemos preguntarnos entonces si la cantidad de casos de ACV es mayor entre fumadores de lo esperado o no.
+
+$$
+E_{ij} = \frac{\text{total fila}_i}{\text{total general}}
+\cdot \frac{\text{total columna}_j}{\text{total general}}
+\cdot \text{total general} = \frac{\text{total fila}_i \cdot \text{total columna}_j}{\text{total general}}
+$$
+
+Para nuetro ejemplo los resultados serían los siguientes
+
+| ACV | No Fuma   |   Fuma    |
+|-----|-----------|-----------|
+| No  | 87.272727 | 42.727273 |
+| Si  | 8.727273  | 4.272727  |
+
+```{r}
+expected(tablaACV)
+```
+
+Se puede ver que los fumadores con ACV son más de lo esperado y que entre los No Fumadores es al revés. Luego veremos si esas difererncias son suficientemente grandes como para tener un significado o simplemente es parde de la variabilidad debida al azar. Esto último se evalúa con una prueba de hipótesis que veremos más adelante.
+
+
+## Odd, Odds Ratio, Probabilidad y Riesgo Relativo
+
+Es importante diferenciar un odd (en español razón) de una probabilidad. Los odds expresan cuántos individuos de un grupo tienen una característica respecto de los que tienen otra característica. La probabilidades en cambio expresan cuántos individuos tienen una característica respecto del total del grupo (incluídos ellos mismos).
+
+| ACV / Fuma   |  No   |  Si   | Odds   | Probabilidad |
+|:-------------|:-----:|:-----:|-------:|--------------|
+| No           |   a   |   b   |    a/b | a/a+b        |
+| Si           |   c   |   d   |    c/d | c/c+d        |
+| Odds         |  a/c  |  b/d  |        |              |
+| Probabilidad | a/a+c | b/b+d |        |              |
+
+Odds Ratio = (a/c) / (b/d)
+
+a/c = es el odds de los "Fumadores". Esto dice cuantos casos de ACV hay respecto de los casos que no tienen ACV dentro de los "Fumadores" Cuanto mayor proporción de ACV, mayor es este número. Si el valor es 1 significa que hay tantos casos positivos de ACV como negativos.
+
+b/d = es el odds de los "NO Fumadores". Esto es lo mismo pero en el otro grupo, los "NO Fumadores".
+
+El Odds Ratio (OR) es la razón entre los odds anteriores, de los "Fumadores" respecto de los "NO Fumadores". Es decir que dice cuántos más ACV hay entre "Fumadores" que entre "NO Fumadores". Un OR de 1 significa que no hay direfencia de casos de ACV respecto del fumar. Un OR de 1.5 sifnifica que la proporción de personas con ACV entre los "Fumadores" es un 50% mayor que entre los "NO Fumadores".
+
+También se puede calcular los Odds y OR para las filas, la interpretación es algo diferente y la conclusión se expresa direfente, pero la esencia del fenómeno es el mismo y el OR da el mismo número.
+
+Si este ejercicio se hace con las probabilidades en lugar de los odds, entonces el equivalente al OR lo llamanos "Riesgo Relativo" (RR). El OR y el RR pueden variar entre 0 e infinito, siendo 1 el mismo Odds entre los dos grupos, y 0.5 el mismo riesgo entre los dos grupos.
+
+### Para el ejemplo
+
+| ACV / Fuma   |  No  |  Si  | Odds   | Probabilidad |
+|:-------------|:----:|:----:|-------:|--------------|
+| No           |  90  |  40  |  40/90 |   40/130     |
+| Si           |  6   |  7   |  7/6   |   7/13       |
+| Odds         | 6/90 | 7/40 |        |              |
+| Probabilidad | 6/96 | 7/47 |        |              |
+
+
+-   OR de NO ACV = (90/6) / (40/7) = 2.625
+
+-   Los odds de no tener un ACV son 2.625 veces mayores entre no fumadores que entre fumadores.
+
+-   OR de ACV = (7/40) / (6/90) = 1.75
+
+-   Los odds de tener un ACV son 1.75 veces mayores entre fumadores que entre no fumadores.
+
+-   (Calculándolo con los odds de cada fila da lo mismo, OR = (90/40) / (6/7) = 2.625)
+
+-   Los odds de no fumar son 2.65 veces mayores entre quienes no tuvieron un ACV que ente quienes sí lo tuvieron.
+
+```{r}
+oddsratio(tablaACV, method = "wald")
+```
+
+### El riesgo relativo se calcula con las probabilidades
+
+```{r}
+riskratio(tablaACV, method = "wald")
+```
+
+-   Riesgo Relativo de Fumador = (7/13) / (40/130) = 1.75
+
+Las personas que tuvieron un ACV tienen 1.75 veces más probabilidad de ser fumadores que quienes no tuvieron un ACV.
+
+-   Riesgo Relativo de ACV = (7/47) / (6/96) = 2.38
+
+Los fumadores tienen 2.38 veces más probabilidad de tener un ACV que las personas que no fuman.
+
+
+### Otros indicadores
+
+```{r}
+assocstats(tablaACV)
+```
+
+```{r}
+rateratio(tablaACV)
+```
+
+
+## Con Tidyverse
+
+
+### ACV Fumadores
+
+Observar que no informa el OR sino el logaritmo natural del OR (en R se escribe log(OR)). Los log(OR) van desde -inf hasta +inf. Como log(1) = 0, eso significa que no hay asociación entre las variables, los dos grupos tienen ACV en la misma proporción. Valores negativos corresponden a OR menores a 1 y los positivos a OR mayores a 1. Cuanto mayor el número más fuerte la asociación directamente proporcional, es decir que cuanto más fuma más proporción de ACV. En cambio cuanto más negativo el número más fuerte es la asociación inversamente proporcional, es decir que cuanto más fuma menos proporción de ACV.
+
+#### Primero creamos un tibble con los datos.
+
+```{r}
+library(tidyverse)
+tablaACVTibble <- tibble(
+  Fuma = factor(c("No", "Si", "No", "Si")),
+  ACV = factor(c("No", "No", "Si", "Si")),
+  Conteo = c(90, 40, 6, 7)
+  )
+
+tablaACVTidy <- tablaACVTibble %>%
+  uncount(weights = Conteo) %>%
+  mutate(Persona = 1:n()) %>%
+  # select(Persona, everything()) %>%
+  arrange(Persona)
+
+tablaACVTidy
+```
+
+##### Explicación:
+
+-   Primero creamos un tibble con las combinaciones de las categorías y sus conteos.
+
+-   Usamos uncount() para expandir las filas según el conteo (7 filas para Fuma=Si/ACV=Si, 40 para Fuma=No/ACV=Si, etc.).
+
+-   Añadimos una columna "Persona" con un ID único para cada fila.
+
+-   Reordenamos las columnas para que Persona quede primero.
+
+-   Ordenamos por número de persona.
+
+La siguiente es una forma más explícita de crear lo mismo que antes.
+
+```{r}
+# tablaACVTidy2 <- tibble(
+#   Persona = 1:143,
+#   Fuma = factor(c(rep("Si", 7), rep("Si", 40), rep("No", 6), rep("No", 90))),
+#   ACV = factor(c(rep("Si", 7), rep("No", 40), rep("Si", 6), rep("No", 90)))
+# )
+# tablaACVTidy2
+```
+
+Se puede reconstruir la tabla así:
+
+```{r}
+nuevaTablaACV <- table(tablaACVTidy$ACV, tablaACVTidy$Fuma)
+rownames(nuevaTablaACV) <- c("ACV No", "ACV Si")
+colnames(nuevaTablaACV) <- c("Fuma No", "Fuma Si")
+nuevaTablaACV
+```
+
+Luego graficamos con ggmosaic, que es un paquete que extiende las capacidades de ggplot2.
+
+```{r}
+# library(vcd)
+mosaic(~ ACV + Fuma, data = tablaACVTidy, shade=TRUE, legend=TRUE)
+```
+
+```{r warning=FALSE}
+# Prueba de independencia
+resultado_chi2 <- chisq.test(nuevaTablaACV, correct = TRUE)
+resultado_chi2
+
+# Valores esperados bajo hipótesis nula
+resultado_chi2$expected
+
+# Residuales
+resultado_chi2$res
+
+# Residuales estandarizados
+resultado_chi2$stdres
+```
+
+## Test de alcoholismo
+
+```{r}
+library(tidyverse)
+tibbleAlcolemia <- tibble(
+    Test = factor(c("+", "+", "-", "-")),
+    Consumo = factor(c("Si", "No", "Si", "No")),
+    n = c(45, 5, 190, 760)
+  )
+
+tibbleAlcolemia <- tibbleAlcolemia %>%
+  uncount(weights = n) %>%
+  mutate(Persona = 1:n()) %>%
+  # select(Persona, everything()) %>%
+  arrange(Persona)
+```
+
+```{r}
+tablaAlcolemia <- table(tibbleAlcolemia$Consumo, tibbleAlcolemia$Test)
+rownames(tablaAlcolemia) <- c("Test -", "Test +")
+colnames(tablaAlcolemia) <- c("Consumo No", "Consumo Si")
+tablaAlcolemia
+```
+	
+	expected = c(c(726.75, 223.25), c(38.25, 11.75)), 
+```{r}
+library(vcd)
+mosaic(~ Consumo + Test, data = tibbleAlcolemia, shade = TRUE, legend = TRUE)
+```
+
+## AirBag
+
+Los datos corresponden a la siguiente descripción:
+<https://vincentarelbundock.github.io/Rdatasets/doc/DAAG/nassCDS.html>
+
+Se obtuvieron del siguiente vínculo:
+<https://vincentarelbundock.github.io/Rdatasets/csv/DAAG/nassCDS.csv>
+
+
+```{r}
+library(readr)
+nassCDS <- read_csv("datos/nassCDS.csv")
+nassCDS
+```
+
+### Armar tabla
+
+```{r}
+tablaAirBag <- table(nassCDS$dead, nassCDS$airbag)
+tablaAirBag
+prop.table(tablaAirBag)
+```
+
+### Gráfico de Mosaico
+
+```{r}
+library(vcd)
+mosaic(~ dead + airbag, data = nassCDS, shade = TRUE, legend = TRUE)
+```
+
+### Estadísticas generales de asociación para toda la tabla
+
+```{r}
+assocstats(tablaAirBag)
+```
+
+#### Chi cuadrado (Pearson)
+
+El test de Chi-cuadrado ($\chi^2$) es una prueba estadística que sirve para saber si dos variables categóricas (cualitativas) están relacionadas o si, por el contrario, son completamente independientes.
+
+Por ejemplo, te ayuda a responder preguntas como: ¿El tipo de tratamiento médico que recibe un paciente está relacionado con su probabilidad de recuperarse? o ¿El género de una persona influye en su marca de coche favorita?¿Cómo funciona? (La lógica detrás del test)
+
+El test compara dos cosas:
+
+-   Frecuencias Observadas ($O$): Los datos reales que recolectaste en tu muestra.
+
+-   Frecuencias Esperadas ($E$): Los datos que deberías haber obtenido teóricamente si las dos variables no tuvieran ninguna relación entre sí (puro azar).
+
+La fórmula matemática mide la distancia entre lo que viste y lo que esperabas:
+
+$$\chi^2 = \sum \frac{(O - E)^2}{E}$$
+
+-   Si los datos observados son muy parecidos a los esperados, el valor de $\chi^2$ será cercano a cero. Conclusión: Las variables son independientes (no hay relación).
+
+-   Si los datos observados son muy diferentes a los esperados, el valor de $\chi^2$ será muy grande. Conclusión: Las variables están asociadas (sí hay relación).
+
+#### El P-valor: La regla de decisión
+
+Para saber si ese número $\chi^2$ es lo suficientemente grande como para asegurar que hay una relación real y no una simple coincidencia, miramos el p-valor:
+
+-   P-valor $< 0.05$ (Significativo): Se rechaza la hipótesis de independencia. Sí hay una relación estadísticamente significativa entre las variables.
+
+-   P-valor $\ge 0.05$ (No significativo): No hay pruebas suficientes para decir que están relacionadas. Cualquier diferencia se debe al azar.
+
+En resumen: El Chi-cuadrado te dice si el "patrón" o la diferencia que ves en tus datos es real o si es solo ruido estadístico. Sin embargo, recuerda que no te dice qué tan fuerte es esa relación (para eso necesitas métricas como el Odds Ratio o el Coeficiente de Contingencia).
+
+```{r}
+library(rstatix)
+chiTest <- chisq_test(tablaAirBag)
+chiTest
+```
+
+
+#### Test de Razón de Verosimilitud
+
+Test de Razón de Verosimilitud Chi-cuadrado para independencia, también conocido universalmente en estadística como el Test G ($G^2$). Este test cumple el mismo propósito que el test clásico de Chi-cuadrado de Pearson (evaluar si dos variables categóricas están asociadas), pero utiliza un enfoque de máxima verosimilitud logarítmica.
+
+$$G^2 = 2 \sum_{i=1}^{r} \sum_{j=1}^{c} O_{ij} \cdot \ln\left(\frac{O_{ij}}{E_{ij}}\right)$$
+
+Donde:
+
+$O_{ij}$: Es la frecuencia Observada en la celda de la fila $i$ y columna $j$.
+
+$E_{ij}$: Es la frecuencia Esperada para esa misma celda bajo la hipótesis de que las variables son independientes calculada como: 
+$$\frac{\text{Total Fila} \times \text{Total Columna}}{\text{Total General}}$$
+
+$\ln$: Es el logaritmo natural.Al igual que el Chi-cuadrado tradicional, este estadístico $G^2$ se distribuye de forma aproximada como una distribución Chi-cuadrado con los mismos grados de libertad: $\text{gl} = (r - 1) \times (c - 1)$.
+
+#### Odds y ln(Odds)
+
+```{r}
+odds(tablaAirBag)
+lodds(tablaAirBag)
+```
+
+#### Odds Ratio
+
+El OR mide la fuerza de asociación entre dos variables. Nos dice cuánto más probables son los odds de un evento en un grupo en comparación con el otro. 
+
+-   Odds de estar vivo / muerto con airbag: $\frac{13908}{511} = 27.21722$ (Por cada 27 vivos, hay 1 muerto en el grupo con airbag).
+-   Odds de estar vivo / muerto sin airbag: $\frac{11129}{669} = 16.63528$ (Por cada 17 vivos, hay 1 muerto en el grupo sin airbag).
+
+$$OR = \frac{\text{Odds grupo (con airbag)}}{\text{Odds grupo (sin airbag)}} = \frac{27.21722}{16.63528} = 1.636115$$
+
+Interpretación del OR: Los odds de estar vivo son 1.6 veces mayores en las personas que tuvieron airbag que en las que no tuvieron airbag. Es una medida de asociación global simétrica (da igual si miras filas o columnas).
+
+```{r}
+oddsratio(tablaAirBag, method = "wald")
+```
+
+#### Ln(OR), habitualmente llamado Log-Odds o Logit.
+
+El logaritmo del Odds Ratio  es la transformación matemática del Odds Ratio ($OR$) mediante el logaritmo natural: $\ln(OR)$.
+
+Aunque a nivel intuitivo el $OR$ clásico (el "multiplicador") parece más fácil de entender, el Log-Odds es la unidad fundamental de la regresión logística y tiene propiedades estadísticas que lo hacen infinitamente más útil para los cálculos.
+
+Aquí te explico cómo se interpreta y por qué se usa:
+1.    La escala del Log-Odds (Interpretación directa)Cuando pasamos el $OR$ a escala logarítmica, los valores cambian por completo su comportamiento, volviéndose simétricos y centrados en el cero:
+
+-   $\ln(OR) = 0$: Significa que no hay asociación. Equivale a un $OR = 1$. Las probabilidades de que ocurra el evento son exactamente las mismas en ambos grupos.
+
+-   $\ln(OR) > 0$ (Positivo): Significa una asociación positiva (factor de riesgo). El evento es más probable en el grupo analizado. Equivale a un $OR > 1$.
+
+-   $\ln(OR) < 0$ (Negativo): Significa una asociación negativa (factor protector). El evento es menos probable en el grupo analizado. Equivale a un $OR < 1$.2. 
+
+Un ejemplo numérico para ver la simetría
+
+Imagina que analizamos el riesgo de enfermar según dos mutaciones genéticas distintas:
+
+-   Mutación A: Duplica el riesgo $\rightarrow OR = 2$.
+-   Mutación B: Reduce el riesgo a la mitad $\rightarrow OR = 0.5$.
+
+En la escala del $OR$ normal, la Mutación A se aleja $+1$ unidad del centro (que es 1), mientras que la Mutación B solo se mueve $-0.5$ unidades. Visualmente, parece que el riesgo positivo es "más grande" que el protector.
+
+Si aplicamos el logaritmo natural ($\ln$):
+
+-   Log-Odds de Mutación A: $\ln(2) = +0.693$
+-   Log-Odds de Mutación B: $\ln(0.5) = -0.693$
+
+La magia del Log-Odds: Ahora ambos efectos tienen exactamente la misma magnitud ($0.693$), pero con signos opuestos. Esto demuestra que un efecto protector inverso tiene la misma fuerza que un efecto de riesgo directo.
+
+#### Coeficiente de contingencia
+
+El coeficiente de contingencia (a menudo denotado como $C$ o $C_p$, y derivado por el estadístico Karl Pearson) es una medida que sirve para cuantificar la intensidad de la asociación o relación entre dos variables cualitativas (nominales o categóricas) en una tabla de contingencia. 
+
+A diferencia del test de Chi-cuadrado ($\chi^2$), que solo te dice si existe o no una relación estadísticamente significativa, el coeficiente de contingencia te dice qué tan fuerte es esa relación.
+
+$$C = \sqrt{\frac{\chi^2}{\chi^2 + N}}$$
+
+Características clave que debes conocer si estás analizando este coeficiente, tienes que tener en cuenta tres propiedades fundamentales:
+
+-   Siempre es positivo y varía entre 0 y menos de 1: Un valor de $0$ significa que hay independencia absoluta (las variables no tienen ninguna relación).
+-   Nunca llega a 1: A diferencia de otros coeficientes (como el de correlación de Pearson para variables numéricas), el coeficiente de contingencia nunca alcanza el valor máximo de $1$, ni siquiera cuando la relación entre las variables es perfecta.
+-   Su límite máximo depende del tamaño de la tabla: El valor máximo que puede alcanzar está limitado por el número de filas ($r$) y columnas ($c$). Específicamente, el límite máximo se calcula como:
+
+$$\text{C}_{\text{máx}} = \sqrt{\frac{k - 1}{k}}$$
+
+(Donde $k$ es el menor número entre el total de filas o de columnas, es decir, $k = \min(r, c)$). > Por ejemplo, en una tabla de $2 \times 2$ (donde $k=2$), el valor máximo que puede alcanzar el coeficiente es $\sqrt{1/2} = 0.707$. Si tu coeficiente da $0.68$, significa que la relación es extremadamente fuerte para ese tipo de tabla, aunque esté lejos de $1$.
+
+#### Alternativa común: La V de Cramer
+
+Debido a que el Coeficiente de Contingencia de Pearson no puede llegar a 1 y su interpretación depende del tamaño de la tabla, en la práctica moderna muchos paquetes estadísticos (como SPSS o R) prefieren mostrar la V de Cramer.
+
+La V de Cramer corrige este problema y está ajustada para que sus valores vayan estrictamente de 0 a 1, facilitando la comparación de la fuerza de asociación entre tablas de diferentes tamaños.
+
+### Estadísticas particulares de asociación
+
+#### Residuales de Pearson (los que aparecen en colores en el gráfico mosaic)
+
+Los Residuos de Pearson (o Pearson Residuals) son una herramienta fundamental para analizar tablas de contingencia. Mientras que el test de Chi-cuadrado ($\chi^2$) te dice si existe una relación global entre las dos variables, los residuos de Pearson van un paso más allá: te dicen exactamente qué celdas específicas de la tabla están causando esa relación.
+
+En términos sencillos, miden la diferencia entre lo que observaste en una celda y lo que se esperaría encontrar si las dos variables fueran completamente independientes.
+
+$$r_{ij} = \frac{O_{ij} - E_{ij}}{\sqrt{E_{ij}}}$$
+
+Donde: 
+
+$O_{ij}$: Es la frecuencia Observada (los datos reales de la celda).
+
+$E_{ij}$: Es la frecuencia Esperada (lo que teóricamente debería haber en esa celda si no hubiera ninguna asociación entre las variables).
+
+```{r}
+pearson_residuals(chiTest)
+```
+
+#### Razón de Verosimilitud (Likelihood Ratio - LR)
+
+La LR no mira la asociación general, sino el valor diagnóstico de un resultado específico.
+
+Existen dos tipos (LR con airbag y LR sin airbag), pero enfoquémonos en la Razón de Verosimilitud Positiva conairbag:
+
+$$\text{LR con airbag} = \frac{\text{Probabilidad de estar vivo con airbag}}{\text{Probabilidad de estar muerto con airbag}}$$
+
+-   De todos los que tienen airbag, ¿cuántos resultaron vivos? $\frac{13908}{14419} = 0.9645606$.
+
+-   De todos los que tienen airbag, ¿cuántos resultaron muertos? $\frac{511}{14419} = 0.03543935$.
+
+$$\text{LR con airbag} = \frac{0.9645606}{0.03543935} = 27.21722$$
+
+Interpretación del LR conairbag: En un accidente con airbag es 27 veces más probable resultar vivo que muerto. Haciendo el cálculo sin airbag da 17.
+
+#### Riesgo Relativo (Risq Ratio).
+
+El (RR) Riesgo Relativo es una métrica estadística utilizada principalmente en epidemiología y estudios de salud para comparar el riesgo de que ocurra un evento (generalmente una enfermedad o un resultado negativo) entre dos grupos diferentes: uno expuesto a un factor de riesgo y otro no expuesto.
+
+A diferencia del Odds Ratio (que usa odds), el Risk Ratio trabaja directamente con probabilidades puras.¿Cómo se calcula?
+
+Para calcular el Risk Ratio, primero debemos entender qué es el "Riesgo" en estadística: es simplemente la proporción de personas en un grupo que experimentan el evento. La fórmula general es:
+
+$$RR = \frac{\text{Riesgo en el grupo expuesto}}{\text{Riesgo en el grupo no expuesto}}$$
+La Tabla de ContingenciaUtilizando una tabla estándar de $2 \times 2$, podemos ver cómo se desglosan los componentes:
+
+|                              | Desarrolla el Evento (Enfermo)  | No Desarrolla el Evento (Sano) | Total |
+|------------------------------|---------------------------------|--------------------------------|-------|
+| Expuestos (Factor de riesgo) |            A                    |                    B           | A + B |
+| No Expuestos (Control)       |            C                    |                    D           | C + D |
+
+A partir de esta tabla, calculamos el riesgo de cada grupo:
+
+-   Riesgo en Expuestos ($R_1$): $\frac{A}{A + B}$
+-   Riesgo en No Expuestos ($R_0$): $\frac{C}{C + D}$
+
+Por lo tanto, la fórmula matemática final es:
+
+$$RR = \frac{\frac{A}{A + B}}{\frac{C}{C + D}}$$
+Condición clave de uso: El Risk Ratio solo se puede calcular en estudios prospectivos (como ensayos clínicos o estudios de cohortes), donde se conoce el número total de personas inicialmente expuestas y se les sigue en el tiempo para ver cuántas enferman. No se puede calcular en estudios retrospectivos de Casos y Controles (donde corresponde usar el OR).
+
+```{r}
+riskratio(tablaAirBag, method = "wald")
+```
+
+Interpretación: Se tiene 27% veces más riesgo de morir si no se usa airbag.
+
+
+## Cars93
+
+```{r}
+library(MASS)
+help(Cars93)
+summary(Cars93)
+show(Cars93)
+```
+
+```{r}
+tc1 <- table(Cars93$AirBags, Cars93$Type)
+tc1Margins <- addmargins(tc1)
+tc1Margins
+```
+
+```{r}
+propTc1 <- prop.table(tc1)
+propTc1
+```
+
+```{r}
+ggplot(Cars93) +
+  aes(x = AirBags, y = ..count.., fill = Type) +
+  geom_col(position = position_dodge(width = 0.9), stat = "count")
+```
+
+```{r}
+chiTc1 <- chisq.test(tc1)
+print("Observados")
+chiTc1$observed   # observed counts (same as M)
+writeLines("\n")
+print("Frecuencias relativas")
+propTc1
+writeLines("\n")
+print("Esperados")
+chiTc1$expected   # expected counts under the null
+writeLines("\n")
+print("Residuales")
+chiTc1$residuals  # Pearson residuals
+writeLines("\n")
+print("Residuales estandarizados")
+chiTc1$stdres     # standardized residuals
+writeLines("\n")
+print("Valor p")
+writeLines("\n")
+chiTc1$p.value
+writeLines("\n")
+chiTc1
+```
+
+```{r}
+satsTc1 <- assocstats(tc1)
+satsTc1
+```
+

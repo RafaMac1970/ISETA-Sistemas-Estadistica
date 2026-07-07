@@ -47,6 +47,7 @@ Como ejemplo de esto último comparemos las covarianzas en dos datasets diferent
 cov(iris$Sepal.Length, iris$Sepal.Width)
 nrow(iris) # nrow devuelve la cantidad de filas del dataset (n)
 cov(diamonds$price, diamonds$carat)
+cov(diamonds$price, diamonds$depth)
 nrow(diamonds)
 ```
 
@@ -147,7 +148,7 @@ cor(diamonds$price, diamonds$carat)
 ```{r}
 # Gráfico de dispersión para precio y quilates
 ggplot(diamonds, aes(x = carat, y = price)) +
-  geom_point(alpha = 0.3) +
+  geom_point(alpha = 0.1) +
   geom_smooth(method = "lm", se = FALSE)
 ```
 
