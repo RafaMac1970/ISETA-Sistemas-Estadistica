@@ -1,0 +1,67 @@
+---
+title: "Inferencia - Cuidado con las interpretaciones"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(readr)
+library(plotly)
+```
+
+## Asociación o correlación no significa causalidad
+
+```{r}
+literacyAlcohol <- read_csv("datos/literacyAlcohol.csv")
+```
+
+```{r}
+gr1 <- ggplot(literacyAlcohol, aes(x = totLiteracy, y = totAlcohol, label = country)) +
+# ggplot(literacyAlcohol, aes(x = totLiteracy, y = totAlcohol, label = country)) +
+# geom_text(check_overlap = TRUE, size = 2, hjust = -0.1, vjust = 1) +
+  geom_point(alpha = 0.3, size = 2) +
+  coord_trans(y ='log', x='log') +
+  scale_x_continuous(trans = scales::log_trans(),
+                     breaks = scales::log_breaks()) +
+  scale_y_continuous(trans = scales::log_trans(),
+                     breaks = scales::log_breaks()) +
+  xlab("Personas letradas") +
+  ylab("Consumo anual de alcohol (litros equivalentes)") +
+  labs(title = "Relación entre la instrucción y el consumo de alcohol.",
+              caption = "Datos: www.gapminder.org")
+ggplotly(gr1)
+```
+
+```{r}
+regLA <- lm(totAlcohol ~ totLiteracy, data = literacyAlcohol)
+summary(regLA)
+```
+
+
+```{r}
+# literacyAlcohol <- mutate(literacyAlcohol, alcohol = totAlcohol / popu , literacy = totLiteracy / popu)
+```
+
+
+```{r}
+gr2 <- ggplot(literacyAlcohol, aes(x = totLiteracy / popu, y = totAlcohol / popu, label = country)) + 
+# ggplot(literacyAlcohol, aes(x = literacy, y = alcohol, label = country)) + 
+  geom_point(alpha = 0.3) +
+  geom_text(check_overlap = TRUE, size = 4, hjust = -0.1, vjust = 1) +
+  # xlim(70,100) +
+  xlab("Alfabetismo (%)") +
+  ylab("Consumo anual de alcohol (litros equivalentes / persona)") +
+  labs(title = "Relación entre la instrucción y el consumo de alcohol.",
+              caption = "Datos: www.gapminder.org")
+
+ggplotly(gr2)
+```
+
+```{r}
+regLA <- lm((totAlcohol / popu) ~ I(totLiteracy / popu), data = literacyAlcohol)
+summary(regLA)
+```
+
+Aquí una colección de buenos ejemplos de correlaciones espúreas.
+<https://tylervigen.com/spurious-correlations>
+
