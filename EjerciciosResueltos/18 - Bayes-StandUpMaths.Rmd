@@ -1,0 +1,123 @@
+---
+title: "Probabilidad - Inferencia - Bayes - StandUpMaths"
+output: html_notebook
+---
+
+# Bayes - Stand Up Maths
+
+### Fuente: Matt Parker. "Bayesian Statistics with Hannah Fry". https://www.youtube.com/watch?v=7GgLSnQ48os
+
+Este ejemplo está inspirado en el video anterior, la intensión es simular el ejemplo que en el video se realiza físicamente.
+
+El ejercicio consta de una mesa (con coordenadas cartesianas establecidas sobre el), y una silla de espaldas a la mesa. Una persona (A) se sienta en la silla y aroja hacia atrás, sin mirar, una pequeña bolsa de arena (para que no rebote) sobre la mesa. La posición de esta bolsa es el "objetivo", es decir la posición que debemos estimar. 
+Luego una segunda persona (B) que no miró el proceso anterior, y por lo tanto no conoce la posición de la bolsa original, se sienta en la silla y arroja la bolsa nuevamente. Entonces A registra en una planilla las coordenadas donde cayó la bolsa y calcula las diferencias en la posición respecto de la posición "objetivo" (previamente registrada).
+
+Finalmente B debe estimar la posición "objetivo" con la información de las diferencias que le informa A.
+Se supone que al lanzar la bolsa la posición obtenida es al azar.
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+## Primero se fija el objetivo. Persona A
+
+Estamos suponiendo una mesa cuadrada con coordenadas entre 15 y -15
+
+```{r}
+# objetivo <- matrix(1:2,2,1)
+objetivo <- sample(-15:15,2, replace = TRUE)
+objetivo
+```
+
+## Luego se arrojan las bolsas al azar. Persona B
+
+```{r}
+muestreoX <- sample(-15:15,15, replace = TRUE)
+muestreoY <- sample(-15:15,15, replace = TRUE)
+matrizMuestreo <- cbind(muestreoX, muestreoY)
+matrizMuestreo
+```
+
+## Luego A calcula las diferencias entre el objetivo y las posiciones obtenidas por B
+
+```{r}
+diferenciasX <- objetivo[1] - muestreoX
+diferenciasY <- objetivo[2] - muestreoY
+diferencias <- cbind(diferenciasX, diferenciasY)
+# diferencias <- diferencias * -1
+diferencias
+```
+
+## Podemos hacer dos cosas, establecer el área de posibilidades donde encontrar el objetivo y estimar la posición más probable (esperanza)
+
+### Área de posibilidades
+
+Esto puedo calcularlo únicamente cuando conozco las posiciones más extremas posibles (los bordes de la mesa) en las que puede caer cada bolsa. En este caso pueden ser 15 o -15 tanto para x como para y. Muchas veces desconocemos los límites de la mesa y debemos usar la estimación del inciso siguiente.
+
+Los valores de la diferencia en x nos indica qué tanto a la izquierda del objetivo (valores negativos)  cayó la bolsa o a la derecha del mismo (valores positivos). Esto nos permite asegurar que los máximos valores absolutos de las diferencias establecen los límites del área de posibilidades. Por ejemplo si el máximo valor absoluto de los valores positivos es 7 significa que el objetivo no puede estar a la derecha de 4 (14 - 15 = 4) porque si la bolsa hubiera caído en el borde de la mesa (15) y la diferencia es 14 entonces el objetivo estaría en 4. Este mismo razonamiento lo podemos aplicar a los valores negativos (a la izquierda del objetivo) y a los valores de "y" (arriba los valores positivos y abajo los negativos).
+
+```{r}
+limiteDerecho <- max(diferenciasX) - 15
+limiteIzquierdo <- min(diferenciasX) + 15
+limiteSuperior <- max(diferenciasY) - 15
+limiteInferior <- min(diferenciasY) + 15
+
+limiteDerecho
+limiteIzquierdo
+limiteSuperior
+limiteInferior
+```
+
+
+### Ahora se puede estimar la posición del objetivo.
+
+Es importante aclarar que esta estimación puede caer afura del área calculada en el inciso anterior.Esto es así porque setrata de una estimación basada en un muestreo al azar. Es por lo tanto útil cuando no conocemos los límites de la mesa o cuando el área calculada anterior es demasiado grande.
+
+```{r}
+puntoEstimado <- c(mean(diferenciasX), mean(diferenciasY))
+# diferencias %>% reframe(meanX = mean(diferenciasX), meanY = mean(diferenciasY))
+
+objetivo
+puntoEstimado
+puntoEstimado - objetivo
+```
+
+## Finalmente un gráfico muestra toda la información
+
+### Primero mostramos el muestreo real (que en realidad desconocemos)
+
+```{r}
+diferencias <- data.frame(diferencias)
+grafico1 <- ggplot(diferencias, aes(muestreoX, muestreoY)) + 
+  geom_point(alpha = 0.5) + 
+  geom_point(aes(x=objetivo[1], y=objetivo[2]), colour="red") + 
+  geom_point(aes(x=mean(diferenciasX), y=mean(diferenciasY)), colour="green") + 
+  geom_segment(aes(x = objetivo[1], y = objetivo[2], xend = mean(diferenciasX), yend = mean(diferenciasY)), arrow = arrow(length = unit(0.2, "cm"))) +
+  geom_hline(yintercept=limiteSuperior, alpha = 0.5) +
+  geom_hline(yintercept=limiteInferior, alpha = 0.5) +
+  geom_vline(xintercept=limiteDerecho, alpha = 0.5) +
+  geom_vline(xintercept=limiteIzquierdo, alpha = 0.5) +
+  xlim(-30, 30) + 
+  ylim(-30, 30) + 
+  theme(aspect.ratio = 1)
+grafico1
+```
+
+### Luego mostramos el las diferencias (que es lo único que conocemos)
+
+```{r}
+diferencias <- data.frame(diferencias)
+grafico1 <- ggplot(diferencias, aes(diferenciasX, diferenciasY)) + 
+  geom_rect(xmin = limiteIzquierdo, xmax = limiteDerecho, ymin = limiteInferior, ymax = limiteSuperior, fill = "lightblue", alpha = 0.5) +
+  geom_point(alpha = 0.5) + 
+  geom_point(aes(x=objetivo[1], y=objetivo[2]), colour="red") + 
+  geom_point(aes(x=mean(diferenciasX), y=mean(diferenciasY)), colour="green") + 
+  geom_segment(aes(x = objetivo[1], y = objetivo[2], xend = mean(diferenciasX), yend = mean(diferenciasY)), arrow = arrow(length = unit(0.2, "cm"))) +
+  xlim(-30, 30) + 
+  ylim(-30, 30) + 
+  theme(aspect.ratio = 1)
+grafico1
+```
+
+

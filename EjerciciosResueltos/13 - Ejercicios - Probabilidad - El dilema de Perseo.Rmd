@@ -1,0 +1,108 @@
+---
+title: "Probabilidad - Ejercicio - El dilema de Perseo"
+output: html_notebook
+---
+
+Perseo debe rescatar a la bella Andrómeda prisionera en una caverna cuyo acceso está bloqueado con rocas. El probglema es que hay tres cavernas idénticas: una de ellas aloja a Andrómeda y en cada una de las otras dos se oculta una górona, monstruo legendario con poderes para petrificar a los intrusos con sólo una mirada. Perseo consulta a Pegasa - la urraca mítica - quién manifiesta saber en qué caverna se encuentra Andrómeda, pero no le es permitido revelar el secreto so pena de terrible castigo por parte de los dioses; sin embargo puede ayudar a Perseo. Éste dice que, a su parecer, Andrómeda está en la caverna del centro; Pegasa informa entonces que en la de la izquierda hay una górgona. Aquí se presenta el dilema, ¿aumentan las posibilidades de Perseo de acertar con la caverna correcta si toma en cuenta la revelación de Pegasa y modifica su apreciación inicial?
+
+Esta mítica diyuntiva puede, en realidad, ser más frecuente que lo que uno supone. El autor discute el dilema y nos provee de una respuesta al mismo.
+
+Felizia, Eduardo (1994). El dilema de Perseo. Ciencia Hoy, Buenos Aires, Argentina. Vol 5, N° 26, pgs 58-61.
+https://drive.google.com/file/d/1XhsddWr398AoqsccWXdhL158ZpuP3ISt/view?usp=share_link
+
+# Primero planteamos el problema desglosado que realiza un experimento.
+## Cuando Perseo conserva la primera elección.
+
+```{r}
+cavernas <- c("izquierda", "centro", "derecha")
+contenidos <- rep(c("Gorgona", "Andrómeda"), times = c(2,1))
+
+  contenidoCavernas <- sample(contenidos, 3, replace = FALSE)
+  eleccionPerseo1 <- sample(cavernas, 1, replace = FALSE)
+  alternativasPegasa <- setdiff(setdiff(cavernas, eleccionPerseo1), cavernas[match("Andrómeda", contenidoCavernas)])
+  descartePegasa <- sample(alternativasPegasa, 1, replace = FALSE)
+  eleccionPerseo2 <- eleccionPerseo1
+  acierto <- contenidoCavernas[match(eleccionPerseo2, cavernas)] == "Andrómeda"
+
+paste("Contenido de las Cavernas")
+contenidoCavernas
+paste("1° elección de Perseo")
+eleccionPerseo1
+paste("Alternativas de Pegasa")
+alternativasPegasa
+paste("Descarte de Pegasa")
+descartePegasa
+paste("2° eleccióndePerseo, que repite la primera")
+eleccionPerseo2
+paste("¿Perseo eligió a Andrómeda?")
+acierto
+```
+
+## Cuando Perseo cambia de alternativa en la 2° elección.
+
+```{r}
+cavernas <- c("izquierda", "centro", "derecha")
+contenidos <- rep(c("Gorgona", "Andrómeda"), times = c(2,1))
+
+
+  contenidoCavernas <- sample(contenidos, 3, replace = FALSE)
+  eleccionPerseo1 <- sample(cavernas, 1, replace = FALSE)
+  alternativasPegasa <- setdiff(setdiff(cavernas, eleccionPerseo1), cavernas[match("Andrómeda", contenidoCavernas)])
+  descartePegasa <- sample(alternativasPegasa, 1, replace = FALSE)
+  eleccionPerseo2 <- setdiff(setdiff(cavernas, eleccionPerseo1), descartePegasa)
+  acierto <- contenidoCavernas[match(eleccionPerseo2, cavernas)] == "Andrómeda"
+
+paste("Contenido de las Cavernas")
+contenidoCavernas
+paste("1° elección de Perseo")
+eleccionPerseo1
+paste("Alternativas de Pegasa")
+alternativasPegasa
+paste("Descarte de Pegasa")
+descartePegasa
+paste("2° eleccióndePerseo")
+eleccionPerseo2
+paste("¿Perseo eligió a Andrómeda?")
+acierto
+```
+# Luego planteamos el problema repitiéndolo múltiples veces.
+## Cuando Perseo conserva la primera elección.
+
+```{r}
+cavernas <- c("izquierda", "centro", "derecha")
+contenidos <- rep(c("Gorgona", "Andrómeda"), times = c(2,1))
+aciertos <- c()
+
+resultados <- replicate(100000, {
+  contenidoCavernas <- sample(contenidos, 3, replace = FALSE)
+  eleccionPerseo1 <- sample(cavernas, 1, replace = FALSE)
+  alternativasPegasa <- setdiff(setdiff(cavernas, eleccionPerseo1), cavernas[match("Andrómeda", contenidoCavernas)])
+  descartePegasa <- sample(alternativasPegasa, 1, replace = FALSE)
+  eleccionPerseo2 <- eleccionPerseo1
+  acerto <- contenidoCavernas[match(eleccionPerseo2, cavernas)] == "Andrómeda"
+  aciertos <- append(aciertos,acerto)
+  aciertos
+})
+prop.table(table(resultados))
+```
+
+## Cuando Perseo cambia de alternativa en la 2° elección.
+
+```{r}
+cavernas <- c("izquierda", "centro", "derecha")
+contenidos <- rep(c("Gorgona", "Andrómeda"), times = c(2,1))
+aciertos <- c()
+
+resultados <- replicate(100000, {
+  contenidoCavernas <- sample(contenidos, 3, replace = FALSE)
+  eleccionPerseo1 <- sample(cavernas, 1, replace = FALSE)
+  alternativasPegasa <- setdiff(setdiff(cavernas, eleccionPerseo1), cavernas[match("Andrómeda", contenidoCavernas)])
+  descartePegasa <- sample(alternativasPegasa, 1, replace = FALSE)
+  eleccionPerseo2 <- setdiff(setdiff(cavernas, eleccionPerseo1), descartePegasa)
+  acerto <- contenidoCavernas[match(eleccionPerseo2, cavernas)] == "Andrómeda"
+  aciertos <- append(aciertos,acerto)
+  aciertos
+})
+prop.table(table(resultados))
+```
+
